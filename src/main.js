@@ -12,6 +12,8 @@ import '@babel/polyfill'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 import L from 'leaflet';
+import '@morioh/v-quill-editor/dist/editor.css'
+import Editor from '@morioh/v-quill-editor'
 
 const router = new VueRouter({ mode: 'history', routes: Routes })
 
@@ -19,6 +21,7 @@ Vue.config.productionTip = false
 
 Vue.use(VueRouter)
 Vue.use(Vuetify)
+Vue.use(Editor)
 
 const opts = {
   icons: {
@@ -60,8 +63,9 @@ let app = ''
 // middleware de sécurité
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
+  // récupération du user courant
   const currentUser = firebase.auth().currentUser
-  // accès au menu
+
   store.commit('setDisplayMenuOn')
 
   //
@@ -75,6 +79,8 @@ router.beforeEach((to, from, next) => {
     // route without sécurity
     next()
   }
+
+
 })
 
 delete L.Icon.Default.prototype._getIconUrl;

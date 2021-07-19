@@ -103,23 +103,24 @@ export default {
     }
   },
   methods: {
-    login: function () {
+    async login () {
       let self = this
       this.errorMsg = ''
       this.displayalert = false
-      const user = fb.auth.signInWithEmailAndPassword(this.email, this.password)
-      user.then((user) => {
-        this.$store.commit('setCurrentUser', user.user)
-        this.$store.dispatch('fetchUserProfile')
-        this.$store.commit('setDisplayMenuOn')
-        self.$router.push({ name: 'listEvent' })
-      })
-      user.catch((err) => {
-        this.displayalert = true
-        console.log('connexion ko')
-        this.errorMsg = err.message
-        console.log(err)
-      })
+      const user = await fb.auth
+        .signInWithEmailAndPassword(this.email, this.password)
+        .then((user) => {
+          this.$store.commit('setCurrentUser', user.user)
+          this.$store.dispatch('fetchUserProfile')
+          // this.$store.commit('setDisplayMenuOn')
+          self.$router.push({ name: 'listEvent' })
+        })
+        .catch((err) => {
+          this.displayalert = true
+          console.log('connexion ko')
+          this.errorMsg = err.message
+          console.log(err)
+        })
     }
   }
 }

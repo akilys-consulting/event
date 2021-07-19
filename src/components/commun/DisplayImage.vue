@@ -62,14 +62,14 @@ export default {
           .ref()
           .child(this.rep + '/' + this.localImg)
           .getDownloadURL()
-        file.then(function (url) {
-          self.urlImg = url
-          self.displayImg = true
-          self.loadPhoto = false
-        })
-        file.catch(function () {
-          self.getDefaultImg()
-        })
+          .then(function (url) {
+            self.urlImg = url
+            self.displayImg = true
+            self.loadPhoto = false
+          })
+          .catch(function (error) {
+            self.getDefaultImg()
+          })
       } else {
         self.getDefaultImg()
       }

@@ -159,7 +159,7 @@
       </v-card>
     </v-dialog>
 
-    <v-card elevation="0">
+    <v-card hover evevation="15">
       <v-card-title
         >Programmation
         <v-btn color="primary" fab small @click.stop="dialog = true">

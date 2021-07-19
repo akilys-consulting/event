@@ -9,7 +9,7 @@
             small
             color="primary"
             v-on="on"
-            :to="{ name: 'calendrierevent' }"
+            :to="{ name: 'calendrier' }"
           >
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
@@ -40,7 +40,7 @@
     </v-tabs>
     <v-tabs-items v-model="tab">
       <v-tab-item
-        ><v-card flat>
+        ><v-card>
           <v-card-text>
             <v-row>
               <v-col cols="12">
@@ -49,8 +49,8 @@
             </v-row>
             <v-row>
               <imageUpload
-                v-if="currentEvent.id != -1"
-                :fileName="currentEvent.id"
+                v-if="currentEvent"
+                :fileName="getImage"
                 rep="image_event"
                 @uploadfile="saveEvent"
               />
@@ -106,11 +106,10 @@
                     @uptadr="updateadresse"
                     :adresse="currentEvent.localisation"/></v-col
                 ><v-col cols="12">
-                  <ckeditor
-                    :editor="editor"
+                  <editor
                     v-model="currentEvent.minisite"
-                    :config="editorConfig"
-                  ></ckeditor> </v-col></v-row></v-form
+                    :options="editorOption"
+                  ></editor></v-col></v-row></v-form
           ></v-card-text>
         </v-card>
       </v-tab-item>
@@ -127,7 +126,6 @@
   </div>
 </template>
 <script>
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import adrmanagement from '@/components/commun/AdrManagement'
 import optionevent from '@/components/event/OptionEvent'
 import optionemplacement from '@/components/event/OptionEmplacement'
@@ -135,6 +133,7 @@ import imageUpload from '@/components/commun/ImageUpload'
 import prixevent from '@/components/event/OptionPrix'
 import dialogmodal from '@/components/commun/DialogModal'
 import programmation from '@/components/event/Programmation'
+
 import { mapState } from 'vuex'
 export default {
   name: 'formEvent',
@@ -165,14 +164,22 @@ export default {
       rules: {
         required: (value) => !!value || 'obligatoire.'
       },
-      editor: ClassicEditor,
-      editorConfig: {
-        // The configuration of the editor.
-        link: {
-          addTargetToExternalLinks: true
+      valid: true,
+      editorOption: {
+        theme: 'bubble',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            [{ color: [] }, { background: [] }],
+            [{ font: [] }],
+            [{ align: [] }],
+            ['link'],
+            ['clean']
+          ]
         }
-      },
-      valid: true
+      }
     }
   },
 
@@ -182,7 +189,10 @@ export default {
     }
   },
   computed: {
-    ...mapState('event', ['CONST_CATEGORIE'])
+    ...mapState('event', ['CONST_CATEGORIE']),
+    getImage () {
+      return this.currentEvent !== null ? this.currentEvent.id : null
+    }
   },
   beforeRouteLeave (to, from, next) {
     /*
@@ -205,8 +215,8 @@ export default {
     next()
   },
   updated () {
-    if (this.currentEvent.id == null) {
-      this.$router.push({ name: 'calendrierevent' })
+    if (this.currentEvent == null) {
+      this.$router.push({ name: 'calendrier' })
     }
   },
   created () {
@@ -215,7 +225,7 @@ export default {
 
     if (this.currentEvent) {
       this.EventImage = []
-    } else this.$router.push({ name: 'calendrierevent' })
+    } else this.$router.push({ name: 'calendrier' })
 
     // lecture de la liste des plans
     /* this.$store
@@ -270,22 +280,7 @@ export default {
 </script>
 
 <style>
-.ck.ck-editor__editable_inline {
-  margin: 5px;
-  height: 300px;
+.ql-bubble .ql-editor:focus {
   background-color: black;
-  color: white;
-}
-.ck.ck-editor__main > .ck-editor__editable {
-  background-color: black;
-}
-.ck.ck-toolbar {
-  background-color: black;
-}
-.ck.ck-icon {
-  color: white;
-}
-.ck-button__label {
-  color: white;
 }
 </style>

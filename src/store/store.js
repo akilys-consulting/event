@@ -83,25 +83,19 @@ export const store = new Vuex.Store({
     /*
       récupération du profil de connexion et mémorisation
     */
-    fetchUserProfile({ commit, state }, user) {
+    async fetchUserProfile({ commit, state }) {
       let self = this
-      if (state.currentUser) {
-        return new Promise((resolve, reject) => {
-          const execute = fb.clientCollection
-            .where('user_uid', '==', state.currentUser.uid)
-            .get()
-          execute.then(function (querySnapshot) {
-            querySnapshot.forEach(function (doc) {
-              commit('setUserProfile', doc.data())
-              resolve(doc.data())
-            })
-          })
-          execute.catch((err) => {
-            self.dispatch('displayMessage', 'LUKO')
-            reject(err)
-          })
+      if (!state.currentUser) return false
+      await fb.clientCollection
+        .where('user_uid', '==', state.currentUser.uid)
+        .get().then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            state.currentUser.profil = doc.data()
+          });
+        }).catch((err) => {
+          self.dispatch('displayMessage', 'LUKO')
         })
-      } else return false
     },
     /*
       récupération d'un profil user (à partir du userid
@@ -321,8 +315,7 @@ export const store = new Vuex.Store({
 
     /* configuration du profil courant */
     async setUserProfile(state, val) {
-      console.log('set profile ' + val.profil)
-      state.profil = val
+      state.currentUser.profil = val
     },
 
     /* etat affichage info de chargement */
@@ -358,7 +351,10 @@ export const store = new Vuex.Store({
       else return true
     },
     getProfil(state) {
-      return state.profil
+      return state.currentUser.profil
+    },
+    getOrganisation(state) {
+      return state.currentUser.profil.organisation
     },
     getAllProfils() {
       return userType
@@ -367,9 +363,10 @@ export const store = new Vuex.Store({
       return state.currentUser.uid
     },
     isAdmin(state) {
-      console.log('isAdmin')
-      if (typeof state.profil.profil === 'undefined') return false
-      else return state.profil.profil === 'admin'
+      if (state.currentUser)
+        if ((typeof state.currentUser.profil.organisation === 'undefined') || state.currentUser.profil.organisation === '') return false
+        else return true
+      else return false
     },
     getUserInfo(state) {
       return state.currentUser

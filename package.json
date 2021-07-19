@@ -13,6 +13,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@mdi/font": "5.9.55",
+    "@morioh/v-quill-editor": "^1.0.2",
     "firebase": "^8.7.1",
     "leaflet": "^1.7.1",
     "moment": "^2.29.1",
@@ -21,7 +22,6 @@
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vue2-leaflet": "^2.7.1",
-    "vuejs-quill": "^1.4.0",
     "vuetify": "^2.4.0",
     "vuex": "^3.6.2"
   },
