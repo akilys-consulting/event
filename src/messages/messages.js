@@ -21,7 +21,7 @@ export const messages = [
   // message sur plan
   { code: "DLOJ", message: "Impossible de dupliquer les objets", type: "error" },
   { code: "SSNS", message: "Pas de salons à afficher", type: "warning" },
-  { code: "DCNX", message: "Vous êtes déconnecté", type: "success" },
+  { code: "DCNX", message: "Vous êtes déconnecté", type: "primary" },
   { code: "ECNX", message: "Impossible de procéder à la déconnexion", type: "error" },
   { code: "CNXU", message: "Vous êtes maintenant connecté", type: "success" },
   { code: "ERRA", message: "Erreur applicatif", type: "error" },

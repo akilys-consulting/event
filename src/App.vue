@@ -1,13 +1,14 @@
 <template>
   <v-app id="app">
-    <chargement />
-    <navbar></navbar>
     <v-progress-linear
       v-if="waiting"
       height="9"
       indeterminate
       color="yellow darken-2"
     />
+    <chargement />
+    <navbar></navbar>
+
     <v-main>
       <v-container fluid>
         <router-view></router-view>

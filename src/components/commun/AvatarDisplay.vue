@@ -24,7 +24,7 @@ export default {
         self.displayImg = true
       })
       execute.catch(function () {
-        self.loadDefautImg
+        self.loadDefautImg()
       })
     } else {
       this.loadDefautImg()

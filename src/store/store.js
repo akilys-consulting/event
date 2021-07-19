@@ -277,111 +277,112 @@ export const store = new Vuex.Store({
         let user = fb.auth
           .signOut()
           .then(() => {
-            context.dispatch('clearData')
+            self.dispatch('clearData')
             resolve()
           })
           .catch((err) => {
             reject(err)
           })
-      }
+      })
+    }
 
   },
 
-    mutations: {
-      setDisplayMenuOff(state) {
-        state.display = false
-      },
-      setDisplayMenuOn(state) {
-        state.display = true
-      },
-      /* une modification donnée a été faite */
-      setModifUser(state) {
-        state.modifUser = true
-      },
-
-      /* réinitialisation des modif écran */
-      initModifUser(state) {
-        state.modifUser = false
-      },
-
-      /* configuration de l'utilisateur connecté */
-      setCurrentUser(state, val) {
-        state.currentUser = val
-        if (val !== null) {
-          state.profil.user_uid = val.uid
-          state.profil.email = val.email
-        }
-      },
-
-      setInitUser(state) {
-        state.currentUser = null
-        state.profil = null
-      },
-
-      /* configuration du profil courant */
-      async setUserProfile(state, val) {
-        console.log('set profile ' + val.profil)
-        state.profil = val
-      },
-
-      /* etat affichage info de chargement */
-      setWaiting(state, val) {
-        state.waiting = val
-      },
-
-      /* init message à afficher */
-      setMessage(state, message) {
-        state.message.display = true
-        state.message.message = message.message
-        state.message.type = message.type
-      },
-      /* init message à afficher */
-      setQuestion(state, message) {
-        state.question.display = true
-        state.question.message = message.message
-        state.question.type = message.type
-      },
-      setInitQuestion(state) {
-        state.question.display = {}
-      },
+  mutations: {
+    setDisplayMenuOff(state) {
+      state.display = false
     },
-    getters: {
-      getQuestion(state) {
-        return state.question
-      },
-      getBanqueImage(state) {
-        return state.banqueImage
-      },
-      isconnected(state) {
-        if (!state.currentUser) return false
-        else return true
-      },
-      getProfil(state) {
-        return state.profil
-      },
-      getAllProfils() {
-        return userType
-      },
-      getUserUid(state) {
-        return state.currentUser.uid
-      },
-      isAdmin(state) {
-        console.log('isAdmin')
-        if (typeof state.profil.profil === 'undefined') return false
-        else return state.profil.profil === 'admin'
-      },
-      getUserInfo(state) {
-        return state.currentUser
-      },
-      /* management des modif données */
-      getModifUser(state) {
-        return state.modifUser
-      },
-      getCurrentAvatarImg(state) {
-        return imgAvatarPath + state.currentUser.uid
-      },
-      getDefaultAvatarImg(state) {
-        return imgAvatarPath + imgDefaut
-      },
-    }
-  })
+    setDisplayMenuOn(state) {
+      state.display = true
+    },
+    /* une modification donnée a été faite */
+    setModifUser(state) {
+      state.modifUser = true
+    },
+
+    /* réinitialisation des modif écran */
+    initModifUser(state) {
+      state.modifUser = false
+    },
+
+    /* configuration de l'utilisateur connecté */
+    setCurrentUser(state, val) {
+      state.currentUser = val
+      if (val !== null) {
+        state.profil.user_uid = val.uid
+        state.profil.email = val.email
+      }
+    },
+
+    setInitUser(state) {
+      state.currentUser = null
+      state.profil = null
+    },
+
+    /* configuration du profil courant */
+    async setUserProfile(state, val) {
+      console.log('set profile ' + val.profil)
+      state.profil = val
+    },
+
+    /* etat affichage info de chargement */
+    setWaiting(state, val) {
+      state.waiting = val
+    },
+
+    /* init message à afficher */
+    setMessage(state, message) {
+      state.message.display = true
+      state.message.message = message.message
+      state.message.type = message.type
+    },
+    /* init message à afficher */
+    setQuestion(state, message) {
+      state.question.display = true
+      state.question.message = message.message
+      state.question.type = message.type
+    },
+    setInitQuestion(state) {
+      state.question.display = {}
+    },
+  },
+  getters: {
+    getQuestion(state) {
+      return state.question
+    },
+    getBanqueImage(state) {
+      return state.banqueImage
+    },
+    isconnected(state) {
+      if (!state.currentUser) return false
+      else return true
+    },
+    getProfil(state) {
+      return state.profil
+    },
+    getAllProfils() {
+      return userType
+    },
+    getUserUid(state) {
+      return state.currentUser.uid
+    },
+    isAdmin(state) {
+      console.log('isAdmin')
+      if (typeof state.profil.profil === 'undefined') return false
+      else return state.profil.profil === 'admin'
+    },
+    getUserInfo(state) {
+      return state.currentUser
+    },
+    /* management des modif données */
+    getModifUser(state) {
+      return state.modifUser
+    },
+    getCurrentAvatarImg(state) {
+      return imgAvatarPath + state.currentUser.uid
+    },
+    getDefaultAvatarImg(state) {
+      return imgAvatarPath + imgDefaut
+    },
+  }
+})

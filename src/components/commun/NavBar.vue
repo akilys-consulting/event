@@ -1,28 +1,19 @@
 <template>
   <div v-if="display">
-    <v-app-bar app color="primary">
+    <v-toolbar app color="primary">
       <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
       <v-toolbar-title>quefaire.fr</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <v-divider class="mx-4" vertical></v-divider>
-        <v-btn v-if="admin" text to="/admin"> mes events</v-btn>
-        <v-btn v-if="connected && !admin" text to="/preference">
-          mes events</v-btn
-        >
-
-        <v-divider class="mx-4" vertical></v-divider>
-      </v-toolbar-items>
+      <v-divider class="mx-4" vertical></v-divider>
+      <v-btn v-if="admin" text to="/admin"> mes events</v-btn>
+      <v-btn v-if="connected && !admin" text to="/preference">
+        mes events</v-btn
+      >
       <v-spacer></v-spacer>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn depressed text @click="checkConnect" v-on="on">
-            <AvatarDisplay @click="checkConnect" />
-          </v-btn>
-        </template>
-        <span>connexion</span>
-      </v-tooltip>
-    </v-app-bar>
+      <v-btn icon @click="checkConnect">
+        <AvatarDisplay />
+      </v-btn>
+    </v-toolbar>
   </div>
 </template>
 
@@ -53,17 +44,18 @@ export default {
   },
   methods: {
     checkConnect () {
-      !this.connected ? this.$router.push({ name: 'login' }) : this.disconnect()
+      if (this.connected) this.disconnect()
+      else this.$router.push({ name: 'login' })
     },
     disconnect () {
       let self = this
-      let user = this.dispatch('disconnect')
+      let user = this.$store.dispatch('disconnect')
       user.then(() => {
-        self.$router.push('/login')
-        self.dispatch('displayMessage', 'DCNX')
+        self.$router.push({ name: 'listEvent' })
+        self.$store.dispatch('displayMessage', 'DCNX')
       })
-      user.catch(() => {
-        self.dispatch('displayMessage', 'ECNX')
+      user.catch((error) => {
+        self.$store.dispatch('displayMessage', 'ECNX')
       })
     }
   }
