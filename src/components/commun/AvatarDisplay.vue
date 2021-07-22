@@ -15,17 +15,18 @@ export default {
     const self = this
     // get UID user
     if (self.$store.getters.isconnected) {
+      console.log('avatar: user connect')
       const execute = fb.file
         .ref()
         .child(self.$store.getters.getCurrentAvatarImg)
         .getDownloadURL()
-      execute.then(function (url) {
-        self.urlImg = url
-        self.displayImg = true
-      })
-      execute.catch(function () {
-        self.loadDefautImg()
-      })
+        .then(function (url) {
+          self.urlImg = url
+          self.displayImg = true
+        })
+        .catch(function () {
+          self.loadDefautImg()
+        })
     } else {
       this.loadDefautImg()
     }
@@ -37,13 +38,13 @@ export default {
         .ref()
         .child(this.$store.getters.getDefaultAvatarImg)
         .getDownloadURL()
-      executeFile.then(function (url) {
-        self.urlImg = url
-        self.displayImg = true
-      })
-      executeFile.catch(() => {
-        console.log('pas de fichier')
-      })
+        .then(function (url) {
+          self.urlImg = url
+          self.displayImg = true
+        })
+        .catch(() => {
+          console.log('pas de fichier')
+        })
     }
   }
 }

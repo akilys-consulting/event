@@ -73,7 +73,7 @@
                     v-model="currentEvent.categorie"
                     :rules="[rules.required]"
                     required
-                    :items="CONST_CATEGORIE"
+                    :items="getCategorie"
                     label="Catégorie"
                   ></v-select
                 ></v-col>
@@ -162,7 +162,7 @@ export default {
       ImageFileName: false,
 
       rules: {
-        required: (value) => !!value || 'obligatoire.'
+        required: value => !!value || 'obligatoire.'
       },
       valid: true,
       editorOption: {
@@ -190,8 +190,16 @@ export default {
   },
   computed: {
     ...mapState('event', ['CONST_CATEGORIE']),
+    ...mapState['currentProfil'],
     getImage () {
       return this.currentEvent !== null ? this.currentEvent.id : null
+    },
+    getCategorie () {
+      let nomCategorie = []
+      this.CONST_CATEGORIE.forEach(data => {
+        nomCategorie.push(data.nom)
+      })
+      return nomCategorie
     }
   },
   beforeRouteLeave (to, from, next) {
@@ -226,24 +234,13 @@ export default {
     if (this.currentEvent) {
       this.EventImage = []
     } else this.$router.push({ name: 'calendrier' })
-
-    // lecture de la liste des plans
-    /* this.$store
-      .dispatch('plan/getLstPlan')
-      .then((data) => {
-        self.lstPlans = data
-        if (self.currentEvent.plan) this.loadAdr(self.currentEvent.plan)
-      })
-      .catch(() => {
-        this.$store.dispatch('displayMessage', 'EVLP')
-      }) */
   },
 
   methods: {
     loadAdr (planId) {
       if (planId) {
         let execute = this.$store.dispatch('plan/getPlan', planId)
-        execute.then((plan) => {
+        execute.then(plan => {
           this.localisation = plan.ville.adr
         })
         execute.catch(() => {
@@ -265,15 +262,15 @@ export default {
         // appel a la fonction de génération des évents
 
         let execute = this.$store.dispatch('event/saveEvent')
-        execute.then((data) => {
+        execute.then(data => {
           this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', 'SAOK')
+          this.$store.dispatch('displayMessage', { code: 'SAOK' })
         })
         execute.catch(() => {
           this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', 'SAKO')
+          this.$store.dispatch('displayMessage', { code: 'SAKO' })
         })
-      } else this.$store.dispatch('displayMessage', 'EADC')
+      } else this.$store.dispatch('displayMessage', { code: 'EADC' })
     }
   }
 }

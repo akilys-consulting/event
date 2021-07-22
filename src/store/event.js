@@ -4,7 +4,6 @@ import moment from 'moment'
     Définition des modèles base
 */
 
-
 const PATH_IMAGE = 'image_event'
 const DEFINE_EVENT = {
   id: -1,
@@ -21,19 +20,28 @@ const state = {
   // mémorise la plannifiation à partir de a programmation
   planning: [],
   // utiliser pour définir le type de programmation
-  typeProgrammation: [{ value: 'days', text: 'journalier' }, { value: 'weeks', text: 'hebdomadaire' }, { value: 'months', text: 'mensuel' }],
-  // permet de charger en mémoire tous les events 
+  typeProgrammation: [
+    { value: 'days', text: 'journalier' },
+    { value: 'weeks', text: 'hebdomadaire' },
+    { value: 'months', text: 'mensuel' }
+  ],
+  // permet de charger en mémoire tous les events
   events: [],
   // permet de définir les catégories
-  CONST_CATEGORIE: ['culture', 'loisir', 'restaurant', 'rencontre', 'sport'],
+  CONST_CATEGORIE: [
+    { nom: 'culture', couleur: 'red', icon: '' },
+    { nom: 'loisir', couleur: 'red', icon: '' },
+    { nom: 'restaurant', couleur: 'red', icon: '' },
+    { nom: 'rencontre', couleur: 'red', icon: '' },
+    { nom: 'sport', couleur: 'red', icon: '' }
+  ],
   currentPlanning: null,
-  searchPlanningId: null,
-
+  searchPlanningId: null
 }
 
 const actions = {
   // sauvegarde de l'évent courant en base
-  saveEvent({ state, dispatch }) {
+  saveEvent ({ state, dispatch }) {
     return new Promise((resolve, reject) => {
       if (state.currentEvent.id == -1) {
         let execute = dispatch('insertEvent')
@@ -55,12 +63,14 @@ const actions = {
     })
   },
   // ajout de l'event courant en base
-  insertEvent() {
+  insertEvent ({ rootState }) {
     return new Promise((resolve, reject) => {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       delete event.id
-      let execute = fb.eventCollection
-        .add(event)
+      if (typeof rootState.currentProfil.organisation !== 'undefined') {
+        event.organisation = rootState.currentProfil.organisation
+      }
+      let execute = fb.eventCollection.add(event)
       execute.then(function (data) {
         state.currentEvent.id = data.id
         resolve(data)
@@ -71,14 +81,16 @@ const actions = {
     })
   },
   // maj de l'évent courant en base
-  updateEvent() {
+  updateEvent ({ rootState }) {
     return new Promise((resolve, reject) => {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       let currentID = event.id
       delete event.id
-      let execute = fb.eventCollection
-        .doc(currentID)
-        .update(event)
+      if (typeof rootState.currentProfil.organisation !== 'undefined') {
+        event.organisation = rootState.currentProfil.organisation
+      }
+
+      let execute = fb.eventCollection.doc(currentID).update(event)
       execute.then(function (data) {
         resolve(data)
       })
@@ -88,55 +100,61 @@ const actions = {
     })
   },
   // chargement des events en mémoire depuis la base
-  loadEvent({ state, dispatch }) {
+  loadEvent ({ state, dispatch }) {
     state.events = []
     state.calendar = []
     return new Promise((resolve, reject) => {
-      const execute = fb.eventCollection
-        .get()
+      const execute = fb.eventCollection.get()
       execute.then(function (querySnapshot) {
-        querySnapshot.forEach(function data(result) {
+        querySnapshot.forEach(function data (result) {
           let record = result.data()
           record.id = result.id
           state.events.push(record)
-          console.log('load events')
         })
 
         resolve()
       })
-      execute.catch((error) => {
+      execute.catch(error => {
         reject(error)
       })
     })
   },
   // chargement des events et du planning depuis les events en base
-  loadPlanning({ state, dispatch }) {
+  async loadPlanning ({ state, dispatch, rootState }) {
     state.events = []
     state.planning = []
-    return new Promise((resolve, reject) => {
-      const execute = fb.eventCollection
+    let query = new Promise((resolve, reject) => {
+      let execute = fb.eventCollection
+      if (typeof rootState.currentProfil.organisation !== 'function') {
+        execute = execute.where(
+          'organisation',
+          '==',
+          rootState.currentProfil.organisation
+        )
+      }
+      execute
         .get()
-      execute.then(function (querySnapshot) {
-        querySnapshot.forEach(function data(result) {
-          let record = result.data()
-          record.id = result.id
-          state.events.push(record)
-          console.log('load events')
-          dispatch('decodePlanning', record)
+        .then(function (querySnapshot) {
+          querySnapshot.forEach(function data (result) {
+            let record = result.data()
+            record.id = result.id
+            state.events.push(record)
+            // on décode la programmation pour définir un planning
+            dispatch('decodePlanning', record)
+          })
+          resolve(true)
         })
-
-        resolve()
-      })
-      execute.catch((error) => {
-        reject(error)
-      })
+        .catch(error => {
+          reject(error)
+        })
     })
+    return await query
   },
 
   // parcours la programmation afin de définir toutes les dates
   // de l'évènement
   // met à jour le state calendar
-  decodePlanning({ state }, event) {
+  decodePlanning ({ state }, event) {
     let record = event
     if (event.planning.length > 0) {
       event.planning.forEach(prog => {
@@ -147,82 +165,86 @@ const actions = {
           let planningId = record.id + guard
           // creation de l'évènement
           let newPlanning = {
-            id: planningId, eventid: record.id, color: 'primary', category: record.categorie, name: record.nom, start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut, end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
+            id: planningId,
+            eventid: record.id,
+            color: 'primary',
+            category: record.categorie,
+            name: record.nom,
+            start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut,
+            end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
           }
           state.planning.push(newPlanning)
           currentDate = currentDate.add(1, prog.type)
         }
       })
     }
-  },
-
+  }
 }
 const mutations = {
-
   // vider l'event courant
-  setInitEvent(state) {
-    state.currentEvent = JSON.parse(JSON.stringify(DEFINE_EVENT));
+  setInitEvent (state) {
+    state.currentEvent = JSON.parse(JSON.stringify(DEFINE_EVENT))
   },
 
   // definir l'event courant
-  setCurrentEventByPlanning(state, planning) {
+  setCurrentEventByPlanning (state, planning) {
     state.currentEvent = state.events.find(element => element.id == planning)
   },
 
   // ajout d'une image à l'event courant
-  setAddEventImg(state, nvlImg) {
+  setAddEventImg (state, nvlImg) {
     state.currentEvent.images.push(nvlImg.path)
   },
 
   // ajout du planning à l'event courant
-  setPlanning(state, value) {
+  setPlanning (state, value) {
     state.currentEvent.planning = value
   },
 
   // definir le planning courant
-  setCurrentPlanning(state, planning) {
+  setCurrentPlanning (state, planning) {
     state.currentPlanning = planning
-  },
+  }
 }
 
 const getters = {
   // récupérer l'event courant
-  getCurrentEvent(state) {
+  getCurrentEvent (state) {
     return state.currentEvent
   },
 
   // récupérer le planning courant
-  getPlanning(state) {
+  getPlanning (state) {
     return state.currentEvent.planning
   },
 
-  getAllPlanning(state) {
+  getAllPlanning (state) {
     return state.planning
   },
 
   // definir l'event courant
-  getPlanningById(state) {
+  getPlanningById (state) {
     return state.planning.find(element => element.id == state.searchPlanningId)
   },
   // récupérer l'id de l'event courant
-  getCurrentEventId(state) {
+  getCurrentEventId (state) {
     return state.currentEvent.id
   },
 
   // récupérer l'image de l'évent courant
-  getCurrentEventImg(state) {
+  getCurrentEventImg (state) {
     return state.currentEvent.images
   },
 
   // récupérer l'adr de l'event
-  getCurrentAdr(state) {
+  getCurrentAdr (state) {
     return state.currentEvent.localisation.adr
   },
 
   // récupérer le chemin d'accès aux images des events
-  getEventImgPath() {
+  getEventImgPath () {
     return PATH_IMAGE
-  },
+  }
 }
 
 export default {

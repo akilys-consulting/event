@@ -138,13 +138,23 @@ export default {
       'Party'
     ]
   }),
-  created () {
+
+  async created () {
     let self = this
     // charger les events via la liste des events specifiques
     this.$store.dispatch('startWaiting')
-    this.$store.dispatch('event/loadPlanning').then((data) => {
-      self.$store.dispatch('stopWaiting')
-    })
+    await this.$store
+      .dispatch('event/loadPlanning')
+      .then(data => {
+        self.$store.dispatch('stopWaiting')
+      })
+      .catch(error => {
+        self.$store.dispatch('stopWaiting')
+        self.$store.dispatch('displayMessage', {
+          code: 'ADMIN',
+          param: error.message
+        })
+      })
   },
   computed: {
     ...mapState('event', ['planning']) // assuming you are using namespaced modules

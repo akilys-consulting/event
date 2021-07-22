@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar v-if="display" app color="primary">
+    <v-app-bar app v-if="display" color="primary">
       <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
       <v-toolbar-title>quefaire.fr</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -13,7 +13,7 @@
       <v-btn icon @click="checkConnect">
         <AvatarDisplay />
       </v-btn>
-    </v-toolbar>
+    </v-app-bar>
   </div>
 </template>
 
@@ -39,16 +39,10 @@ export default {
   },
   async created () {
     this.connected = this.$store.getters.isconnected
-    try {
-      await this.$store.dispatch('fetchUserProfile')
-      this.admin = this.$store.getters.isAdmin
-    } catch (ex) {
-      console.log('err navbar' + ex.message)
-      this.$store.dispatch('displayMessage', 'ECNX')
-    }
   },
+
   mounted () {
-    //   this.admin = this.$store.getters.isAdmin
+    this.admin = this.$store.getters.isAdmin
     console.log('admin : ' + this.admin)
   },
   methods: {
@@ -63,7 +57,7 @@ export default {
         self.$router.push({ name: 'listEvent' })
         self.$store.dispatch('displayMessage', 'DCNX')
       })
-      user.catch((error) => {
+      user.catch(error => {
         self.$store.dispatch('displayMessage', 'ECNX')
       })
     }

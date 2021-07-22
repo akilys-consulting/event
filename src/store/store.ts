@@ -2,12 +2,12 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { fb } from '@/firebaseDef.js'
 import { messages } from '@/messages/messages'
-import storeEvent from '@/store/event'
+import storeEvent from '@/store/event.ts'
 
 Vue.use(Vuex)
 
 // contrôle de la connexion
-const user = fb.auth.onAuthStateChanged((user) => {
+const user = fb.auth.onAuthStateChanged(user => {
   if (user) store.commit('setCurrentUser', user)
   else store.commit('initModifUser')
 })
@@ -21,12 +21,13 @@ export const store = new Vuex.Store({
   modules: {
     event: storeEvent
   },
+  /*
+  définition d'un user */
+
   state: {
-    banqueImage: [],
     display: false,
     modifUser: false,
-    currentUser: false,
-    userProfile: {},
+    currentUser: Object,
     waiting: false,
     message: {
       display: false,
@@ -39,11 +40,12 @@ export const store = new Vuex.Store({
       message: 'Oups, je vais disparaitre',
       type: 'question'
     },
-    profil: {
-      nom: '',
-      prenom: '',
-      societe: '',
-      ville: ''
+    currentProfil: {
+      nom: String,
+      prenom: String,
+      adresse: Object,
+      organisation: String,
+      user_uid: String
     },
     emailParam: {
       template: 'template_W2ROE7Xi',
@@ -51,7 +53,7 @@ export const store = new Vuex.Store({
       account: 'user_ykRUBR3yHvO1VOlIU0z2V',
       adrAdmin: 'akilys.consulting@gmail.com'
     },
-    cart: [],
+    cart: Array,
     currentResa: false,
     currentCmd: { resa: { stand: null } },
     DisplayDetailEmplacement: false, // affichage fenetre détail emplacement
@@ -62,45 +64,40 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-    loadBanqueImage({ commit, state }) {
-      var listRef = fb.file.ref().child('bib_objets')
-      listRef.listAll().then((res) => {
-        res.items.forEach((itemRef) => {
-          let name = itemRef.name
-          itemRef.getDownloadURL().then(function (url) {
-            state.banqueImage.push({ name: name, url: url })
-          })
-        })
-      })
-    },
     /*
       on efface le user courant
     */
-    clearData({ commit }) {
+    clearData ({ commit }) {
       commit('setCurrentUser', false)
-      commit('setUserProfile', {})
     },
     /*
       récupération du profil de connexion et mémorisation
     */
-    async fetchUserProfile({ commit, state }) {
+    async fetchUserProfile ({ commit, state }) {
       let self = this
-      if (!state.currentUser) return false
-      await fb.clientCollection
-        .where('user_uid', '==', state.currentUser.uid)
-        .get().then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            // doc.data() is never undefined for query doc snapshots
-            state.currentUser.profil = doc.data()
-          });
-        }).catch((err) => {
-          self.dispatch('displayMessage', 'LUKO')
-        })
+      const request = new Promise((resolve, reject) => {
+        if (typeof state.currentUser.uid === 'undefined') return false
+        fb.clientCollection
+          .where('user_uid', '==', state.currentUser.uid)
+          .get()
+          .then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+              // doc.data() is never undefined for query doc snapshots
+              state.currentProfil = doc.data()
+              resolve(doc.data())
+            })
+          })
+          .catch(err => {
+            self.dispatch('displayMessage', { code: 'LUKO' })
+            reject(err)
+          })
+      })
+      return await request
     },
     /*
       récupération d'un profil user (à partir du userid
     */
-    getUserData(state, userUid) {
+    getUserData (state, userUid) {
       let self = this
       return new Promise((resolve, reject) => {
         const execute = fb.clientCollection
@@ -112,7 +109,7 @@ export const store = new Vuex.Store({
             resolve(doc.data())
           })
         })
-        execute.catch((err) => {
+        execute.catch(err => {
           self.dispatch('displayMessage', 'LUKO')
           reject(err)
         })
@@ -120,26 +117,34 @@ export const store = new Vuex.Store({
     },
 
     // démarrage de la barre d'attente
-    startWaiting({ commit }) {
+    startWaiting ({ commit }) {
       commit('setWaiting', true)
     },
 
     // arrêt de la barre d'attente
-    stopWaiting({ commit }) {
+    stopWaiting ({ commit }) {
       commit('setWaiting', false)
     },
 
     // declenche l'affichage d'un message
-    displayMessage({ commit }, code) {
+    displayMessage ({ commit }, param) {
       for (var i = 0; i < messages.length; i++) {
-        if (messages[i]['code'] === code) {
-          commit('setMessage', messages[i])
+        if (messages[i]['code'] == param.code) {
+          let displayedmessage = messages[i]
+          console.log('error' + param.param)
+          if (typeof param.param !== 'undefined') {
+            displayedmessage.message = messages[i].message.replace(
+              '[PARAM]',
+              param.param
+            )
+          }
+          commit('setMessage', displayedmessage)
           i = messages.length
         }
       }
     },
     // declenche l'affichage d'un message
-    displayQuestion({ commit }, code) {
+    displayQuestion ({ commit }, code) {
       for (var i = 0; i < messages.length; i++) {
         if (messages[i]['code'] === code) {
           commit('setQuestion', messages[i])
@@ -147,13 +152,13 @@ export const store = new Vuex.Store({
         }
       }
     },
-    getEmailUser() {
+    getEmailUser () {
       var user = fb.auth.currentUser
       if (user) {
         return user.email
       } else return false
     },
-    updateEmailUser(state, email) {
+    updateEmailUser (state, email) {
       return new Promise((resolve, reject) => {
         var user = fb.auth.currentUser
         user
@@ -166,7 +171,7 @@ export const store = new Vuex.Store({
           })
       })
     },
-    getAvatarFile({ state }, id) {
+    getAvatarFile ({ state }, id) {
       let findUser = null
       if (!id) findUser = state.currentUser.uid
       else findUser = id
@@ -186,29 +191,27 @@ export const store = new Vuex.Store({
             .then(function (url) {
               resolve(url)
             })
-            .catch((error) => {
+            .catch(error => {
               reject(error)
             })
         })
       })
     },
-    saveImg(context, file) {
+    saveImg (context, file) {
       return new Promise((resolve, reject) => {
         if (typeof file !== 'undefined') {
           var storageRef = fb.file.ref()
-          storageRef
-            .child(file.rep + '/' + file.name)
-            .put(file.file)
+          storageRef.child(file.rep + '/' + file.name).put(file.file)
           storageRef.then(function (snapshot) {
             const data = snapshot.ref.getDownloadURL()
-            data.then((path) => {
+            data.then(path => {
               resolve(path)
             })
-            data.catch((error) => {
+            data.catch(error => {
               reject(error)
             })
           })
-          storageRef.catch((error) => {
+          storageRef.catch(error => {
             reject(error)
           })
         }
@@ -216,35 +219,33 @@ export const store = new Vuex.Store({
     },
     /*
       ajout d'un profil utilisateur
+      nom,prenom,user_uid(auth),organisation,adresse
     */
-    addUser(context, userData) {
-      userData.profil = 'client'
-      return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection
-          .add(userData)
+    async addProfil ({ state }, userData) {
+      let request = new Promise((resolve, reject) => {
+        const execute = fb.clientCollection.add(state.currentProfil)
         execute.then(() => {
-          context.commit('setCurrentUser', userData)
           resolve()
         })
-        execute.catch((err) => {
+        execute.catch(err => {
           reject(err)
         })
       })
+      return await request
     },
+
     /*
       modification d'un profil utilisateur
     */
-    updateUser(context, userData) {
+    updateUser (context, userData) {
       let id = userData.id
       delete userData.id
       return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection
-          .doc(id)
-          .update(userData)
+        const execute = fb.clientCollection.doc(id).update(userData)
         execute.then(() => {
           resolve()
         })
-        execute.catch((err) => {
+        execute.catch(err => {
           reject(err)
         })
       })
@@ -252,20 +253,18 @@ export const store = new Vuex.Store({
     /*
       modification d'un profil utilisateur
     */
-    deleteUser(context, userData) {
+    deleteUser (context, userData) {
       return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection
-          .doc(userData.id)
-          .delete(userData)
+        const execute = fb.clientCollection.doc(userData.id).delete(userData)
         execute.then(() => {
           resolve()
         })
-        execute.catch((err) => {
+        execute.catch(err => {
           reject(err)
         })
       })
     },
-    disconnect({ context }) {
+    disconnect ({ context }) {
       let self = this
       return new Promise((resolve, reject) => {
         let user = fb.auth
@@ -274,112 +273,108 @@ export const store = new Vuex.Store({
             self.dispatch('clearData')
             resolve()
           })
-          .catch((err) => {
+          .catch(err => {
             reject(err)
           })
       })
     }
-
   },
 
   mutations: {
-    setDisplayMenuOff(state) {
+    setDisplayMenuOff (state) {
       state.display = false
     },
-    setDisplayMenuOn(state) {
+    setDisplayMenuOn (state) {
       state.display = true
     },
     /* une modification donnée a été faite */
-    setModifUser(state) {
+    setModifUser (state) {
       state.modifUser = true
     },
 
     /* réinitialisation des modif écran */
-    initModifUser(state) {
+    initModifUser (state) {
       state.modifUser = false
     },
 
     /* configuration de l'utilisateur connecté */
-    setCurrentUser(state, val) {
+    setCurrentUser (state, val) {
       state.currentUser = val
-      if (val !== null) {
-        state.profil.user_uid = val.uid
-        state.profil.email = val.email
-      }
     },
 
-    setInitUser(state) {
+    setInitUser (state) {
       state.currentUser = null
       state.profil = null
     },
 
     /* configuration du profil courant */
-    async setUserProfile(state, val) {
-      state.currentUser.profil = val
+    async setUserProfile (state, val) {
+      state.currentProfil = val
     },
 
     /* etat affichage info de chargement */
-    setWaiting(state, val) {
+    setWaiting (state, val) {
       state.waiting = val
     },
 
     /* init message à afficher */
-    setMessage(state, message) {
+    setMessage (state, message) {
       state.message.display = true
       state.message.message = message.message
       state.message.type = message.type
     },
     /* init message à afficher */
-    setQuestion(state, message) {
+    setQuestion (state, message) {
       state.question.display = true
       state.question.message = message.message
       state.question.type = message.type
     },
-    setInitQuestion(state) {
-      state.question.display = {}
-    },
+    setInitQuestion (state) {
+      state.question = {}
+    }
   },
   getters: {
-    getQuestion(state) {
+    getQuestion (state) {
       return state.question
     },
-    getBanqueImage(state) {
-      return state.banqueImage
-    },
-    isconnected(state) {
-      if (!state.currentUser) return false
+
+    isconnected (state) {
+      if (typeof state.currentUser.uid === 'undefined') return false
       else return true
     },
-    getProfil(state) {
-      return state.currentUser.profil
+    getProfil (state) {
+      return state.currentProfil
     },
-    getOrganisation(state) {
-      return state.currentUser.profil.organisation
+    getOrganisation (state) {
+      return state.currentProfil.organisation
     },
-    getAllProfils() {
-      return userType
-    },
-    getUserUid(state) {
+
+    getUserUid (state) {
       return state.currentUser.uid
     },
-    isAdmin(state) {
-      if (state.currentUser)
-        if ((typeof state.currentUser.profil.organisation === 'undefined') || state.currentUser.profil.organisation === '') return false
-        else return true
-      else return false
+    isAdmin (state) {
+      if (state.currentUser) {
+        if (
+          typeof state.currentProfil.organisation === 'undefined' ||
+          state.currentProfil.organisation === ''
+        ) {
+          return false
+        } else return true
+      } else return false
     },
-    getUserInfo(state) {
+    getUserInfo (state) {
       return state.currentUser
     },
     /* management des modif données */
-    getModifUser(state) {
+    getModifUser (state) {
       return state.modifUser
     },
-    getCurrentAvatarImg(state) {
-      return imgAvatarPath + state.currentUser.uid
+    getCurrentAvatarImg (state) {
+      if (state.currentUser.uid) return imgAvatarPath + state.currentUser.uid
+      else return imgAvatarPath + imgDefaut
     },
-    getDefaultAvatarImg(state) {
+    getDefaultAvatarImg (state) {
       return imgAvatarPath + imgDefaut
-    },
+    }
   }
 })

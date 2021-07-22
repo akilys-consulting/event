@@ -1,74 +1,87 @@
 <template>
-  <v-data-table
-    class="elevation-1"
-    :items="filteredItems"
-    :sort-by="['category', 'start']"
-    group-by="start"
-    :items-per-page="5"
-    no-results-text="Pas d'évènement trouvé"
-    show-group-by
-  >
-    <template v-slot:header>
-      <v-toolbar class="mb-1">
-        <v-menu
-          v-model="picker_date"
-          :close-on-content-click="false"
-          max-width="290"
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              flat
-              solo-inverted
-              append-icon="mdi-clock-outline"
-              :value="search"
-              clearable
-              label="début après le"
-              hide-details
-              readonly
-              v-on="on"
-              @click:clear="search = null"
-            ></v-text-field>
-          </template>
-          <v-date-picker
-            v-model="search"
-            @change="picker_date = false"
-          ></v-date-picker> </v-menu
-        ><v-spacer></v-spacer>
-        <v-select
-          v-model="category"
-          hide-details
-          flat
-          append-icon="mdi-filter-variant"
-          clearable
-          :items="CONST_CATEGORIE"
-          label="Catégorie"
-        ></v-select
-        ><v-spacer></v-spacer>
-        <v-text-field
-          flat
-          solo-inverted
-          v-model="critere"
-          append-icon="mdi-magnify"
-          label="rechercher..."
-          clearable
-          single-line
-          hide-details
-        ></v-text-field>
-      </v-toolbar>
-    </template>
-    <template v-slot:group.header="{ items, isOpen, toggle }">
-      <th colspan="2">
-        <v-icon @click="toggle"
-          >{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
-        </v-icon>
+  <div>
+    <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
 
-        {{ displayDate(items[0].start) }}
-      </th>
-    </template>
-    <template v-slot:item="{ item }">
-      <displayEvent :key="item.id + generatekey" :itemPlanning="item" />
-    </template>
-  </v-data-table>
+    <v-data-table
+      class="elevation-1"
+      :items="filteredItems"
+      :sort-by="['category', 'start']"
+      group-by="start"
+      :show="!firstLoad"
+      :items-per-page="5"
+      no-results-text="Pas d'évènement trouvé"
+      show-group-by
+    >
+      <template v-slot:header>
+        <v-toolbar class="mb-1">
+          <v-menu
+            v-model="picker_date"
+            :close-on-content-click="false"
+            max-width="290"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                flat
+                solo-inverted
+                append-icon="mdi-clock-outline"
+                :value="search"
+                clearable
+                label="début après le"
+                hide-details
+                readonly
+                v-on="on"
+                @click:clear="search = null"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="search"
+              @change="picker_date = false"
+            ></v-date-picker> </v-menu
+          ><v-spacer></v-spacer>
+          <v-select
+            v-model="category"
+            hide-details
+            flat
+            append-icon="mdi-filter-variant"
+            clearable
+            :items="CONST_CATEGORIE"
+            label="Catégorie"
+          ></v-select
+          ><v-spacer></v-spacer>
+          <v-text-field
+            flat
+            solo-inverted
+            v-model="critere"
+            append-icon="mdi-magnify"
+            label="rechercher..."
+            clearable
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-toolbar>
+      </template>
+      <template v-slot:group.header="{ items, isOpen, toggle }">
+        <th colspan="2">
+          <v-icon @click="toggle"
+            >{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
+          </v-icon>
+
+          {{ displayDate(items[0].start) }}
+        </th>
+      </template>
+      <template v-slot:item="{ item }">
+        <displayEvent
+          :key="item.name + item.start + item.end"
+          :itemPlanning="item"
+        />
+      </template>
+      <v-skeleton-loader
+        class="mx-auto"
+        max-width="300"
+        type="table"
+      ></v-skeleton-loader>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
@@ -84,6 +97,7 @@ export default {
   data () {
     return {
       critere: '',
+      firstLoad: true,
       category: '',
       picker_date: false,
       itemsPerPageArray: [4, 8, 12],
@@ -91,22 +105,20 @@ export default {
       sortDesc: false,
       page: 1,
       itemsPerPage: 4,
-      planning: [],
+      // planning: [],
       key: 1
     }
   },
   computed: {
-    ...mapState('event', ['events', 'CONST_CATEGORIE']), // assuming you are using namespaced modules
+    ...mapState('event', ['events', 'planning', 'CONST_CATEGORIE']), // assuming you are using namespaced modules
 
-    generatekey () {
-      return this.filteredItems.eventid + this.key++
-    },
     numberOfPages () {
       return Math.ceil(this.filteredItems.length / this.itemsPerPage)
     },
 
     filteredItems () {
-      return this.planning.filter((row) => {
+      return this.planning.filter(row => {
+        this.firstLoad = false
         return this.searchByCritere(row)
       })
     },
@@ -116,18 +128,26 @@ export default {
       return ville[ville.length - 3]
     }
   },
-  created () {
+  async created () {
     let self = this
-    console.log('client page')
 
     // charger les events via la liste des events et leurs planning
     this.$store.dispatch('startWaiting')
-    let execute = this.$store.dispatch('event/loadPlanning')
-    execute.then(() => {
-      // les events sont chargés
-      self.planning = self.$store.getters['event/getAllPlanning']
-      self.$store.dispatch('stopWaiting')
-    })
+    let execute = this.$store
+      .dispatch('event/loadPlanning')
+      .then(() => {
+        // les events sont chargés
+        // self.planning = self.$store.getters['event/getAllPlanning']
+        self.$store.dispatch('stopWaiting')
+      })
+      .catch(error => {
+        self.$store.dispatch('stopWaiting')
+
+        self.$store.dispatch('displayMessage', {
+          code: 'ADMIN',
+          param: error.message
+        })
+      })
   },
 
   methods: {
@@ -159,7 +179,7 @@ export default {
     getAdresseEvent (eventId) {
       let search = this.critere
       let event = null
-      event = this.events.find((element) => {
+      event = this.events.find(element => {
         if (typeof element.localisation === 'undefined') return false
         else {
           return (

@@ -109,15 +109,24 @@ export default {
       this.displayalert = false
       const user = await fb.auth
         .signInWithEmailAndPassword(this.email, this.password)
-        .then((user) => {
+        .then(user => {
+          // le user courent est initialisé
           this.$store.commit('setCurrentUser', user.user)
-          this.$store.dispatch('fetchUserProfile')
-          // this.$store.commit('setDisplayMenuOn')
-          self.$router.push({ name: 'listEvent' })
+          // le profil est chargé
+          this.$store
+            .dispatch('fetchUserProfile')
+            .then(() => {
+              self.$router.push({ name: 'listEvent' })
+            })
+            .catch(error => {
+              self.$store.dispatch('displayMessage', {
+                code: 'ADMIN',
+                param: error.message
+              })
+            })
         })
-        .catch((err) => {
+        .catch(err => {
           this.displayalert = true
-          console.log('connexion ko')
           this.errorMsg = err.message
           console.log(err)
         })
