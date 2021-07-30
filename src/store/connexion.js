@@ -1,4 +1,5 @@
 import firebase from 'firebase'
+import { getParsedCommandLineOfConfigFile } from 'typescript'
 
 /*
     Définition des modèles base
@@ -109,6 +110,10 @@ const actions = {
       .collection('profil')
       .doc(state.user.uid)
       .get()
+      .then(data => {
+        state.currentProfil = data
+        throw data
+      })
   }
 }
 
@@ -124,6 +129,10 @@ const mutations = {
 const getters = {
   isAuthenticated (state) {
     return !!state.user
+  },
+
+  getProfil (state) {
+    return state.currentProfil
   }
 }
 

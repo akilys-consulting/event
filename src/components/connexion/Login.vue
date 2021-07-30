@@ -43,11 +43,7 @@
                 v-if="errorMsg !== ''"
                 >{{ errorMsg }}</v-alert
               >
-              <v-btn
-                @click="login"
-                block
-                color="light-green lighten-3"
-                class="mt-3"
+              <v-btn @click="login" block color="primary" class="mt-3"
                 >Login</v-btn
               >
             </v-form>

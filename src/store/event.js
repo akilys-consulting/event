@@ -126,11 +126,11 @@ const actions = {
     state.planning = []
     let query = new Promise((resolve, reject) => {
       let execute = fb.eventCollection
-      if (typeof rootState.currentProfil.organisation !== 'function') {
+      if (typeof rootState.cnx.profil.organisation !== 'function') {
         execute = execute.where(
           'organisation',
           '==',
-          rootState.currentProfil.organisation
+          rootState.cnx.profil.organisation
         )
       }
       execute

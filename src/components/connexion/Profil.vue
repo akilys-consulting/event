@@ -78,9 +78,10 @@ export default {
     deconnexion () {
       console.log('demande de deconnexion')
       this.$store.dispatch('cnx/disconnect')
+      this.$router.push({ name: 'listEvent' }).catch(() => {})
     },
     voirProfil () {
-      this.$router.push({ name: 'voirProfil' })
+      this.$router.push({ name: 'voirProfil' }).catch(() => {})
     }
   }
 }
