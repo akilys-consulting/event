@@ -52,7 +52,7 @@
               >
             </v-form>
             <p class="overline font-weight-light text-right mt-3">
-              <router-link to="/sign-up">créér un nouveau compte</router-link>
+              <router-link to="/creation">créér un nouveau compte</router-link>
             </p>
           </v-col>
         </v-row>
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { fb } from '@/firebaseDef.js'
+import { fb } from '@/plugins/firebaseInit'
 export default {
   name: 'login',
   data () {
@@ -79,12 +79,14 @@ export default {
       url_img: '@/static/img/fond_app.jpg'
     }
   },
+  /*
   created () {
     this.$store.dispatch('clearData')
-  },
+  }, */
 
   mounted () {
     this.$store.commit('setDisplayMenuOff')
+    console.log('login:Mounted')
   },
   destroyed () {
     var test = document.getElementById('app')
@@ -103,32 +105,26 @@ export default {
     }
   },
   methods: {
-    async login () {
+    login () {
       let self = this
       this.errorMsg = ''
       this.displayalert = false
-      const user = await fb.auth
-        .signInWithEmailAndPassword(this.email, this.password)
-        .then(user => {
-          // le user courent est initialisé
-          this.$store.commit('setCurrentUser', user.user)
-          // le profil est chargé
-          this.$store
-            .dispatch('fetchUserProfile')
-            .then(() => {
-              self.$router.push({ name: 'listEvent' })
-            })
-            .catch(error => {
-              self.$store.dispatch('displayMessage', {
-                code: 'ADMIN',
-                param: error.message
-              })
-            })
+      this.formError = ''
+      this.$store
+        .dispatch('cnx/userLogin', {
+          email: this.email,
+          password: this.password
         })
-        .catch(err => {
-          this.displayalert = true
-          this.errorMsg = err.message
-          console.log(err)
+        .then(() => {
+          self.$store.dispatch('displayMessage', { code: 'CNXU', param: null })
+          this.$router.push('/')
+        })
+        .catch(error => {
+          self.$store.dispatch('displayMessage', {
+            code: 'CECNX',
+            param: error.message
+          })
+          console.log(error)
         })
     }
   }

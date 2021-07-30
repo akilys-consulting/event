@@ -54,6 +54,7 @@ export default {
     }
   },
   name: 'ListEventImg',
+
   components: { displayEventImg },
   created () {
     // chargement des images displonible pour l'event
@@ -71,7 +72,7 @@ export default {
         img2save.rep = this.$store.getters['event/getEventImgPath']
         console.log('image ' + img2save.name + img2save.rep)
         let execute = this.$store.dispatch('saveImg', img2save)
-        execute.then((imgId) => {
+        execute.then(imgId => {
           img2save.path = imgId
           console.log('image saved')
           self.$store.commit('event/setAddEventImg', img2save.name)

@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { fb } from '@/firebaseDef'
+import { fb } from '@/plugins/firebaseInit'
 export default {
   name: 'displayImage',
   data () {
@@ -44,7 +44,7 @@ export default {
         .ref()
         .child(this.rep + '/IMG_DEFAUT.jpg')
         .getDownloadURL()
-      file.then((url) => {
+      file.then(url => {
         self.urlImg = url
         self.displayImg = true
         self.loadPhoto = false

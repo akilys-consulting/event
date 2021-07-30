@@ -1,20 +1,33 @@
 <template>
-  <form class="contact-form" @submit.prevent="sendEmail">
-    <label>Name</label>
-    <input type="text" name="user_name" />
-    <label>Email</label>
-    <input type="email" name="user_email" />
-    <label>Message</label>
-    <textarea name="message"></textarea>
-    <input type="submit" value="Send" />
-  </form>
+  <v-card>
+    <v-card-subtitle>Partager cette event</v-card-subtitle>
+    <v-card-text>
+      <v-form ref="form" @submit.prevent="sendEmail" lazy-validation>
+        <v-row>
+          <v-col cols="8">
+            <v-text-field
+              v-model="email"
+              label="saisir l'email du destinataire"
+              required
+            ></v-text-field>
+          </v-col>
+          <v-col col="4">
+            <v-btn text color="primary">Envoyer</v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
+    </v-card-text>
+  </v-card>
 </template>
 <script>
 import emailjs from 'emailjs-com'
 
 export default {
+  data () {
+    return { email: '' }
+  },
   methods: {
-    sendEmail: (e) => {
+    sendEmail: e => {
       let templateParams = {
         to_name: 'jerome.vidaillac@gmail.com',
         commande: 'CMD962020',

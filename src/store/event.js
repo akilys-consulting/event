@@ -1,4 +1,4 @@
-import { fb } from '@/firebaseDef.js'
+import { fb } from '@/plugins/firebaseInit'
 import moment from 'moment'
 /*
     Définition des modèles base
@@ -10,7 +10,8 @@ const DEFINE_EVENT = {
   nom: null,
   adresse: {},
   plan: null,
-  planning: []
+  planning: [],
+  like: 0
 }
 
 const state = {
@@ -178,6 +179,17 @@ const actions = {
         }
       })
     }
+  },
+
+  addLike2Event ({ state, dispatch }) {
+    let eventDoc = fb.eventCollection.doc(state.currentEvent.id)
+    eventDoc.update({ like: ++state.currentEvent.like }).catch(error => {
+      dispatch(
+        'displayMessage',
+        { code: 'ADMIN', param: error.message },
+        { root: true }
+      )
+    })
   }
 }
 const mutations = {
@@ -222,6 +234,10 @@ const getters = {
     return state.planning
   },
 
+  getAllEevents (state) {
+    return state.events
+  },
+
   // definir l'event courant
   getPlanningById (state) {
     return state.planning.find(element => element.id == state.searchPlanningId)
@@ -244,6 +260,9 @@ const getters = {
   // récupérer le chemin d'accès aux images des events
   getEventImgPath () {
     return PATH_IMAGE
+  },
+  getNbLike (state) {
+    return state.currentEvent.like
   }
 }
 

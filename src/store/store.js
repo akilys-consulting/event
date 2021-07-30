@@ -1,16 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { fb } from '@/firebaseDef.js'
+import { fb } from '@/plugins/firebaseInit'
 import { messages } from '@/messages/messages'
-import storeEvent from '@/store/event.ts'
+import storeEvent from '@/store/event.js'
+import storeConnexion from '@/store/connexion.js'
 
 Vue.use(Vuex)
-
-// contrôle de la connexion
-const user = fb.auth.onAuthStateChanged(user => {
-  if (user) store.commit('setCurrentUser', user)
-  else store.commit('initModifUser')
-})
 
 // gestion de l'environnement
 const imgAvatarPath = 'image_avatar/'
@@ -19,15 +14,14 @@ const userType = ['client', 'commercial', 'admin']
 
 export const store = new Vuex.Store({
   modules: {
-    event: storeEvent
+    event: storeEvent,
+    cnx: storeConnexion
   },
   /*
   définition d'un user */
 
   state: {
     display: false,
-    modifUser: false,
-    currentUser: Object,
     waiting: false,
     message: {
       display: false,
@@ -64,58 +58,6 @@ export const store = new Vuex.Store({
   },
 
   actions: {
-    /*
-      on efface le user courant
-    */
-    clearData ({ commit }) {
-      commit('setCurrentUser', false)
-    },
-    /*
-      récupération du profil de connexion et mémorisation
-    */
-    async fetchUserProfile ({ commit, state }) {
-      let self = this
-      const request = new Promise((resolve, reject) => {
-        if (typeof state.currentUser.uid === 'undefined') return false
-        fb.clientCollection
-          .where('user_uid', '==', state.currentUser.uid)
-          .get()
-          .then(querySnapshot => {
-            querySnapshot.forEach(doc => {
-              // doc.data() is never undefined for query doc snapshots
-              state.currentProfil = doc.data()
-              resolve(doc.data())
-            })
-          })
-          .catch(err => {
-            self.dispatch('displayMessage', { code: 'LUKO' })
-            reject(err)
-          })
-      })
-      return await request
-    },
-    /*
-      récupération d'un profil user (à partir du userid
-    */
-    getUserData (state, userUid) {
-      let self = this
-      return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection
-          .where('user_uid', '==', userUid)
-          .get()
-        execute.then(function (querySnapshot) {
-          querySnapshot.forEach(function (doc) {
-            // doc.data() is never undefined for query doc snapshots
-            resolve(doc.data())
-          })
-        })
-        execute.catch(err => {
-          self.dispatch('displayMessage', 'LUKO')
-          reject(err)
-        })
-      })
-    },
-
     // démarrage de la barre d'attente
     startWaiting ({ commit }) {
       commit('setWaiting', true)
@@ -152,25 +94,7 @@ export const store = new Vuex.Store({
         }
       }
     },
-    getEmailUser () {
-      var user = fb.auth.currentUser
-      if (user) {
-        return user.email
-      } else return false
-    },
-    updateEmailUser (state, email) {
-      return new Promise((resolve, reject) => {
-        var user = fb.auth.currentUser
-        user
-          .updateEmail(email)
-          .then(function () {
-            resolve(true)
-          })
-          .catch(function (error) {
-            reject(error)
-          })
-      })
-    },
+
     getAvatarFile ({ state }, id) {
       let findUser = null
       if (!id) findUser = state.currentUser.uid
@@ -215,67 +139,6 @@ export const store = new Vuex.Store({
             reject(error)
           })
         }
-      })
-    },
-    /*
-      ajout d'un profil utilisateur
-      nom,prenom,user_uid(auth),organisation,adresse
-    */
-    async addProfil ({ state }, userData) {
-      let request = new Promise((resolve, reject) => {
-        const execute = fb.clientCollection.add(state.currentProfil)
-        execute.then(() => {
-          resolve()
-        })
-        execute.catch(err => {
-          reject(err)
-        })
-      })
-      return await request
-    },
-
-    /*
-      modification d'un profil utilisateur
-    */
-    updateUser (context, userData) {
-      let id = userData.id
-      delete userData.id
-      return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection.doc(id).update(userData)
-        execute.then(() => {
-          resolve()
-        })
-        execute.catch(err => {
-          reject(err)
-        })
-      })
-    },
-    /*
-      modification d'un profil utilisateur
-    */
-    deleteUser (context, userData) {
-      return new Promise((resolve, reject) => {
-        const execute = fb.clientCollection.doc(userData.id).delete(userData)
-        execute.then(() => {
-          resolve()
-        })
-        execute.catch(err => {
-          reject(err)
-        })
-      })
-    },
-    disconnect ({ context }) {
-      let self = this
-      return new Promise((resolve, reject) => {
-        let user = fb.auth
-          .signOut()
-          .then(() => {
-            self.dispatch('clearData')
-            resolve()
-          })
-          .catch(err => {
-            reject(err)
-          })
       })
     }
   },
@@ -355,7 +218,7 @@ export const store = new Vuex.Store({
     isAdmin (state) {
       if (state.currentUser) {
         if (
-          typeof state.currentProfil.organisation === 'undefined' ||
+          typeof state.currentProfil.organisation === 'function' ||
           state.currentProfil.organisation === ''
         ) {
           return false

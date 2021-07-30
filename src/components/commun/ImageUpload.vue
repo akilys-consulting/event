@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { fb } from '@/firebaseDef'
+import { fb } from '@/plugins/firebaseInit'
 export default {
   name: 'ImageUpload',
   data () {

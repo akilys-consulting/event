@@ -15,7 +15,15 @@ const config = {
   appId: '1:249987798838:web:33c1c3d195843c1de70597',
   measurementId: 'G-NYLWNCZ3XN'
 }
-firebase.initializeApp(config)
+
+const errorCode = [
+  {
+    code: 'EMAILEXIST',
+    errorCode: 'auth/email-already-in-use'
+  }
+]
+
+!firebase.apps.length ? firebase.initializeApp(config) : ''
 
 // firebase utils
 const db = firebase.firestore()
@@ -27,15 +35,7 @@ const currentUser = auth.currentUser
 
 // firebase collections
 const clientCollection = db.collection('client')
-const planCollection = db.collection('plan')
 const eventCollection = db.collection('event')
-const standCollection = db.collection('stand')
-const cmdCollection = db.collection('commande')
-const banqueEmplacementCollection = db.collection('emplacement')
-
-// const postsCollection = db.collection('posts')
-// const commentsCollection = db.collection('comments')
-// const likesCollection = db.collection('likes')
 
 export const fb = {
   db,
@@ -44,9 +44,6 @@ export const fb = {
   storage,
   currentUser,
   clientCollection,
-  planCollection,
   eventCollection,
-  standCollection,
-  cmdCollection,
-  banqueEmplacementCollection
+  errorCode
 }

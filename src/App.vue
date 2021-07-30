@@ -1,5 +1,5 @@
 <template>
-  <v-app id="app">
+  <div>
     <v-progress-linear
       v-if="waiting"
       height="9"
@@ -7,14 +7,22 @@
       color="yellow darken-2"
     />
     <chargement />
-    <navbar></navbar>
 
-    <v-main>
-      <v-container fluid>
-        <router-view></router-view>
-      </v-container>
-    </v-main>
+    <v-app id="app">
+      <navbar></navbar>
+      <v-main>
+        <v-container fluid>
+          <router-view></router-view>
+        </v-container>
+      </v-main>
 
+      <v-footer app>
+        <v-col class="text-center" cols="12" color="blue-grey lighten-2">
+          {{ new Date().getFullYear() }} —
+          <strong>AKILYS</strong>
+        </v-col>
+      </v-footer>
+    </v-app>
     <v-bottom-sheet
       inset
       :open-delay="message.timeout"
@@ -31,13 +39,7 @@
         </div>
       </v-sheet>
     </v-bottom-sheet>
-    <v-footer app>
-      <v-col class="text-center" cols="12" color="blue-grey lighten-2">
-        {{ new Date().getFullYear() }} —
-        <strong>AKILYS</strong>
-      </v-col>
-    </v-footer>
-  </v-app>
+  </div>
 </template>
 
 <script>
@@ -55,9 +57,7 @@ export default {
     ...mapState(['waiting', 'message'])
   },
   created () {
-    this.user = this.$store.getters.getUserInfo
-    this.$store.dispatch('loadBanqueImage')
+    console.log('created App')
   }
 }
 </script>
-<style></style>

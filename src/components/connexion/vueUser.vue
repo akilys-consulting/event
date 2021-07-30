@@ -40,28 +40,16 @@
             <v-col cols="6" lg="6" sm="12" md="12">
               <v-text-field
                 label="Nom"
-                v-model="user.nom"
+                v-model="nom"
                 @change="changeData"
               ></v-text-field>
             </v-col>
             <v-col cols="6" lg="6" sm="12" md="12">
               <v-text-field
                 label="Prénom"
-                v-model="user.prenom"
+                v-model="prenom"
                 @change="changeData"
               ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-select
-                :items="lstProfils"
-                prepend-icon="mdi-account-key-outline"
-                v-model="user.profil"
-                menu-props="auto"
-                item-text="text"
-                item-value="id"
-                label="Profil"
-                @change="changeData"
-              ></v-select>
             </v-col>
           </v-row>
         </v-col>
@@ -125,7 +113,7 @@ export default {
           self.saveUser()
           next()
         })
-        .catch((error) => {
+        .catch(error => {
           next()
         })
     } else next()
@@ -140,7 +128,7 @@ export default {
     ) {
       this.filename = this.user.user_uid
       let execute = this.$store.dispatch('getEmailUser')
-      execute.then((res) => {
+      execute.then(res => {
         self.email = res
         self.lstProfils = self.$store.getters.getAllProfils
       })

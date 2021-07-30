@@ -1,12 +1,15 @@
 <template>
   <div>
+    <v-dialog v-model="DisplaySend2email">
+      <email />
+    </v-dialog>
     <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
-
     <v-data-table
       class="elevation-1"
       :items="filteredItems"
       :sort-by="['category', 'start']"
       group-by="start"
+      item-key="name+start"
       :show="!firstLoad"
       :items-per-page="5"
       no-results-text="Pas d'évènement trouvé"
@@ -44,7 +47,7 @@
             flat
             append-icon="mdi-filter-variant"
             clearable
-            :items="CONST_CATEGORIE"
+            :items="getCategorie"
             label="Catégorie"
           ></v-select
           ><v-spacer></v-spacer>
@@ -71,21 +74,18 @@
       </template>
       <template v-slot:item="{ item }">
         <displayEvent
-          :key="item.name + item.start + item.end"
+          :key="item.start + item.end + item.nom"
           :itemPlanning="item"
+          @send2EMail="send2email()"
         />
       </template>
-      <v-skeleton-loader
-        class="mx-auto"
-        max-width="300"
-        type="table"
-      ></v-skeleton-loader>
     </v-data-table>
   </div>
 </template>
 
 <script>
 import displayEvent from '@/components/client/DisplayEvent'
+import email from '@/components/commun/EmailManagement'
 import mixFunctions from '@/components/commun/Functions'
 import moment from 'moment'
 import { mapState } from 'vuex'
@@ -93,7 +93,7 @@ import { mapState } from 'vuex'
 export default {
   name: 'listEvent',
   mixins: [mixFunctions],
-  components: { displayEvent },
+  components: { displayEvent, email },
   data () {
     return {
       critere: '',
@@ -106,7 +106,8 @@ export default {
       page: 1,
       itemsPerPage: 4,
       // planning: [],
-      key: 1
+      key: 1,
+      DisplaySend2email: false
     }
   },
   computed: {
@@ -126,10 +127,19 @@ export default {
     computedville: function (item) {
       let ville = item.adr.split(',')
       return ville[ville.length - 3]
+    },
+    getCategorie () {
+      let nomCategorie = []
+      this.CONST_CATEGORIE.forEach(data => {
+        nomCategorie.push(data.nom)
+      })
+      return nomCategorie
     }
   },
   async created () {
     let self = this
+    this.$store.commit('setDisplayMenuOn')
+    console.log('listEvent : created')
 
     // charger les events via la liste des events et leurs planning
     this.$store.dispatch('startWaiting')
@@ -142,9 +152,8 @@ export default {
       })
       .catch(error => {
         self.$store.dispatch('stopWaiting')
-
         self.$store.dispatch('displayMessage', {
-          code: 'ADMIN',
+          code: 'LEVT',
           param: error.message
         })
       })
@@ -203,6 +212,10 @@ export default {
 
     updateItemsPerPage (number) {
       this.itemsPerPage = number
+    },
+    send2email () {
+      console.log('send2email')
+      this.DisplaySend2email = true
     }
   }
 }

@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { fb } from '@/firebaseDef.js'
+import { fb } from '@/plugins/firebaseInit'
 import dialogmodal from '@/components/commun/DialogModal'
 export default {
   name: 'optionstand',
@@ -96,8 +96,8 @@ export default {
       { text: 'Actions', value: 'action', sortable: false }
     ],
     rules: {
-      required: (value) => !!value || 'champ obligatoire.',
-      number: (value) => !isNaN(value) || 'nombre attendu'
+      required: value => !!value || 'champ obligatoire.',
+      number: value => !isNaN(value) || 'nombre attendu'
     },
     editedIndex: -1,
     editedItem: {

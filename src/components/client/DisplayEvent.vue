@@ -1,10 +1,6 @@
 <template>
   <v-hover v-slot="{ hover }">
-    <v-card
-      @click="detailEvent(itemPlanning)"
-      :elevation="hover ? 12 : 2"
-      :class="{ 'on-hover': hover }"
-    >
+    <v-card :elevation="hover ? 24 : 12" :class="{ 'on-hover': hover }">
       <template v-slot:placeholder>
         <v-row class="fill-height ma-0" align="center" justify="center">
           <v-progress-circularl
@@ -14,7 +10,7 @@
         </v-row>
       </template>
       <v-card-title>{{ itemPlanning.name }}</v-card-title>
-      <v-card-text>
+      <v-card-text @click="detailEvent(itemPlanning)">
         <v-row>
           <v-col cols="4">
             <displayImage
@@ -32,6 +28,26 @@
           </v-col>
         </v-row>
       </v-card-text>
+      <v-card-actions>
+        <v-badge
+          v-if="nbLike > 0"
+          overlap
+          bordered
+          color="error"
+          :content="nbLike"
+        >
+          <v-btn icon>
+            <v-icon @click="addLike()">mdi-heart</v-icon>
+          </v-btn></v-badge
+        >
+        <v-btn icon v-if="!nbLike">
+          <v-icon @click="addLike()">mdi-heart</v-icon>
+        </v-btn>
+
+        <v-btn icon @click="shareinfo()">
+          <v-icon>mdi-share-variant</v-icon>
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </v-hover>
 </template>
@@ -40,13 +56,15 @@
 import moment from 'moment'
 import mixFunctions from '@/components/commun/Functions'
 import displayImage from '@/components/commun/DisplayImage'
+
 import { mapState } from 'vuex'
 export default {
   data () {
     return {
       isAdmin: false,
       urlImg: null,
-      displayImg: false
+      displayImg: false,
+      calculNbLike: false
     }
   },
   components: {
@@ -56,9 +74,6 @@ export default {
   props: ['itemPlanning', 'taille'],
   mixins: [mixFunctions],
 
-  created () {
-    console.log('iem ' + this.itemPlanning.eventid)
-  },
   computed: {
     ...mapState('event', ['events']), // assuming you are using namespaced modules
 
@@ -71,6 +86,13 @@ export default {
       return moment(this.itemPlanning.end, 'YYYY-MM-DD HH:mm').format(
         'DD/MM/YYYY HH:mm'
       )
+    },
+    nbLike () {
+      let searchIdEvent = this.itemPlanning.eventid
+      let currentEvent = this.events.find(
+        element => element.id == searchIdEvent
+      )
+      return currentEvent.like
     }
   },
   methods: {
@@ -82,10 +104,24 @@ export default {
     },
     getAdresseEvent () {
       let searchIdEvent = this.itemPlanning.eventid
-      let event = this.events.find((element) => element.id == searchIdEvent)
+      let event = this.events.find(element => element.id == searchIdEvent)
       if (event && typeof event.localisation !== 'undefined') {
         return event.localisation.adr
       } else return null
+    },
+    // add like to event
+    addLike () {
+      console.log('addlike')
+      this.$store.commit(
+        'event/setCurrentEventByPlanning',
+        this.itemPlanning.eventid
+      )
+      this.$store.dispatch('event/addLike2Event')
+    },
+
+    shareinfo () {
+      console.log('shareinfo')
+      this.$emit('send2EMail')
     }
   }
 }
