@@ -23,6 +23,7 @@
 
               <v-text-field
                 prepend-icon="mdi-lock"
+                filled
                 label="Votre mot de passe"
                 :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="show3 ? 'text' : 'password'"

@@ -1,5 +1,4 @@
 import firebase from 'firebase'
-import { getParsedCommandLineOfConfigFile } from 'typescript'
 
 /*
     Définition des modèles base
