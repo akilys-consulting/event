@@ -5,8 +5,8 @@ import { store } from '@/store/store.js'
 
 import VuetifyConf from '@/plugins/vuetify'
 import '@/plugins/editorHtml'
-import '@babel/polyfill'
 import '@/plugins/fireauth'
+import 'leaflet/dist/leaflet.css'
 
 Vue.config.productionTip = false
 

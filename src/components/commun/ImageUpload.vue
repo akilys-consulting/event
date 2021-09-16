@@ -2,7 +2,20 @@
   <v-container fluid>
     <v-card>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="12" align-self="start">
+          <v-file-input
+            v-model="file"
+            show-size
+            dense
+            accept="image/png, image/jpeg, image/bmp image/svg"
+            :placeholder="placeholderImg"
+            prepend-icon="mdi-camera"
+            @change="UploadFile"
+            @click.stop
+          ></v-file-input>
+        </v-col>
+
+        <v-col cols="12">
           <v-img height="200" :src="urlImg">
             <template v-slot:placeholder>
               <v-row class="fill-height ma-0" align="center" justify="center">
@@ -13,19 +26,6 @@
               </v-row>
             </template>
           </v-img>
-        </v-col>
-        <v-col cols="6" align-self="start">
-          <v-file-input
-            v-model="file"
-            :loading="loadPhoto"
-            show-size
-            dense
-            accept="image/png, image/jpeg, image/bmp"
-            :placeholder="placeholderImg"
-            prepend-icon="mdi-camera"
-            @change="UploadFile"
-            @click.stop
-          ></v-file-input>
         </v-col>
       </v-row>
     </v-card>
@@ -40,7 +40,7 @@ export default {
     return {
       displayImg: false,
       urlImg: '',
-      loadPhoto: true,
+      loadPhoto: false,
       localImg: null,
       placeholderImg: 'choisir une image',
       file: null
@@ -63,12 +63,14 @@ export default {
     },
     getDefaultImg () {
       let self = this
+
       const fileDefault = fb.file
         .ref()
         .child(this.rep + '/IMG_DEFAUT.jpg')
         .getDownloadURL()
       fileDefault.then(function (url) {
-        self.localImg = url
+        console.log('get default img')
+        self.urlImg = url
         self.displayImg = true
         self.loadPhoto = false
       })
@@ -80,7 +82,11 @@ export default {
     },
     displayImage: function () {
       let self = this
-      if (this.localImg && typeof this.localImg !== 'undefined') {
+      if (
+        this.localImg &&
+        typeof this.localImg !== 'undefined' &&
+        this.localImg !== -1
+      ) {
         const file = fb.file
           .ref()
           .child(this.rep + '/' + this.localImg)

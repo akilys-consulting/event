@@ -10,7 +10,6 @@ Vue.use(Vuex)
 // gestion de l'environnement
 const imgAvatarPath = 'image_avatar/'
 const imgDefaut = 'IMG_DEFAUT.jpg'
-const userType = ['client', 'commercial', 'admin']
 
 export const store = new Vuex.Store({
   modules: {
@@ -33,13 +32,6 @@ export const store = new Vuex.Store({
       display: false,
       message: 'Oups, je vais disparaitre',
       type: 'question'
-    },
-    currentProfil: {
-      nom: String,
-      prenom: String,
-      adresse: Object,
-      organisation: String,
-      user_uid: String
     },
     emailParam: {
       template: 'template_W2ROE7Xi',
@@ -74,7 +66,7 @@ export const store = new Vuex.Store({
         if (messages[i]['code'] == param.code) {
           let displayedmessage = messages[i]
           console.log('error' + param.param)
-          if (typeof param.param !== 'undefined') {
+          if (param && typeof param.param !== 'undefined') {
             displayedmessage.message = messages[i].message.replace(
               '[PARAM]',
               param.param
@@ -86,10 +78,17 @@ export const store = new Vuex.Store({
       }
     },
     // declenche l'affichage d'un message
-    displayQuestion ({ commit }, code) {
+    displayQuestion ({ commit }, param) {
       for (var i = 0; i < messages.length; i++) {
-        if (messages[i]['code'] === code) {
-          commit('setQuestion', messages[i])
+        if (messages[i]['code'] === param.code) {
+          let displayedmessage = messages[i]
+          if (param && typeof param.param !== 'undefined') {
+            displayedmessage.message = messages[i].message.replace(
+              '[PARAM]',
+              param.param
+            )
+          }
+          commit('setQuestion', displayedmessage)
           i = messages.length
         }
       }
@@ -145,29 +144,11 @@ export const store = new Vuex.Store({
 
   mutations: {
     setDisplayMenuOff (state) {
+      console.log()
       state.display = false
     },
     setDisplayMenuOn (state) {
       state.display = true
-    },
-    /* une modification donnée a été faite */
-    setModifUser (state) {
-      state.modifUser = true
-    },
-
-    /* réinitialisation des modif écran */
-    initModifUser (state) {
-      state.modifUser = false
-    },
-
-    /* configuration de l'utilisateur connecté */
-    setCurrentUser (state, val) {
-      state.currentUser = val
-    },
-
-    setInitUser (state) {
-      state.currentUser = null
-      state.profil = null
     },
 
     /* configuration du profil courant */

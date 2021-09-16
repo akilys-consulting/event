@@ -4,63 +4,58 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn
-            fab
-            small
-            color="primary"
+          <v-btn outlined color="primary" 
             v-on="on"
             :to="{ name: 'calendrier' }"
           >
-            <v-icon>mdi-arrow-left</v-icon>
+            <v-icon x-small>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
         <span>retour au calendrier</span>
       </v-tooltip>
 
       <v-spacer></v-spacer>
-      <v-btn
-        fab
-        color="accent"
+      <v-btn outlined color="primary"
         :disabled="!valid"
         @click="saveEvent"
-        large
-        icon
       >
         <v-icon>mdi-content-save-outline</v-icon>
       </v-btn>
-      <v-btn color="accent" large icon>
+      <v-btn outlined color="primary">
         <v-icon>mdi-delete-outline</v-icon>
       </v-btn>
     </v-toolbar>
-    <v-tabs color="lime darken-4" v-model="tab">
-      <v-tab>Général</v-tab>
-      <v-tab v-if="plan">gestion des prix</v-tab>
-      <v-tab v-if="plan">options évènement</v-tab>
-      <v-tab v-if="plan">options emplacement</v-tab>
-    </v-tabs>
-    <v-tabs-items v-model="tab">
-      <v-tab-item
-        ><v-card>
+<v-card>
+
           <v-card-text>
             <v-row>
               <v-col cols="12">
                 <programmation ref="programmation" />
               </v-col>
-            </v-row>
-            <v-row>
-              <imageUpload
-                v-if="currentEvent"
-                :fileName="getImage"
-                rep="image_event"
-                @uploadfile="saveEvent"
-              />
-              <p v-else>
-                Sauvegarder votre évènement et vous pourrez ajouter une image
-              </p>
+
+              <v-col cols="12" lg="6">
+                <imageUpload
+                  v-if="currentEvent"
+                  :fileName="getImage"
+                  rep="image_event"
+                  @uploadfile="saveEvent"
+                />
+                <p v-else>
+                  Sauvegarder votre évènement et vous pourrez ajouter une image
+                </p>
+              </v-col>
+              <v-col cols="12" lg="6">
+                <editor
+                  class="subtitle-1"
+                  v-model="currentEvent.minisite"
+                  :options="editorOption"
+                  placeholder="merci de saisir une description à votre évènement"
+                ></editor>
+              </v-col>
             </v-row>
             <v-form ref="form" v-model="valid" lazy-validation>
               <v-row>
-                <v-col cols="6">
+                <v-col cols="12" lg="6" md="6">
                   <v-text-field
                     v-model="currentEvent.nom"
                     label="Nom évènement"
@@ -68,7 +63,7 @@
                     :rules="[rules.required]"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" lg="6" md="6">
                   <v-select
                     v-model="currentEvent.categorie"
                     :rules="[rules.required]"
@@ -78,19 +73,21 @@
                   ></v-select
                 ></v-col>
 
-                <v-col cols="6">
+                <v-col cols="12" lg="6" md="6">
                   <v-text-field
                     v-model="currentEvent.organisateur"
                     label="Organisateur"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" lg="6" md="6">
                   <v-text-field
+                  :rules="[rules.url]"
                     v-model="currentEvent.urlsite"
-                    label="Site vers spectacle"
+                    label="lien vers spectacle"
                   ></v-text-field
                 ></v-col>
-                <v-col cols="6">
+                <!--
+                <v-col cols="12" lg="6" md="6">
                   <v-select
                     v-model="currentEvent.plan"
                     :items="lstPlans"
@@ -100,29 +97,31 @@
                     item-value="value"
                     @change="loadAdr"
                     @click:clear="localisation = null"
-                  ></v-select></v-col
-                ><v-col cols="6">
+                  ></v-select>
+                -->
+                </v-col
+                ><v-col cols="12" >
                   <adrmanagement
                     @uptadr="updateadresse"
-                    :adresse="currentEvent.localisation"/></v-col
-                ><v-col cols="12">
-                  <editor
-                    v-model="currentEvent.minisite"
-                    :options="editorOption"
-                  ></editor></v-col></v-row></v-form
+                    :adresse="currentEvent.localisation"
+                /></v-col>
+                <v-col cols="6">
+                  <v-switch
+                    v-model="currentEvent.payant"
+                    label="payant ?"
+                  ></v-switch>
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="currentEvent.prix"
+                    label="Prix de la place"
+                    :rules="[rules.digits]"
+                    v-if="currentEvent.payant"
+                  ></v-text-field
+                ></v-col>
+              </v-row> </v-form
           ></v-card-text>
         </v-card>
-      </v-tab-item>
-      <v-tab-item>
-        <prixevent />
-      </v-tab-item>
-      <v-tab-item>
-        <optionsalon />
-      </v-tab-item>
-      <v-tab-item>
-        <optionstand />
-      </v-tab-item>
-    </v-tabs-items>
   </div>
 </template>
 <script>
@@ -162,11 +161,15 @@ export default {
       ImageFileName: false,
 
       rules: {
-        required: value => !!value || 'obligatoire.'
+        required: value => !!value || 'obligatoire.',
+        digits: v => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
+        url: v => /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL',
+
       },
       valid: true,
       editorOption: {
         theme: 'bubble',
+        placeholder: 'Compose an epic...',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'],
@@ -228,7 +231,7 @@ export default {
     }
   },
   created () {
-    this.$store.commit('initModifUser')
+    // this.$store.commit('initModifUser')
     this.currentEvent = this.$store.getters['event/getCurrentEvent']
 
     if (this.currentEvent) {
@@ -279,5 +282,28 @@ export default {
 <style>
 .ql-bubble .ql-editor:focus {
   background-color: black;
+}
+#quill-container {
+  height: auto;
+  min-height: 100%;
+  padding: 50px;
+}
+
+/* Specify our own scrolling container */
+#scrolling-container {
+  height: 100%;
+  min-height: 200;
+  overflow-y: auto;
+}
+.ql-editor {
+  max-height: 325px;
+  height: 325px;
+  overflow-y: auto;
+}
+
+.ql-editor.ql-blank:before {
+  color: rgb(161, 158, 158) !important;
+  font-size: small;
+  height: 250px !important;
 }
 </style>

@@ -37,7 +37,10 @@ export const routes = [
   {
     path: '/calendrier',
     name: 'calendrier',
-    component: calendrier
+    component: calendrier,
+    meta: {
+      requiresAuth: true
+    }
   },
 
   {

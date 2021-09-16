@@ -1,50 +1,108 @@
 <template>
-  <v-avatar>
-    <v-img v-if="displayImg" :src="urlImg"></v-img>
-  </v-avatar>
+  <v-row>
+    <v-col cols="5">
+      <v-avatar :size="sizeAvatar">
+        <v-img :src="urlImg"></v-img>
+      </v-avatar>
+    </v-col>
+
+    <v-col cols="7" align-self="start">
+      <v-file-input
+        v-if="uploadMode"
+        v-model="file"
+        :loading="loadPhoto"
+        show-size
+        dense
+        accept="image/png, image/jpeg, image/bmp image/svg"
+        :placeholder="placeholderImg"
+        prepend-icon="mdi-camera"
+        @change="UploadFile"
+        @click.stop
+      ></v-file-input>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
 import { fb } from '@/plugins/firebaseInit'
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'AvatarDisplay',
+  props: ['uploadMode', 'sizeAvatar'],
+
   data () {
-    return { urlImg: null, displayImg: false }
-  },
-  created () {
-    const self = this
-    // get UID user
-    if (self.$store.getters.isconnected) {
-      console.log('avatar: user connect')
-      const execute = fb.file
-        .ref()
-        .child(self.$store.getters.getCurrentAvatarImg)
-        .getDownloadURL()
-        .then(function (url) {
-          self.urlImg = url
-          self.displayImg = true
-        })
-        .catch(function () {
-          self.loadDefautImg()
-        })
-    } else {
-      this.loadDefautImg()
+    return {
+      urlImg: null,
+      displayImg: false,
+      loadPhoto: false,
+      placeholderImg: 'changer votre avatar',
+      file: null
     }
   },
+  computed: {
+    ...mapGetters('cnx', ['getProfilPhoto'])
+  },
+
+  created () {
+    // récupération de l'avatar (google ou storage)
+    this.urlImg = this.getProfilPhoto
+  },
   methods: {
-    loadDefautImg () {
-      const self = this
-      let executeFile = fb.file
-        .ref()
-        .child(this.$store.getters.getDefaultAvatarImg)
-        .getDownloadURL()
-        .then(function (url) {
-          self.urlImg = url
-          self.displayImg = true
-        })
-        .catch(() => {
-          console.log('pas de fichier')
-        })
+    UploadFile (file) {
+      let self = this
+      // récupération du nom de l'image
+      if (typeof file !== 'undefined' && file != null) {
+        this.$store.dispatch('startWaiting')
+        // get avatar rep+filename
+        let filename = this.$store.getters['cnx/getAvatarImg']
+
+        if (filename) {
+          let storageRef = fb.file.ref()
+
+          storageRef
+            .child(filename)
+            .put(file)
+            .then(function (snapshot) {
+              self.$store.dispatch('stopWaiting')
+              self.$store.dispatch('displayMessage', 'IMOK')
+              self.localImg = self.fileName
+              self.displayImage().then(() => {
+                self.$emit('uploadfile', self.urlImg)
+                self.file = null
+              })
+            })
+            .catch(() => {
+              self.$store.dispatch('stopWaiting')
+              self.$store.dispatch('displayMessage', 'IMKO')
+            })
+        }
+      }
+    },
+    displayImage: function () {
+      let self = this
+      let filename = this.$store.getters['cnx/getAvatarImg']
+      return new Promise((resolve, reject) => {
+        if (filename && typeof filename !== 'undefined') {
+          const file = fb.file
+            .ref()
+            .child(filename)
+            .getDownloadURL()
+          file.then(function (url) {
+            self.urlImg = url
+            self.displayImg = true
+            self.loadPhoto = false
+            self.placeholderImg = "Changer d'image"
+            resolve()
+          })
+          file.catch(function (err) {
+            self.getDefaultImg()
+            reject(err)
+          })
+        } else {
+          self.getDefaultImg()
+        }
+      })
     }
   }
 }

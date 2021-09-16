@@ -1,6 +1,56 @@
 <template>
   <v-card>
     <v-card-title>
+      <v-row align="center" justify="center">
+        <v-col cols="auto">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn fab x-small color="primary" @click="refreshList" v-on="on">
+                <v-icon>mdi-arrow-left</v-icon>
+              </v-btn>
+            </template>
+            <span>retour à la liste</span>
+          </v-tooltip>
+        </v-col>
+        <v-col md="10" class="subtitle-2" lg="11">
+          {{ event.nom }}
+        </v-col>
+      </v-row>
+    </v-card-title>
+    <v-spacer></v-spacer>
+
+      <v-row>
+        <v-col cols="12">
+          {{ event.categorie }} - {{ event.localisation.adr }}</v-col
+        >
+      </v-row>
+      <v-row
+        ><v-col cols="12"
+          ><div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
+        </v-col></v-row
+      >
+
+      <add-to-calendar
+        :title="event.nom"
+        :location="event.localisation.adr"
+        :start="new Date(currentPlanning.start)"
+        :end="new Date(currentPlanning.end)"
+        :details="displayMiniSite"
+        inline-template
+      >
+        <div>
+          <google-calendar id="google-calendar">
+            <v-btn small rounded plain>
+              <img
+                style="height:30px;width:30px"
+                class="icon_image"
+                src="@/assets/google-calendar.png"
+              />
+              ajouter au calendrier
+            </v-btn>
+          </google-calendar>
+        </div>
+      </add-to-calendar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn fab small color="primary" @click="refreshList" v-on="on">
@@ -16,14 +66,17 @@
     </v-card-subtitle>
     <v-card-text>
       <v-row>
-        <v-col cols="auto">
+        <v-col lg="6" sm="6" xs="12">
           <displayImage
             :fileName="event.id"
             rep="image_event"
             height="250"
-            width="350"
+            width="auto"
           ></displayImage>
           <v-btn
+
+            v-if="event.urlsite"
+
             small
             color="primary"
             text
@@ -33,31 +86,42 @@
             Lien vers site organisateur
           </v-btn>
         </v-col>
-        <v-col>
+        <v-col lg="6" sm="6" xm="12">
           <l-map
             :zoom="zoom"
             :options="mapOptions"
             :center="center"
-            style="height: 100%"
+            style="height: 300px;width=auto"
           >
             <l-tile-layer :url="url" />
-            <l-marker :lat-lng="makerEvent"></l-marker>
+            <l-marker :icon="warehouse_icon" :lat-lng="[43.6142, 1.4155]">
+            </l-marker>
           </l-map>
         </v-col>
       </v-row>
     </v-card-text>
-    <v-card-text v-html="event.minisite"></v-card-text>
+
+    <v-card-text
+      class="subtitle-2"
+      v-if="event.minisite"
+      v-html="displayMiniSite"
+    ></v-card-text>
+    <v-card-text class="subtitle-2" v-else
+      >Aucune description n'a été fourni</v-card-text
+    >
   </v-card>
 </template>
 
 <script>
 import moment from 'moment'
 
-import { latLng } from 'leaflet'
-import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
-import 'leaflet/dist/leaflet.css'
 import displayImage from '@/components/commun/DisplayImage'
 import { mapState } from 'vuex'
+
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
+import { latLng, icon } from 'leaflet'
+import marker from '@/assets/marker.png'
+
 export default {
   name: 'detailEvent',
   components: {
@@ -76,7 +140,16 @@ export default {
       },
       event: { nom: null, minisite: null },
       currentPlanning: null,
+
+      makerEvent: null,
+      aad2calendar: false,
+      warehouse_icon: icon({
+        iconUrl: marker,
+        iconSize: [32, 37],
+        iconAnchor: [16, 37]
+      }),
       makerEvent: null
+
     }
   },
 
@@ -91,31 +164,46 @@ export default {
       return moment(this.currentPlanning.end, 'YYYY-MM-DD HH:mm').format(
         'DD/MM/YYYY HH:mm'
       )
+    },
+    displayMiniSite () {
+      return 'Pas de description'
+    },
+    dynamicSize () {
+      return [this.iconSize, this.iconSize * 1.15]
+    },
+    dynamicAnchor () {
+      return [this.iconSize / 2, this.iconSize * 1.15]
     }
   },
   created () {
-    this.$store.commit('setDisplayMenuOff')
     // on récupére l'event
     if (typeof this.$route.params.currentPlanning === 'undefined') {
       this.refreshList()
     }
 
     this.currentPlanning = this.planning.find(
-      (element) => element.id == this.$route.params.currentPlanning
+      element => element.id == this.$route.params.currentPlanning
     )
     this.event = this.events.find(
-      (element) => element.id == this.currentPlanning.eventid
+      element => element.id == this.currentPlanning.eventid
     )
     console.log('minisiste' + this.event.minisite)
 
-    this.center = latLng(
+    this.center = [
       this.event.localisation.latLng.lat,
       this.event.localisation.latLng.lng
+    ]
+
+    console.log(
+      'marker' +
+        this.event.localisation.latLng.lat +
+        ' ' +
+        this.event.localisation.latLng.lng
     )
-    this.makerEvent = latLng(
+    this.makerEvent = [
       this.event.localisation.latLng.lat,
       this.event.localisation.latLng.lng
-    )
+    ]
   },
   methods: {
     refreshList () {
@@ -127,4 +215,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.vue2leaflet-map {
+  z-index: 0;
+}
+</style>

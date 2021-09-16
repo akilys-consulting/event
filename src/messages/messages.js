@@ -34,7 +34,11 @@ export const messages = [
     message: 'Impossible de vous connecter :[PARAM]',
     type: 'error'
   },
-  { code: 'CNXU', message: 'Vous êtes maintenant connecté', type: 'success' },
+  {
+    code: 'CNXU',
+    message: 'Vous êtes maintenant connecté',
+    type: 'success'
+  },
   {
     code: 'CEEM',
     message: 'création impossible, cet email est déjà attribué',
@@ -78,6 +82,11 @@ export const messages = [
   {
     code: 'QSOS',
     message: 'voulez-vous supprimer cette option',
+    type: 'question'
+  },
+  {
+    code: 'QADR',
+    message: 'voulez-vous sauvegarder la valeur [PARAM]',
     type: 'question'
   }
 ]

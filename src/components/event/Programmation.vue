@@ -6,12 +6,12 @@
     <v-dialog overlay-opacity="0.4" overlay-color="white" v-model="dialog">
       <v-card elevation="3">
         <v-card-subtitle>
-          <span class="headline">{{ formTitle }}</span>
+          <span class="subtitle-2">{{ formTitle }}</span>
         </v-card-subtitle>
         <v-form ref="form" lazy-validation>
           <v-card-text>
             <v-row>
-              <v-col cols="4">
+              <v-col cols="12" md="4">
                 <v-select
                   :items="typeProgrammation"
                   item-text="text"
@@ -20,8 +20,8 @@
                 >
                 </v-select>
               </v-col>
-              <v-col cols="4">
-                <v-col lg="12" sm="6" md="6">
+              <v-col cols="12" md="4">
+                <v-col cols="12">
                   <v-menu
                     ref="menu_DD"
                     v-model="menu_DD"
@@ -41,7 +41,7 @@
                         readonly-
                         v-bind="attrs"
                         v-on="on"
-                        :rules="[(v) => !!v || 'champ obligatoire']"
+                        :rules="[v => !!v || 'champ obligatoire']"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -51,7 +51,7 @@
                     ></v-date-picker>
                   </v-menu>
                 </v-col>
-                <v-col lg="12" sm="6" md="6">
+                <v-col cols="12">
                   <v-menu
                     ref="menu_DF"
                     v-model="menu_DF"
@@ -71,7 +71,7 @@
                         readonly
                         v-bind="attrs"
                         v-on="on"
-                        :rules="[(v) => !!v || 'champ obligatoire']"
+                        :rules="[v => !!v || 'champ obligatoire']"
                       ></v-text-field>
                     </template>
                     <v-date-picker
@@ -81,8 +81,8 @@
                     ></v-date-picker>
                   </v-menu> </v-col
               ></v-col>
-              <v-col cols="4">
-                <v-col lg="12" sm="6" md="6">
+              <v-col cols="12" md="4">
+                <v-col cols="12">
                   <v-menu
                     ref="menu_HD"
                     v-model="menu_HD"
@@ -101,7 +101,7 @@
                         prepend-icon="mdi-clock-outline"
                         readonly
                         v-bind="attrs"
-                        :rules="[(v) => !!v || 'champ obligatoire']"
+                        :rules="[v => !!v || 'champ obligatoire']"
                         v-on="on"
                       ></v-text-field>
                     </template>
@@ -114,7 +114,7 @@
                     ></v-time-picker>
                   </v-menu>
                 </v-col>
-                <v-col lg="12" sm="6" md="6">
+                <v-col cols="12">
                   <v-menu
                     ref="menu_HF"
                     v-model="menu_HF"
@@ -131,7 +131,7 @@
                         prepend-icon="mdi-clock-outline"
                         readonly
                         v-bind="attrs"
-                        :rules="[(v) => !!v || 'champ obligatoire']"
+                        :rules="[v => !!v || 'champ obligatoire']"
                         v-on="on"
                       ></v-text-field>
                     </template>
@@ -160,14 +160,19 @@
     </v-dialog>
 
     <v-card hover evevation="15">
-      <v-card-title
+      <v-card-subtitle
         >Programmation
-        <v-btn color="primary" fab small @click.stop="dialog = true">
-          <v-icon dark>mdi-plus</v-icon>
+        <v-btn color="primary" fab x-small @click.stop="dialog = true">
+          <v-icon x-small dark>mdi-plus</v-icon>
         </v-btn>
-      </v-card-title>
+      </v-card-subtitle>
       <v-card-text>
-        <v-data-table :headers="headers" :items="planning" class="elevation-1">
+        <v-data-table
+          :headers="headers"
+          no-data-text="pas encore de programmation"
+          :items="planning"
+          class="elevation-1"
+        >
           <template v-slot:[`item.dtDebut`]="{ item }">
             {{ displayDtFr(item.dtDebut) }}
           </template>
@@ -250,7 +255,6 @@ export default {
         ? 'nouvelle programation'
         : 'modifier une programmation'
     },
-
     ...mapState('event', ['eventTab', 'typeProgrammation'])
   },
 
@@ -269,7 +273,7 @@ export default {
       return moment(dt).format('DD/MM/YYYY')
     },
     getType (type) {
-      return this.typeProgrammation.find((value) => value.value === type).text
+      return this.typeProgrammation.find(value => value.value === type).text
     },
     initialize () {
       this.planning = this.$store.getters['event/getPlanning']
@@ -294,7 +298,7 @@ export default {
       this.currentIndex = this.planning.indexOf(item)
       this.$store.dispatch('displayQuestion', 'QSOS')
       let execute = this.$refs.questionDelete.open()
-      execute.then((response) => {
+      execute.then(response => {
         if (response) this.confirmedelete()
       })
     },

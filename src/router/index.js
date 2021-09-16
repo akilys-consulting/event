@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+
 import { fb } from '@/plugins/firebaseInit'
 import { routes } from '@/router/lstRoute'
-import { store } from '@/store/store.js'
 
 Vue.use(VueRouter)
 
@@ -14,10 +14,10 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const connectedUser = fb.auth.currentUser
+  const currentUser = fb.auth.currentUser
 
-  if (connectedUser) console.log(connectedUser.uid)
-  if (requiresAuth && !(await fb.auth.getCurrentUser())) {
+
+  if (requiresAuth && !currentUser) {
     next({ name: 'login' })
   } else {
     next()

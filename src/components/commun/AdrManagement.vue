@@ -7,7 +7,7 @@
       class="updateAdr"
       v-model="localeadr.adr"
       id="country"
-      label="Votre adresse"
+      :label="libelleAdr == null ? 'Votre adresse' : libelleAdr"
     ></v-text-field>
   </div>
 </template>
@@ -20,7 +20,7 @@ export default {
   components: {
     dialogmodal
   },
-  props: ['adresse'],
+  props: ['adresse', 'libelleAdr'],
   data () {
     return {
       codeQuestion: {
@@ -37,6 +37,7 @@ export default {
     }
   },
   created () {
+    console.log('adrManagement' + this.adresse)
     if (typeof this.adresse !== 'undefined') this.localeadr = this.adresse
   },
   mounted () {
@@ -46,24 +47,13 @@ export default {
     }).configure({
       countries: ['fr']
     })
+    placesAutocomplete.on('clear', function (e) {
+      self.localeadr = { adr: null, latLng: { lat: 0, lng: 0 } }
+    })
+
     placesAutocomplete.on('change', function (e) {
-      let execute = self.$refs.checkModif.open(
-        'sauvegarde',
-        'voulez-vous sauvegarder la valeur <br>' + e.suggestion.value + ' ?',
-        {
-          color: 'red',
-          width: '300'
-        }
-      )
-      execute.then((data) => {
-        if (data) {
-          self.localeadr = {
-            adr: e.suggestion.value,
-            latLng: e.suggestion.latlng
-          }
-          self.$emit('uptadr', self.localeadr)
-        }
-      })
+      self.localeadr = { adr: e.suggestion.value, latLng: e.suggestion.latlng }
+      self.$emit('uptadr', self.localeadr)
     })
   },
   methods: {}

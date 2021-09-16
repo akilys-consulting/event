@@ -28,22 +28,24 @@ const errorCode = [
 // firebase utils
 const db = firebase.firestore()
 const auth = firebase.auth()
+const authObj = firebase.auth
 const file = firebase.storage()
 const storage = firebase.app().storage('gs://akilys-dev.appspot.com')
 
 const currentUser = auth.currentUser
 
 // firebase collections
-const clientCollection = db.collection('client')
+const profilCollection = db.collection('profil')
 const eventCollection = db.collection('event')
 
 export const fb = {
   db,
   auth,
+  authObj,
   file,
   storage,
   currentUser,
-  clientCollection,
+  profilCollection,
   eventCollection,
   errorCode
 }

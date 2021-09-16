@@ -1,6 +1,6 @@
 <template>
   <v-hover v-slot="{ hover }">
-    <v-card :elevation="hover ? 24 : 12" :class="{ 'on-hover': hover }">
+    <v-card :elevation="hover ? 12 : 2" :class="{ 'on-hover': hover }">
       <template v-slot:placeholder>
         <v-row class="fill-height ma-0" align="center" justify="center">
           <v-progress-circularl
@@ -9,10 +9,12 @@
           ></v-progress-circularl>
         </v-row>
       </template>
-      <v-card-title>{{ itemPlanning.name }}</v-card-title>
+      <v-card-title>{{ itemPlanning.nom }}</v-card-title>
       <v-card-text @click="detailEvent(itemPlanning)">
-        <v-row>
-          <v-col cols="4">
+
+        <v-row class="">
+          <v-col cols="6" lg="4">
+
             <displayImage
               :fileName="itemPlanning.eventid"
               rep="image_event"
@@ -20,11 +22,23 @@
               width="150"
             ></displayImage>
           </v-col>
-          <v-col>
+          <v-col cols="6" class="hidden-lg-and-up">
+            <v-avatar tile color="pink">
+              {{ getPrix }}
+            </v-avatar>
+          </v-col>
+
+          <EmailManagement :content="getHtml" />
+          <v-col cols="auto">
             <v-card-subtitle
               >{{ itemPlanning.category }} - {{ getAdresseEvent() }}
               <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
             </v-card-subtitle>
+          </v-col>
+          <v-col cols="3" class="hidden-md-and-down">
+            <v-avatar tile color="pink">
+              {{ getPrix }}
+            </v-avatar>
           </v-col>
         </v-row>
       </v-card-text>
@@ -43,9 +57,8 @@
         <v-btn icon v-if="!nbLike">
           <v-icon @click="addLike()">mdi-heart</v-icon>
         </v-btn>
-
-        <v-btn icon @click="shareinfo()">
-          <v-icon>mdi-share-variant</v-icon>
+        <v-btn icon>
+          <v-icon @click="sendEmail">mdi-email-send-outline</v-icon>
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -56,8 +69,10 @@
 import moment from 'moment'
 import mixFunctions from '@/components/commun/Functions'
 import displayImage from '@/components/commun/DisplayImage'
+import EmailManagement from '@/components/commun/EmailManagement'
 
 import { mapState } from 'vuex'
+
 export default {
   data () {
     return {
@@ -68,7 +83,8 @@ export default {
     }
   },
   components: {
-    displayImage
+    displayImage,
+    EmailManagement
   },
   name: 'displayEvent',
   props: ['itemPlanning', 'taille'],
@@ -88,14 +104,30 @@ export default {
       )
     },
     nbLike () {
-      let searchIdEvent = this.itemPlanning.eventid
-      let currentEvent = this.events.find(
-        element => element.id == searchIdEvent
-      )
+      let currentEvent = this.getEvent()
       return currentEvent.like
+    },
+    getHtml () {
+      let event = this.getEvent()
+      return {
+        nom: event.nom,
+        adr: event.localisation.adr,
+        debut: this.DateDebut,
+        fin: this.DateFin,
+        description: event.minisite ? event.minisite : 'Pas de description'
+      }
+    },
+    getPrix () {
+      let event = this.getEvent()
+      return event.prix ? event.prix + '€' : 'Free!'
     }
   },
+
   methods: {
+    getEvent () {
+      let searchIdEvent = this.itemPlanning.eventid
+      return this.events.find(element => element.id == searchIdEvent)
+    },
     detailEvent (element) {
       this.$router.push({
         name: 'clientdetailEvent',
@@ -103,8 +135,7 @@ export default {
       })
     },
     getAdresseEvent () {
-      let searchIdEvent = this.itemPlanning.eventid
-      let event = this.events.find(element => element.id == searchIdEvent)
+      let event = this.getEvent()
       if (event && typeof event.localisation !== 'undefined') {
         return event.localisation.adr
       } else return null
@@ -119,9 +150,9 @@ export default {
       this.$store.dispatch('event/addLike2Event')
     },
 
-    shareinfo () {
-      console.log('shareinfo')
-      this.$emit('send2EMail')
+    sendEmail () {
+      // affichage de la fenêtre d'nevoi de mail
+      this.$store.commit('event/setActiveEmailWin')
     }
   }
 }
@@ -134,14 +165,5 @@ export default {
 
 .v-card:not(.on-hover) {
   opacity: 0.6;
-}
-
-.v-card--reveal {
-  align-items: center;
-  bottom: 0;
-  justify-content: center;
-  opacity: 0.9;
-  position: absolute;
-  width: 100%;
 }
 </style>

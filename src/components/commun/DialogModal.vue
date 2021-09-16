@@ -8,9 +8,9 @@
   >
     <v-card>
       <v-toolbar dark dense flat>
-        <v-toolbar-title class="white--text"
-          >Action à votre demande</v-toolbar-title
-        >
+        <v-toolbar-title class="white--text">{{
+          question.titre
+        }}</v-toolbar-title>
       </v-toolbar>
       <v-card-text class="pa-4">{{ question.message }} ?</v-card-text>
       <v-card-actions class="pt-0">
@@ -24,22 +24,23 @@
 
 <script>
 import { mapState } from 'vuex'
+
 export default {
   data: () => ({
     dialog: false,
     resolve: null,
     reject: null,
-    question: { message: null },
     options: {
       color: 'primary',
       width: 290,
       zIndex: 200
     }
   }),
-
+  computed: {
+    ...mapState(['question'])
+  },
   methods: {
     open () {
-      this.question = this.$store.getters.getQuestion
       this.dialog = true
       return new Promise((resolve, reject) => {
         this.resolve = resolve
@@ -48,13 +49,11 @@ export default {
     },
     agree () {
       this.dialog = false
-      this.question = false
       this.$store.commit('setInitQuestion')
       this.resolve(true)
     },
     cancel () {
       this.dialog = false
-      this.question = false
       this.$store.commit('setInitQuestion')
       this.resolve(false)
     }

@@ -2,9 +2,8 @@
   <div class="text-center">
     <v-menu
       v-model="menuProfil"
-      open-on-hover
       :close-on-content-click="false"
-      :nudge-width="200"
+      :nudge-width="400"
       offset-x
     >
       <template v-slot:activator="{ on, attrs }">
@@ -12,27 +11,7 @@
           Mon compte
         </v-btn>
       </template>
-
       <v-card>
-        <v-list>
-          <v-list-item>
-            <v-list-item-avatar>
-              <img src="https://cdn.vuetifyjs.com/images/john.jpg" alt="John" />
-            </v-list-item-avatar>
-
-            <v-list-item-content>
-              <v-list-item-title
-                >{{ profil.prenom }} {{ profil.nom }}
-              </v-list-item-title>
-              <v-list-item-subtitle>{{
-                profil.organisation
-              }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-
-        <v-divider></v-divider>
-
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="voirProfil()">profil</v-btn>
@@ -42,28 +21,38 @@
           </v-btn>
         </v-card-actions>
       </v-card>
+      <profilForm @closeProfilDetail="closeDetail"></profilForm>
     </v-menu>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
+import profilForm from '@/components/connexion/ProfilForm'
 
 export default {
   name: 'profil',
   data () {
     return {
       menuProfil: false,
-      profil: { nom: '', prenom: '' }
+      profil: { nom: '', prenom: '' },
+      urlProfilPhoto: null,
+      detailDisplayed: false
     }
+  },
+  components: { profilForm },
+
+  computed: {
+    ...mapGetters('cnx', ['getProfilPhoto', 'getDisplayName'])
   },
 
   created () {
     let self = this
     console.log('profil:Created')
+    this.urlProfilPhoto = this.getProfilPhoto
 
     this.$store
-      .dispatch('cnx/loadUser')
+      .dispatch('cnx/loadProfil')
       .then(data => {
         if (data.exists) {
           console.log('then' + data.exists)
@@ -77,11 +66,17 @@ export default {
   methods: {
     deconnexion () {
       console.log('demande de deconnexion')
-      this.$store.dispatch('cnx/disconnect')
+      this.$store.dispatch('cnx/disconnect').then(() => {
+        this.$store.dispatch('displayMessage', { code: 'DCNX', param: null })
+      })
       this.$router.push({ name: 'listEvent' }).catch(() => {})
     },
     voirProfil () {
-      this.$router.push({ name: 'voirProfil' }).catch(() => {})
+      this.detailDisplayed = true
+    },
+    closeDetail () {
+      console.log('close detail')
+      this.detailDisplayed = false
     }
   }
 }

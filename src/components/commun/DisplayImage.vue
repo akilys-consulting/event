@@ -26,12 +26,9 @@ export default {
       file: null
     }
   },
-  props: ['fileName', 'rep', 'height', 'width'],
-  computed: {
-    getUrlImg () {
-      return self.urlImg
-    }
-  },
+
+
+  props: ['fileName', 'rep', 'height', 'width', 'planning', 'event'],
 
   created () {
     this.localImg = this.fileName

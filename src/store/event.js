@@ -5,6 +5,9 @@ import moment from 'moment'
 */
 
 const PATH_IMAGE = 'image_event'
+
+const IMG_DEFAUT = 'IMG_DEFAUT.jpg'
+
 const DEFINE_EVENT = {
   id: -1,
   nom: null,
@@ -26,18 +29,28 @@ const state = {
     { value: 'weeks', text: 'hebdomadaire' },
     { value: 'months', text: 'mensuel' }
   ],
+
+  // critère de recherche des events
+  EVT_SRCH_CAT: null,
+  EVT_SRCH_CRITERE: '',
+  EVT_SRCH_DT: null,
+  EVT_ACTIVE_SEARCH: false,
+  EVT_SRCH_GRATUIT: false,
+
   // permet de charger en mémoire tous les events
   events: [],
   // permet de définir les catégories
   CONST_CATEGORIE: [
-    { nom: 'culture', couleur: 'red', icon: '' },
-    { nom: 'loisir', couleur: 'red', icon: '' },
-    { nom: 'restaurant', couleur: 'red', icon: '' },
-    { nom: 'rencontre', couleur: 'red', icon: '' },
-    { nom: 'sport', couleur: 'red', icon: '' }
+    { nom: 'culture', couleur: 'orange darken-1', icon: '' },
+    { nom: 'loisir', couleur: 'deep-purple lighten-2', icon: '' },
+    { nom: 'restaurant', couleur: 'brown lighten-1', icon: '' },
+    { nom: 'rencontre', couleur: 'pink lighten-1', icon: '' },
+    { nom: 'sport', couleur: 'teal lighten-2', icon: '' }
   ],
   currentPlanning: null,
-  searchPlanningId: null
+  searchPlanningId: null,
+  currentImgUrl: null,
+  ActiveEmailWin: false
 }
 
 const actions = {
@@ -68,7 +81,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       delete event.id
-      if (typeof rootState.currentProfil.organisation !== 'undefined') {
+      if (typeof rootState.cnx.currentProfil.organisation !== 'undefined') {
         event.organisation = rootState.currentProfil.organisation
       }
       let execute = fb.eventCollection.add(event)
@@ -87,8 +100,8 @@ const actions = {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       let currentID = event.id
       delete event.id
-      if (typeof rootState.currentProfil.organisation !== 'undefined') {
-        event.organisation = rootState.currentProfil.organisation
+      if (typeof rootState.cnx.currentProfil.organisation !== 'undefined') {
+        event.organisation = rootState.cnx.currentProfil.organisation
       }
 
       let execute = fb.eventCollection.doc(currentID).update(event)
@@ -121,16 +134,20 @@ const actions = {
     })
   },
   // chargement des events et du planning depuis les events en base
-  async loadPlanning ({ state, dispatch, rootState }) {
+  async loadPlanning ({ state, dispatch, rootState, rootGetters }) {
     state.events = []
     state.planning = []
-    let query = new Promise((resolve, reject) => {
+    // récupération du profil
+    return new Promise((resolve, reject) => {
       let execute = fb.eventCollection
-      if (typeof rootState.cnx.profil.organisation !== 'function') {
+      if (
+        rootGetters['cnx/IsProfilLoaded'] &&
+        rootState.cnx.currentProfil.organisation
+      ) {
         execute = execute.where(
           'organisation',
           '==',
-          rootState.cnx.profil.organisation
+          rootState.cnx.currentProfil.organisation
         )
       }
       execute
@@ -149,13 +166,12 @@ const actions = {
           reject(error)
         })
     })
-    return await query
   },
 
   // parcours la programmation afin de définir toutes les dates
   // de l'évènement
   // met à jour le state calendar
-  decodePlanning ({ state }, event) {
+  decodePlanning ({ state, getters }, event) {
     let record = event
     if (event.planning.length > 0) {
       event.planning.forEach(prog => {
@@ -168,9 +184,10 @@ const actions = {
           let newPlanning = {
             id: planningId,
             eventid: record.id,
-            color: 'primary',
+            color: getters.getColorCategorie(record.categorie),
             category: record.categorie,
             name: record.nom,
+            prix: record.prix,
             start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut,
             end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
           }
@@ -208,18 +225,55 @@ const mutations = {
     state.currentEvent.images.push(nvlImg.path)
   },
 
-  // ajout du planning à l'event courant
-  setPlanning (state, value) {
-    state.currentEvent.planning = value
+  setActiveEmailWin (state) {
+    state.ActiveEmailWin = !state.ActiveEmailWin
   },
 
-  // definir le planning courant
-  setCurrentPlanning (state, planning) {
-    state.currentPlanning = planning
+  setActiveSearch (state) {
+    state.EVT_ACTIVE_SEARCH = true
+  },
+  clearActiveSearch (state) {
+    console.log('clear search')
+    state.EVT_ACTIVE_SEARCH = false
+  },
+  setEVT_SRCH_CAT (state, value) {
+    state.EVT_SRCH_CAT = value
+  },
+  setEVT_SRCH_DT (state, value) {
+    state.EVT_SRCH_DT = value
+  },
+  setEVT_SRCH_CRITERE (state, value) {
+    state.EVT_SRCH_CRITERE = value
+  },
+  setEVT_SRCH_GRATUIT (state, value) {
+    state.EVT_SRCH_GRATUIT = value
   }
 }
 
 const getters = {
+  // retourne les catégories
+  getCategories (state) {
+    let nomCategorie = []
+    state.CONST_CATEGORIE.forEach(data => {
+      nomCategorie.push(data.nom)
+    })
+    return nomCategorie
+  },
+  getColorCategorie: state => cat => {
+    return state.CONST_CATEGORIE.find(x => x.nom === cat).couleur
+  },
+  getEVT_SRCH_CAT (state) {
+    return state.EVT_SRCH_CAT
+  },
+  getEVT_SRCH_DT (state) {
+    return state.EVT_SRCH_DT
+  },
+  getEVT_SRCH_CRITERE (state) {
+    return state.EVT_SRCH_CRITERE
+  },
+  getEVT_SRCH_GRATUIT (state) {
+    return state.EVT_SRCH_GRATUIT
+  },
   // récupérer l'event courant
   getCurrentEvent (state) {
     return state.currentEvent
@@ -238,10 +292,6 @@ const getters = {
     return state.events
   },
 
-  // definir l'event courant
-  getPlanningById (state) {
-    return state.planning.find(element => element.id == state.searchPlanningId)
-  },
   // récupérer l'id de l'event courant
   getCurrentEventId (state) {
     return state.currentEvent.id
@@ -263,6 +313,9 @@ const getters = {
   },
   getNbLike (state) {
     return state.currentEvent.like
+  },
+  getActiveEmailWin (state) {
+    return state.ActiveEmailWin
   }
 }
 

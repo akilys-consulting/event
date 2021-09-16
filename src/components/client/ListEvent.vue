@@ -13,56 +13,9 @@
       :show="!firstLoad"
       :items-per-page="5"
       no-results-text="Pas d'évènement trouvé"
+      no-data-text="Pas d'évènement trouvé"
       show-group-by
     >
-      <template v-slot:header>
-        <v-toolbar class="mb-1">
-          <v-menu
-            v-model="picker_date"
-            :close-on-content-click="false"
-            max-width="290"
-          >
-            <template v-slot:activator="{ on }">
-              <v-text-field
-                flat
-                solo-inverted
-                append-icon="mdi-clock-outline"
-                :value="search"
-                clearable
-                label="début après le"
-                hide-details
-                readonly
-                v-on="on"
-                @click:clear="search = null"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="search"
-              @change="picker_date = false"
-            ></v-date-picker> </v-menu
-          ><v-spacer></v-spacer>
-          <v-select
-            v-model="category"
-            hide-details
-            flat
-            append-icon="mdi-filter-variant"
-            clearable
-            :items="getCategorie"
-            label="Catégorie"
-          ></v-select
-          ><v-spacer></v-spacer>
-          <v-text-field
-            flat
-            solo-inverted
-            v-model="critere"
-            append-icon="mdi-magnify"
-            label="rechercher..."
-            clearable
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-toolbar>
-      </template>
       <template v-slot:group.header="{ items, isOpen, toggle }">
         <th colspan="2">
           <v-icon @click="toggle"
@@ -76,7 +29,6 @@
         <displayEvent
           :key="item.start + item.end + item.nom"
           :itemPlanning="item"
-          @send2EMail="send2email()"
         />
       </template>
     </v-data-table>
@@ -88,7 +40,7 @@ import displayEvent from '@/components/client/DisplayEvent'
 import email from '@/components/commun/EmailManagement'
 import mixFunctions from '@/components/commun/Functions'
 import moment from 'moment'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'listEvent',
@@ -96,12 +48,8 @@ export default {
   components: { displayEvent, email },
   data () {
     return {
-      critere: '',
       firstLoad: true,
-      category: '',
-      picker_date: false,
       itemsPerPageArray: [4, 8, 12],
-      search: '',
       sortDesc: false,
       page: 1,
       itemsPerPage: 4,
@@ -111,7 +59,13 @@ export default {
     }
   },
   computed: {
-    ...mapState('event', ['events', 'planning', 'CONST_CATEGORIE']), // assuming you are using namespaced modules
+    ...mapState('event', ['events', 'planning']), // assuming you are using namespaced modules
+    ...mapGetters('event', [
+      'getEVT_SRCH_DT',
+      'getEVT_SRCH_CAT',
+      'getEVT_SRCH_CRITERE',
+      'getEVT_SRCH_GRATUIT'
+    ]),
 
     numberOfPages () {
       return Math.ceil(this.filteredItems.length / this.itemsPerPage)
@@ -119,7 +73,6 @@ export default {
 
     filteredItems () {
       return this.planning.filter(row => {
-        this.firstLoad = false
         return this.searchByCritere(row)
       })
     },
@@ -127,18 +80,13 @@ export default {
     computedville: function (item) {
       let ville = item.adr.split(',')
       return ville[ville.length - 3]
-    },
-    getCategorie () {
-      let nomCategorie = []
-      this.CONST_CATEGORIE.forEach(data => {
-        nomCategorie.push(data.nom)
-      })
-      return nomCategorie
     }
   },
   async created () {
     let self = this
     this.$store.commit('setDisplayMenuOn')
+    this.$store.commit('event/setActiveSearch')
+
     console.log('listEvent : created')
 
     // charger les events via la liste des events et leurs planning
@@ -149,6 +97,7 @@ export default {
         // les events sont chargés
         // self.planning = self.$store.getters['event/getAllPlanning']
         self.$store.dispatch('stopWaiting')
+        this.firstLoad = false
       })
       .catch(error => {
         self.$store.dispatch('stopWaiting')
@@ -166,20 +115,27 @@ export default {
 
     searchByCritere (row) {
       let dateDebut = moment(row.start, 'YYYY-MM-DD')
-      let dateSearch = moment(this.search, 'YYYY-MM-DD')
+      let dateSearch = moment(this.getEVT_SRCH_DT, 'YYYY-MM-DD')
       let critereMatch = true
 
-      if (this.search) critereMatch = dateSearch.isBefore(dateDebut)
+      if (this.getEVT_SRCH_DT) critereMatch = dateSearch.isBefore(dateDebut)
 
-      if (this.category) {
-        critereMatch = critereMatch && row.category.includes(this.category)
+      if (this.getEVT_SRCH_CAT) {
+        critereMatch =
+          critereMatch && row.category.includes(this.getEVT_SRCH_CAT)
       }
 
-      if (this.critere) {
+      if (this.getEVT_SRCH_CRITERE) {
         critereMatch =
           critereMatch &&
-          (row.name.toUpperCase().includes(this.critere.toUpperCase()) ||
+          (row.name
+            .toUpperCase()
+            .includes(this.getEVT_SRCH_CRITERE.toUpperCase()) ||
             this.getAdresseEvent(row.id))
+      }
+
+      if (this.getEVT_SRCH_GRATUIT) {
+        critereMatch = critereMatch && !row.prix
       }
 
       return critereMatch
@@ -212,10 +168,6 @@ export default {
 
     updateItemsPerPage (number) {
       this.itemsPerPage = number
-    },
-    send2email () {
-      console.log('send2email')
-      this.DisplaySend2email = true
     }
   }
 }
