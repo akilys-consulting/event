@@ -3,23 +3,27 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn outlined color="primary" v-on="on" :to="{ name: 'listEvent' }">
+          <v-btn
+            small
+            outlined
+            color="primary"
+            v-on="on"
+            :to="{ name: 'listEvent' }"
+          >
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
         <span>retour aux évènements</span>
       </v-tooltip>
-      <v-btn outlined color="primary" @click="ajouterEvenement">
+      <v-btn small outlined color="primary" @click="ajouterEvenement">
         <v-icon left> mdi-calendar-plus </v-icon>
         ajouter
       </v-btn>
       <v-menu bottom right>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn outlined color="primary" v-bind="attrs" v-on="on">
+          <v-btn small outlined color="primary" v-bind="attrs" v-on="on">
             <span>affichage</span>
-            <v-icon right>
-              mdi-menu-down
-            </v-icon>
+            <v-icon right> mdi-menu-down </v-icon>
           </v-btn>
         </template>
         <v-list>
@@ -45,9 +49,9 @@
         <v-icon> mdi-chevron-right </v-icon>
       </v-btn>
     </v-toolbar>
-    <v-toolbar-sub-title v-if="$refs.calendar">
+    <v-toolbar-title v-if="$refs.calendar">
       {{ $refs.calendar.title }}
-    </v-toolbar-sub-title>
+    </v-toolbar-title>
 
     <v-calendar
       ref="calendar"
@@ -67,7 +71,7 @@
 </template>
 
 <script>
-import { mapState,mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 export default {
   data: () => ({
     focus: '',
@@ -86,6 +90,7 @@ export default {
     let self = this
 
     this.$store.commit('setDisplayMenuOn')
+    this.$store.commit('event/clearActiveSearch')
 
     if (!this.isAdmin) this.$router.push('/')
 
@@ -93,10 +98,10 @@ export default {
     this.$store.dispatch('startWaiting')
     await this.$store
       .dispatch('event/loadPlanning')
-      .then(data => {
+      .then((data) => {
         self.$store.dispatch('stopWaiting')
       })
-      .catch(error => {
+      .catch((error) => {
         self.$store.dispatch('stopWaiting')
         self.$store.dispatch('displayMessage', {
           code: 'ADMIN',

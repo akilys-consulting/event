@@ -29,10 +29,11 @@ const actions = {
         email: data.user.email,
         organisation: data.account.organisation,
         adresse: data.account.adresse,
+        cleAdmin: data.account.admin_key,
         photoURL: data.user.uid, // supply a default profile image for all users
         displayName: data.account.nom + ' ' + data.account.prenom
       })
-      .catch(error => {
+      .catch((error) => {
         dispatch(
           'displayMessage',
           {
@@ -69,7 +70,7 @@ const actions = {
         commit('setUser', user.user)
         return dispatch('createProfil', { account, user })
       })
-      .catch(error => {
+      .catch((error) => {
         switch (error.code) {
           case 'auth/email-already-in-use':
             dispatch(
@@ -100,7 +101,7 @@ const actions = {
   userLogin (context, account) {
     return fb.auth
       .signInWithEmailAndPassword(account.email, account.password)
-      .then(data => {
+      .then((data) => {
         context.commit('setUser', data.user)
       })
   },
@@ -116,33 +117,57 @@ const actions = {
     let provider = new fb.authObj.GoogleAuthProvider()
     return fb.auth
       .signInWithPopup(provider)
-      .then(result => {
+      .then((result) => {
         context.commit('setUser', result.user)
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err) // This will give you all the information needed to further debug any errors
       })
   },
+  /*
+     on peut savoir si un user est de type admin
+     si cleAdmin de son profil correspond à un Id d'une  organisation
+  */
+  async isadmin ({ state, dispatch }) {
+    await fb.orgaCollection
+      .doc(state.currentProfil.cleAdmin)
+      .get()
+      .then((doc) => {
+        if (doc.exists) state.currentProfil.cleAdmin = true
+        else state.currentProfil.cleAdmin = false
+      })
+      .catch((error) => {
+        dispatch(
+          'displayMessage',
+          {
+            code: 'ADMIN',
+            param: error
+          },
+          { root: true }
+        )
+      })
+  },
 
-  loadProfil ({ state, dispatch, commit, getters }) {
+  async loadProfil ({ state, dispatch, commit, getters }) {
     return new Promise((resolve, reject) => {
       if (getters.isAuthenticated && !getters.IsProfilLoaded) {
+        console.log('chargement du profil')
         let profil = fb.profilCollection.doc(state.user.uid).get()
         profil
-          .then(data => {
+          .then((data) => {
             if (data.exists) {
               commit('setProfil', data.data())
+              dispatch('isadmin')
             }
             resolve()
           })
-          .catch(err => {
+          .catch((err) => {
             reject(err)
           })
       }
     })
   }
 }
-
 const mutations = {
   //
   // mémorisation d'un nutilisateur connecté
@@ -189,9 +214,7 @@ const getters = {
     return state.profilLoaded
   },
   isAdmin (state) {
-    if (state.currentProfil && state.currentProfil.organisation) {
-      return state.currentProfil.organisation != null
-    }
+    return state.currentProfil.cleAdmin
   },
   getDefaultAvatarImg () {
     return imgAvatarPath + imgDefaut

@@ -23,45 +23,34 @@
 
       <v-btn-toggle tile group>
         <v-btn
-          class="hidden-md-and-down"
-          align="center"
+        text
+         align="center"
           justify="center"
-          text
-          to="/"
-        >
+          to="/">
           <v-icon>mdi-view-list</v-icon>
-          Sorties
-        </v-btn>
-        <v-btn
-          align="center"
-          class="hidden-lg-and-up"
-          justify="center"
-          small
-          text
-          to="/"
-        >
-          <v-icon>mdi-view-list</v-icon>
+          <span class="hidden-md-and-down">Sorties</span>
         </v-btn>
 
         <v-btn
           align="center"
+          text
           justify="center"
           v-if="isAuthenticated && isAdmin"
-          class="hidden-md-and-down"
-          to="/calendrier"
-          ><v-icon>mdi-calendar-edit</v-icon>
-          Calendrier
+          to="/calendrier">
+          <v-icon>mdi-calendar-edit</v-icon>
+          <span class="hidden-md-and-down">Calendrier</span>
         </v-btn>
         <v-btn
+        text
           align="center"
           justify="center"
-          small
           v-if="isAuthenticated && isAdmin"
-          class="hidden-lg-and-up"
-          to="/calendrier"
-          ><v-icon small>mdi-calendar-edit</v-icon>
+          to="/selectplan">
+        <v-icon>mdi-floor-plan</v-icon>
+          <span class="hidden-md-and-down">plan</span>
         </v-btn>
-        <v-btn class="hidden-md-and-up" small @click.stop="drawer = !drawer">
+        <v-btn text align="center" justify="center"
+class="hidden-md-and-up"  @click.stop="drawer = !drawer">
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
       </v-btn-toggle>
@@ -115,6 +104,7 @@ export default {
 
     ...mapGetters('cnx', ['isAuthenticated', 'isAdmin'])
   }
+
 }
 </script>
 <style scoped>

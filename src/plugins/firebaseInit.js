@@ -37,6 +37,8 @@ const currentUser = auth.currentUser
 // firebase collections
 const profilCollection = db.collection('profil')
 const eventCollection = db.collection('event')
+const planCollection = db.collection('plan')
+const orgaCollection = db.collection('organisation')
 
 export const fb = {
   db,
@@ -47,5 +49,7 @@ export const fb = {
   currentUser,
   profilCollection,
   eventCollection,
+  planCollection,
+  orgaCollection,
   errorCode
 }

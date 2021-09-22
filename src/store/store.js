@@ -4,6 +4,7 @@ import { fb } from '@/plugins/firebaseInit'
 import { messages } from '@/messages/messages'
 import storeEvent from '@/store/event.js'
 import storeConnexion from '@/store/connexion.js'
+import storePlan from '@/store/plan.js'
 
 Vue.use(Vuex)
 
@@ -14,7 +15,8 @@ const imgDefaut = 'IMG_DEFAUT.jpg'
 export const store = new Vuex.Store({
   modules: {
     event: storeEvent,
-    cnx: storeConnexion
+    cnx: storeConnexion,
+    plan: storePlan
   },
   /*
   définition d'un user */
@@ -114,7 +116,7 @@ export const store = new Vuex.Store({
             .then(function (url) {
               resolve(url)
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error)
             })
         })
@@ -127,14 +129,14 @@ export const store = new Vuex.Store({
           storageRef.child(file.rep + '/' + file.name).put(file.file)
           storageRef.then(function (snapshot) {
             const data = snapshot.ref.getDownloadURL()
-            data.then(path => {
+            data.then((path) => {
               resolve(path)
             })
-            data.catch(error => {
+            data.catch((error) => {
               reject(error)
             })
           })
-          storageRef.catch(error => {
+          storageRef.catch((error) => {
             reject(error)
           })
         }

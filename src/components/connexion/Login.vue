@@ -1,92 +1,79 @@
 <template>
-  <div id="ex1">
-    <v-card
-      class="mx-auto login "
-      hover
-      flat
-      max-height="400"
-      max-width="500"
-      outlined
-    >
-      <v-container>
-        <v-row>
-          <v-col md="8" offset-md="2">
-            <v-form>
-              <v-text-field
-                label="Votre email"
-                v-model="email"
-                :placeholder="autofillLogin ? ` Email` : null"
-                name="login"
-                prepend-icon="mdi-account"
-                type="text"
-              />
+  <v-card
+    class="mx-auto login"
+    hover
+    flat
+    max-height="400"
+    max-width="500"
+    outlined
+  >
+    <v-card-text>
+      <v-row>
+        <v-col md="8" offset-md="2">
+          <v-form>
+            <v-text-field
+              label="Votre email"
+              v-model="email"
+              :placeholder="autofillLogin ? ` Email` : null"
+              name="login"
+              prepend-icon="mdi-account"
+              type="text"
+            />
 
-              <v-text-field
-                prepend-icon="mdi-lock"
-                filled
-                label="Votre mot de passe"
-                :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="show3 ? 'text' : 'password'"
-                name="password"
-                :placeholder="autofill ? ` Mot de passe` : null"
-                v-model="password"
-                class="input-group--focused"
-                @click:append="show3 = !show3"
-              />
-              <v-spacer />
-              <v-alert
-                v-model="displayalert"
-                dismissible
-                outlined
-                type="error"
-                color="error"
-                elevation="2"
-                v-if="errorMsg !== ''"
-                >{{ errorMsg }}</v-alert>
-              <v-btn
-                @click="login"
-                block
-                color="primary"
-                class="text--lighten-1 text-body-2 mt-3"
-                >connexion</v-btn>
-            </v-form>
-            <v-spacer></v-spacer>
+            <v-text-field
+              prepend-icon="mdi-lock"
+              filled
+              label="Votre mot de passe"
+              :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="show3 ? 'text' : 'password'"
+              name="password"
+              :placeholder="autofill ? ` Mot de passe` : null"
+              v-model="password"
+              class="input-group--focused"
+              @click:append="show3 = !show3"
+            />
+            <v-spacer />
+            <v-alert
+              v-model="displayalert"
+              dismissible
+              outlined
+              type="error"
+              color="error"
+              elevation="2"
+              v-if="errorMsg !== ''"
+              >{{ errorMsg }}</v-alert
+            >
+            <v-btn @click="login" class="font-weight-thin" block
+              >connexion</v-btn
+            >
+          </v-form>
+        </v-col>
+      </v-row>
+    </v-card-text>
+    <v-card-text>
+      <v-row align="center" justify="center">
+        <v-col cols="8" class="font-weight-thin">
+          Autre moyen de connexion
+        </v-col>
+        <v-col cols="4">
+          <v-btn icon color="red" outlined @click="cnxgoogle"
+            ><v-icon>mdi-google-plus</v-icon>
+          </v-btn>
+          <v-btn icon outlined color="indigo lighten-2" @click="cnxgoogle">
+            <v-icon>mdi-facebook</v-icon></v-btn
+          >
+        </v-col>
+      </v-row>
 
-            <v-row align="center" justify="center">
-              <v-col cols="8" class="subtitle-2 font-weight-thin">
-                Autre moyen de connexion
-              </v-col>
-              <v-col cols="4">
-                <v-btn icon @click="cnxgoogle" class="mt-3"
-                  ><img
-                    class="icon_image"
-                    src="require('@/assets/google_logo.svg')"
-                  />
-                </v-btn>
-
-                <v-btn icon @click="cnxgoogle" class="mt-3"
-                  ><img
-                    class="icon_image"
-                    src="require('@/assets/facebook_logo.svg')"
-                  /></v-btn>
-              <v-btn @click="login" block color="primary" class="mt-3"
-                >Login</v-btn>
-              </v-col>
-            </v-row>
-
-            <p class="overline font-weight-light text-right mt-3">
-              <router-link to="/creation">créér un nouveau compte</router-link>
-            </p>
-          </v-col>
-        </v-row>
-        <!--</v-parallax>-->
-      </v-container>
-    </v-card>
-  </div>
+      <p class="text-right font-weight-thin mt-3">
+        <router-link to="/creation">créér un nouveau compte</router-link>
+      </p>
+    </v-card-text>
+    <!--</v-parallax>-->
+  </v-card>
 </template>
 
 <script>
-import { fb } from '@/plugins/firebaseInit'
 export default {
   name: 'login',
   data () {
@@ -152,7 +139,7 @@ export default {
               })
               this.$router.push('/')
             })
-            .catch(err => {
+            .catch((err) => {
               // le chargement du login a échoué
               // on déconnecte
               console.log('profil-erreur' + err.message)
@@ -164,7 +151,7 @@ export default {
               })
             })
         })
-        .catch(error => {
+        .catch((error) => {
           console.log('login-error')
           self.$store.dispatch('displayMessage', {
             code: 'ECNX',
@@ -186,7 +173,7 @@ export default {
             this.$store.commit('setDisplayMenuOn')
             this.$router.push('/')
           })
-          .catch(err => {
+          .catch((err) => {
             // le chargement du login a échoué
             // on déconnecte
             console.log('profil-erreur' + err.message)
@@ -204,7 +191,8 @@ export default {
 
 <style>
 #app {
-  background-image: url('~@/assets/fond.jpg');
+  background-image: url('~@/assets/fond.jpg') !important
+;
 }
 .v-btn:not(.v-btn--round).v-size--default {
   min-width: 50%;
