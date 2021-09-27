@@ -10,7 +10,10 @@
           </v-list-item-avatar>
 
           <v-list-item-content>
-            <v-list-item-title v-text="image.name"></v-list-item-title>
+            <v-list-item-title
+              @click="setImage(image)"
+              v-text="image.name"
+            ></v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list-item-group>
@@ -19,8 +22,6 @@
 </template>
 
 <script>
-import { fb } from '@/plugins/firebaseInit'
-
 export default {
   name: 'banqueImage',
   data () {
