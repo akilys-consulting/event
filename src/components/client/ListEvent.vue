@@ -72,7 +72,7 @@ export default {
     },
 
     filteredItems () {
-      return this.planning.filter(row => {
+      return this.planning.filter((row) => {
         return this.searchByCritere(row)
       })
     },
@@ -99,7 +99,7 @@ export default {
         self.$store.dispatch('stopWaiting')
         this.firstLoad = false
       })
-      .catch(error => {
+      .catch((error) => {
         self.$store.dispatch('stopWaiting')
         self.$store.dispatch('displayMessage', {
           code: 'LEVT',
@@ -144,7 +144,7 @@ export default {
     getAdresseEvent (eventId) {
       let search = this.critere
       let event = null
-      event = this.events.find(element => {
+      event = this.events.find((element) => {
         if (typeof element.localisation === 'undefined') return false
         else {
           return (
@@ -172,4 +172,9 @@ export default {
   }
 }
 </script>
-<style></style>
+
+<style>
+#app {
+  background-image: none !important;
+}
+</style>

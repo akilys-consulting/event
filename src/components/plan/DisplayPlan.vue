@@ -23,7 +23,7 @@
           <div v-if="hover">
             <v-card-actions>
               <v-bottom-navigation>
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn
                       v-on="on"
@@ -35,7 +35,7 @@
                   </template>
                   <span>Concevoir</span>
                 </v-tooltip>
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn v-on="on" small @click="goto(itemPlan, 'planForm')">
                       <v-icon dark>mdi-lead-pencil</v-icon>

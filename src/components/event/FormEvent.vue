@@ -247,7 +247,7 @@ export default {
           this.localisation = plan.ville.adr
         })
         execute.catch(() => {
-          this.$store.dispatch('displayMessage', 'EVAD')
+          this.$store.dispatch('displayMessage', {code:'EVAD'})
         })
       }
     },

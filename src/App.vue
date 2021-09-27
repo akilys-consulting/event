@@ -30,7 +30,7 @@
       :overlay-color="message.type"
       overlay-opacity="0.2"
     >
-      <v-sheet color="blue-grey darken-3" class="text-center" height="100px">
+      <v-sheet class="text-center" height="100px">
         <v-btn
           class="text--lighten-1 text-body-2 mt-6"
           text
@@ -62,6 +62,7 @@ export default {
   },
   created () {
     console.log('created App')
+    this.$store.dispatch('plan/loadBanqueImage')
   }
 }
 </script>

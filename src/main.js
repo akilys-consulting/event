@@ -5,6 +5,7 @@ import { store } from '@/store/store.js'
 
 import VuetifyConf from '@/plugins/vuetify'
 import '@/plugins/editorHtml'
+
 import '@/plugins/fireauth'
 import 'leaflet/dist/leaflet.css'
 

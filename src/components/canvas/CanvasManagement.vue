@@ -236,7 +236,10 @@ export default {
             this.$store.dispatch('stopWaiting')
           })
           .catch((err) => {
-            self.$store.dispatch('displayMessage', 'LOAS')
+            self.$store.dispatch('displayMessage', {
+              code: 'LOAS',
+              param: err.message
+            })
             this.$store.dispatch('stopWaiting')
           })
       })
@@ -306,7 +309,10 @@ export default {
             })
             .catch((err) => {
               self.$store.dispatch('stopWaiting')
-              self.$store.dispatch('displayMessage', 'REKO')
+              self.$store.dispatch('displayMessage', {
+                code: 'REKO',
+                param: err.message
+              })
             })
         }
       }
@@ -405,6 +411,10 @@ export default {
     },
     // display stand on canvas
     dessinerEmplacement: function (EmplacementObject, refresh = false) {
+      //
+      // on retire toute sélection
+      this.canvas.discardActiveObject()
+
       // On donne un texte au stand
       let rgb = this.convertHexRgdb(EmplacementObject.couleur)
       let couleurTexte = this.testClairFonce(rgb)
@@ -450,6 +460,10 @@ export default {
         emplacement.hasControls = false
         emplacement.lockMovementX = emplacement.lockMovementY = true
       }
+
+      // on mais le selectd sur le nouveau stand
+      this.canvas.setActiveObject(emplacement)
+
       //
       // save stand when moved
       var self = this
@@ -577,7 +591,10 @@ export default {
           })
         })
         .catch(function (error) {
-          self.$store.dispatch('displayMessage', 'ASKO')
+          self.$store.dispatch('displayMessage', {
+            code: 'ASKO',
+            param: error.message
+          })
         })
     },
     cloneObject (object) {

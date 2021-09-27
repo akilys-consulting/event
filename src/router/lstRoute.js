@@ -7,7 +7,7 @@ import formevent from '@/components/event/FormEvent'
 import profilForm from '@/components/connexion/ProfilForm'
 import designPlan from '@/components/plan/Design'
 import selectPlan from '@/components/plan/SelectPlan'
-import planform from '@/components/plan/PlanForm'
+import planform from '@/components/plan/FormPlan'
 
 export const routes = [
   {

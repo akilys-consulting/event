@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <dialogmodal ref="checkModif" :message="codeQuestion">
       <example-slot :key="codeQuestion.display"></example-slot>
     </dialogmodal>
@@ -188,45 +188,34 @@
 </template>
 
 <script>
-import mixFunctions from "@/components/commun/Functions";
-import detailEmplacement from "@/components/plan/DetailEmplacement";
-import canvasplan from "@/components/canvas/CanvasManagement";
-import dialogmodal from "@/components/commun/DialogModal";
-import banqueImage from "@/components/commun/BanqueImage";
-import banqueEmplacement from "@/components/commun/BanqueEmplacement";
+import mixFunctions from '@/components/commun/Functions'
+import detailEmplacement from '@/components/plan/DetailEmplacement'
+import canvasplan from '@/components/canvas/CanvasManagement'
+import dialogmodal from '@/components/commun/DialogModal'
+import banqueImage from '@/components/plan/BanqueImage'
+import banqueEmplacement from '@/components/plan/BanqueEmplacement'
 // définition d'un emplacement par defaut
-const defaultstand = {
-  reference: "S-XX",
-  couleur: 0,
-  left: 50,
-  top: 50,
-  id: null,
-  height: 50,
-  width: 50,
-  angle: 0,
-  scaleX: 1,
-  scaleY: 1,
-};
 
 export default {
-  name: "designPlan",
-  beforeRouteLeave(to, from, next) {
-    let self = this;
+  name: 'designPlan',
+  beforeRouteLeave (to, from, next) {
+    let self = this
     if (this.$store.getters.getModifUser) {
       this.$refs.checkModif
-        .open("sauvegarde", "voulez-vous sauvegarder ?", {
-          color: "red",
-          width: "300",
+        .open('sauvegarde', 'voulez-vous sauvegarder ?', {
+          color: 'red',
+          width: '300'
         })
         .then((data) => {
-          if (data)
+          if (data) {
             self.sauvegarderPlan().then((data) => {
-              next();
-            });
-          next();
-        });
-      this.$store.commit("initModifUser");
-    } else next();
+              next()
+            })
+          }
+          next()
+        })
+      this.$store.commit('initModifUser')
+    } else next()
   },
   mixins: [mixFunctions],
   components: {
@@ -234,196 +223,196 @@ export default {
     canvasplan,
     dialogmodal,
     banqueImage,
-    banqueEmplacement,
+    banqueEmplacement
   },
-  data() {
+  data () {
     return {
-      currentModele: { flag: "mdi-square", path: "M3,3V21H21V3" },
+      currentModele: { flag: 'mdi-square', path: 'M3,3V21H21V3' },
       modeles: [
-        { flag: "mdi-square", path: "M3,3V21H21V3" },
+        { flag: 'mdi-square', path: 'M3,3V21H21V3' },
         {
-          flag: "mdi-circle",
-          path: "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z",
+          flag: 'mdi-circle',
+          path: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z'
         },
         {
-          flag: "mdi-seat",
-          path: "M4,18V21H7V18H17V21H20V15H4V18M19,10H22V13H19V10M2,10H5V13H2V10M17,13H7V5A2,2 0 0,1 9,3H15A2,2 0 0,1 17,5V13Z",
-        },
+          flag: 'mdi-seat',
+          path: 'M4,18V21H7V18H17V21H20V15H4V18M19,10H22V13H19V10M2,10H5V13H2V10M17,13H7V5A2,2 0 0,1 9,3H15A2,2 0 0,1 17,5V13Z'
+        }
       ],
       plan: {},
       offsetEmplacement: 5,
       catEmplacement: [],
       numEmplacement: 0,
       codeQuestion: {
-        code: "GMOD",
-        display: false,
+        code: 'GMOD',
+        display: false
       },
-      display: false,
-    };
+      display: false
+    }
   },
-  created() {
+  created () {
     this.$store.commit('event/clearActiveSearch')
 
     if (this.$store.getters['plan/getIsCurrentPlanSet']) {
-      this.plan = this.$store.getters["plan/getCurrentPlan"];
+      this.plan = this.$store.getters['plan/getCurrentPlan']
       this.catEmplacement =
-        this.$store.getters["plan/getCurrentCatEmplacement"];
-      this.numEmplacement = this.$store.getters["plan/getNumEmplacement"];
-    } else this.$router.push({ name: "selectPlan" });
+        this.$store.getters['plan/getCurrentCatEmplacement']
+      this.numEmplacement = this.$store.getters['plan/getNumEmplacement']
+    } else this.$router.push({ name: 'selectPlan' })
   },
 
-  beforeDestroy() {
+  beforeDestroy () {
     // on supprime toute trace de stand sélectionné
-    this.$store.commit("plan/setInitCurrentEmplacement");
+    this.$store.commit('plan/setInitCurrentEmplacement')
   },
   computed: {
-    getIcon() {
+    getIcon () {
       return (item) => {
-        let image = item || this.currentModele.flag;
-        let iconSrc = null;
+        let image = item || this.currentModele.flag
+        let iconSrc = null
         Object.keys(this.modeles).forEach((index) => {
           if (this.modeles[index].flag === image) {
-            iconSrc = this.modeles[index].flag;
+            iconSrc = this.modeles[index].flag
           }
-        });
-        return iconSrc;
-      };
-    },
+        })
+        return iconSrc
+      }
+    }
   },
   methods: {
-    setModele(selectedModele) {
-      this.currentModele = selectedModele;
+    setModele (selectedModele) {
+      this.currentModele = selectedModele
     },
     // lock plan
-    validatePlan() {
-      this.plan.validate = !this.plan.validate;
+    validatePlan () {
+      this.plan.validate = !this.plan.validate
       if (this.plan.validate) {
-        this.$store.commit("plan/setValidatePlan", this.plan.validate);
-        this.$store.commit("initModifUser");
+        this.$store.commit('plan/setValidatePlan', this.plan.validate)
+        this.$store.commit('initModifUser')
       }
     },
 
     // generate pdf
-    printPlan() {
-      this.$refs.canvasplan.imprimerPlan();
+    printPlan () {
+      this.$refs.canvasplan.imprimerPlan()
     },
     // save background plan
-    sauvegarderPlan() {
+    sauvegarderPlan () {
       // sauvegarde des emplacements positionnés sur le plan
-      this.$refs.canvasplan.sauvegarderStands();
+      this.$refs.canvasplan.sauvegarderStands()
       // sauvegarde du fond de carte
-      let planJson = this.$refs.canvasplan.getJsonPlan();
-      this.$store.commit("plan/setFondPlan", planJson);
-      let imgPlan = this.$refs.canvasplan.getImagePlan();
-      this.$store.commit("plan/setImgPlan", imgPlan);
-      this.$store.commit("plan/setNumEmplacement", this.numEmplacement);
+      let planJson = this.$refs.canvasplan.getJsonPlan()
+      this.$store.commit('plan/setFondPlan', planJson)
+      let imgPlan = this.$refs.canvasplan.getImagePlan()
+      this.$store.commit('plan/setImgPlan', imgPlan)
+      this.$store.commit('plan/setNumEmplacement', this.numEmplacement)
 
-      this.$store.dispatch("startWaiting");
+      this.$store.dispatch('startWaiting')
       this.$store
-        .dispatch("plan/savePlan")
+        .dispatch('plan/savePlan')
         .then((data) => {
-          this.$store.commit("initModifUser");
-          this.$store.dispatch("stopWaiting");
-          this.$store.dispatch("displayMessage", "SAOK");
+          this.$store.commit('initModifUser')
+          this.$store.dispatch('stopWaiting')
+          this.$store.dispatch('displayMessage', {code:'SAOK'})
         })
         .catch((error) => {
-          this.$store.dispatch("stopWaiting");
-          this.$store.dispatch("displayMessage", "SAKO");
-        });
+          this.$store.dispatch('stopWaiting')
+          this.$store.dispatch('displayMessage', {code:'SAKO',param:error.message})
+        })
     },
     // delete objet (except emplacement)
-    deleteObject() {
-      this.$store.dispatch("startWaiting");
-      this.$refs.canvasplan.supprimerObject();
-      this.$store.dispatch("stopWaiting");
-      this.$store.dispatch("displayMessage", "SUPR");
-      this.$store.commit("setModifUser");
+    deleteObject () {
+      this.$store.dispatch('startWaiting')
+      this.$refs.canvasplan.supprimerObject()
+      this.$store.dispatch('stopWaiting')
+      this.$store.dispatch('displayMessage', {code:'SUPR'})
+      this.$store.commit('setModifUser')
     },
     //
     // ajout d'un emplacement su le plan
-    addEmplacement(typeEmplacement) {
-      let self = this;
-      let newEmplacement = {};
+    addEmplacement (typeEmplacement) {
+      let self = this
+      let newEmplacement = {}
       // préparation reference emplacementF
-      newEmplacement.modele = typeEmplacement;
-      newEmplacement.reference = "S-" + this.numEmplacement++;
-      newEmplacement.couleur = this.catEmplacement[0].color.hex;
-      newEmplacement.left = this.offsetEmplacement;
-      newEmplacement.top = 5;
-      newEmplacement.scaleX = 1;
-      newEmplacement.scaleY = 1;
-      newEmplacement.angle = 0;
-      this.offsetEmplacement = +5;
+      newEmplacement.modele = typeEmplacement
+      newEmplacement.reference = 'S-' + this.numEmplacement++
+      newEmplacement.couleur = this.catEmplacement[0].color.hex
+      newEmplacement.left = this.offsetEmplacement
+      newEmplacement.top = 5
+      newEmplacement.scaleX = 1
+      newEmplacement.scaleY = 1
+      newEmplacement.angle = 0
+      this.offsetEmplacement = +5
       // dessin et sauvegarde de l'emplacement
       this.$store
-        .dispatch("plan/addEmplacement", newEmplacement)
+        .dispatch('plan/addEmplacement', newEmplacement)
         .then(function (newdata) {
-          newEmplacement.id = newdata.id;
-          self.$refs.canvasplan.dessinerEmplacement(newEmplacement, true);
+          newEmplacement.id = newdata.id
+          self.$refs.canvasplan.dessinerEmplacement(newEmplacement, true)
         })
         .catch(function (error) {
-          self.$store.dispatch("displayMessage", "ASKO");
-        });
+          self.$store.dispatch('displayMessage', {code:'ASKO',param:error.message})
+        })
     },
 
     // permet de charger les infos d'un stand et d'affichage le fomr de modif
-    loadDetailEmplacement() {
-      if (this.$store.getters["plan/getIsEmplacementSelected"]) {
-        this.$store.commit("setDisplayDetailEmplacement");
+    loadDetailEmplacement () {
+      if (this.$store.getters['plan/getIsEmplacementSelected']) {
+        this.$store.commit('setDisplayDetailEmplacement')
       } else {
-        this.$store.dispatch("displayMessage", "SLIN");
+        this.$store.dispatch('displayMessage', 'SLIN')
       }
     },
     // appelé après la modif des infos du stand
-    updateDetailEmplacement() {
-      let newdata = this.$store.getters["plan/getCurrentEmplacement"];
-      this.$refs.canvasplan.updateEmplacement(newdata);
-      this.$store.commit("setModifUser");
+    updateDetailEmplacement () {
+      let newdata = this.$store.getters['plan/getCurrentEmplacement']
+      this.$refs.canvasplan.updateEmplacement(newdata)
+      this.$store.commit('setModifUser')
     },
 
-    duplicateObject() {
-      this.$store.dispatch("startWaiting");
-      this.$refs.canvasplan.duplicateObject();
-      this.$store.dispatch("stopWaiting");
+    duplicateObject () {
+      this.$store.dispatch('startWaiting')
+      this.$refs.canvasplan.duplicateObject()
+      this.$store.dispatch('stopWaiting')
     },
     // ajout d'une zone dans le plan
-    ajoutObjet() {
-      this.$refs.canvasplan.ajoutObjet();
-      this.$store.commit("setModifUser");
+    ajoutObjet () {
+      this.$refs.canvasplan.ajoutObjet()
+      this.$store.commit('setModifUser')
     },
     // ajout d'une zone dans le plan
-    ajoutTexte() {
-      this.$refs.canvasplan.ajoutTexte();
-      this.$store.commit("setModifUser");
+    ajoutTexte () {
+      this.$refs.canvasplan.ajoutTexte()
+      this.$store.commit('setModifUser')
     },
-    ajoutFenetre() {
-      this.$refs.canvasplan.ajouterFenetre();
-      this.$store.commit("setModifUser");
+    ajoutFenetre () {
+      this.$refs.canvasplan.ajouterFenetre()
+      this.$store.commit('setModifUser')
     },
-    ajoutPorte() {
-      this.$refs.canvasplan.ajouterFenetre();
-      this.$store.commit("setModifUser");
+    ajoutPorte () {
+      this.$refs.canvasplan.ajouterFenetre()
+      this.$store.commit('setModifUser')
     },
-    alignGauche() {
-      this.$refs.canvasplan.alignGauche();
-      this.$store.commit("setModifUser");
+    alignGauche () {
+      this.$refs.canvasplan.alignGauche()
+      this.$store.commit('setModifUser')
     },
-    alignDroite() {
-      this.$refs.canvasplan.alignDroite();
-      this.$store.commit("setModifUser");
+    alignDroite () {
+      this.$refs.canvasplan.alignDroite()
+      this.$store.commit('setModifUser')
     },
-    alignCentre() {
-      this.$refs.canvasplan.alignCentre();
-      this.$store.commit("setModifUser");
+    alignCentre () {
+      this.$refs.canvasplan.alignCentre()
+      this.$store.commit('setModifUser')
     },
-    ajoutImage(imageUrl) {
-      this.$refs.canvasplan.ajoutImage(imageUrl);
+    ajoutImage (imageUrl) {
+      this.$refs.canvasplan.ajoutImage(imageUrl)
     },
-    drawPolygone() {
-      this.$refs.canvasplan.activeDraw();
-    },
-  },
-};
+    drawPolygone () {
+      this.$refs.canvasplan.activeDraw()
+    }
+  }
+}
 </script>
 
 <style>

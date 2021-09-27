@@ -7,7 +7,7 @@
             <v-icon color="light-green lighten-3" v-text="image.icon"></v-icon>
           </v-list-item-icon>
 
-          <v-list-item-content>
+          <v-list-item-content @click="setImage(image)">
             <v-list-item-title v-text="image.name"></v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -32,6 +32,7 @@ export default {
   methods: {
     getBanqueImage () {
       let self = this
+      this.$store.dispatch('startWaiting')
 
       // récuperation des emplacement
       fb.banqueEmplacementCollection
@@ -44,9 +45,12 @@ export default {
               name: emplacement.data().name
             })
           })
+          self.$store.dispatch('stopWaiting')
         })
         .catch((err) => {
-          self.dispatch('displayMessage', 'EGIM')
+          self.$store.dispatch('stopWaiting')
+
+          self.dispatch('displayMessage', { code: 'EGIM', param: err.message })
           reject(false)
         })
     },

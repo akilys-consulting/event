@@ -16,7 +16,7 @@ const DEFINE_PLAN = {
   /* taille du plan */
   size: CONST_CANVAS,
   /* adresse plan + coordonnées latitude et longitude */
-  ville: { adr: null, latLgn: { lat: null, lgn: null } },
+  ville: { adr: null, latLng: { lat: null, lng: null } },
   cat_emplacement: {},
   type_emplacement: null,
   count_emplacement: 1
@@ -48,7 +48,8 @@ const state = {
   currentPlan: DEFINE_PLAN,
   /* définition d'un emplacement */
   currentEmplacement: DEFINE_EMPLACEMENT,
-  lstPlan: []
+  lstPlan: [],
+  banqueImage: []
 }
 
 const actions = {
@@ -200,6 +201,17 @@ const actions = {
           })
       }
     })
+  },
+  loadBanqueImage ({ commit, state }) {
+    var listRef = fb.file.ref().child('bib_objets')
+    listRef.listAll().then((res) => {
+      res.items.forEach((itemRef) => {
+        let name = itemRef.name
+        itemRef.getDownloadURL().then(function (url) {
+          state.banqueImage.push({ name: name, url: url })
+        })
+      })
+    })
   }
 }
 
@@ -327,6 +339,9 @@ const getters = {
 
   getCurrentEmplacement (state) {
     return state.currentEmplacement
+  },
+  getBanqueImage (state) {
+    return state.banqueImage
   }
 }
 

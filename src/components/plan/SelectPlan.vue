@@ -149,7 +149,7 @@ export default {
         }
         self.$store.dispatch('stopWaiting')
       })
-      .catch((err) => {
+      .catch(() => {
         self.$store.dispatch('stopWaiting')
         self.$store.dispatch('displayMessage', 'SSNS')
       })
@@ -187,6 +187,6 @@ export default {
 </script>
 <style>
 #app {
-  background-image: none;
+  background-image: none !important;
 }
 </style>

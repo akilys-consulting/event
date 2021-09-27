@@ -4,25 +4,26 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
-            fab
-            dark
+            outlined
             small
-            color="pink"
+            color="primary"
             v-on="on"
             :to="{ name: 'selectPlan' }"
           >
             <v-icon>mdi-arrow-left</v-icon>
+            <span class="hidden-md-and-down">retour</span>
           </v-btn>
         </template>
         <span>retour à la liste</span>
       </v-tooltip>
 
-      <v-spacer></v-spacer>
-      <v-btn @click="saveplan" large icon>
+      <v-btn @click="saveplan" color="primary" outlined small>
         <v-icon>mdi-content-save-outline</v-icon>
+        <span class="hidden-md-and-down">sauvegarder</span>
       </v-btn>
-      <v-btn large icon>
+      <v-btn small outlined color="primary">
         <v-icon>mdi-delete-outline</v-icon>
+        <span class="hidden-md-and-down">Supprimer</span>
       </v-btn>
     </v-toolbar>
     <v-row>
@@ -37,9 +38,13 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="12" md="12">
-                <adrmanagement
-                  @uptadr="updateadresse"
-                  :adresse="currentplan.ville"
+                <v-text-field
+                  id="autocomplete"
+                  ref="autocomplete"
+                  :value="currentplan.ville.adr"
+                  placeholder="Search"
+                  onfocus="value = ''"
+                  type="text"
                 />
               </v-col>
             </v-row>
@@ -107,13 +112,12 @@ export default {
           self.$store.dispatch('savePlan')
           next()
         })
-        .catch((error) => {
+        .catch(() => {
           next()
         })
     } else next()
   },
   created () {
-    this.$store.commit('initModifUser')
     if (this.$store.getters['plan/getIsCurrentPlanSet']) {
       this.currentplan = this.$store.getters['plan/getCurrentPlan']
     } else this.$router.push({ name: 'selectPlan' })
@@ -121,7 +125,29 @@ export default {
     // chargement des données
   },
 
+  mounted () {
+    let self = this
+    let currentField = document.getElementById('autocomplete')
+
+    this.autocomplete = new window.google.maps.places.Autocomplete(currentField)
+
+    this.autocomplete.addListener('place_changed', () => {
+      let place = this.autocomplete.getPlace()
+
+      console.log(' adr' + place['formatted_address'])
+      console.log(' adr' + self.currentplan.ville.adr)
+
+      self.currentplan.ville.latLng.lat = place.geometry.location.lat()
+      self.currentplan.ville.latLng.lng = place.geometry.location.lng()
+      self.currentplan.ville.adr = place['formatted_address']
+    })
+  },
+
   methods: {
+    getAddressData (addressData, placeResultData, id) {
+      this.localisation = addressData
+    },
+
     changePlan: function () {
       this.$store.commit('setModifUser')
     },
@@ -133,16 +159,19 @@ export default {
     // manage save all options
     saveplan () {
       this.$store.dispatch('startWaiting')
-      this.$store.commit('initModifUser')
+      // this.$store.commit('initModifUser')
       this.$store
         .dispatch('plan/savePlan')
         .then(() => {
           this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', 'SAOK')
+          this.$store.dispatch('displayMessage', { code: 'SAOK' })
         })
-        .catch(() => {
+        .catch((error) => {
           this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', 'SAKO')
+          this.$store.dispatch('displayMessage', {
+            code: 'SAKO',
+            param: error.message
+          })
         })
     }
   }

@@ -13,17 +13,17 @@
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
-        <span>retour aux évènements</span>
+        <span class="hidden-md-and-down">retour aux évènements</span>
       </v-tooltip>
       <v-btn small outlined color="primary" @click="ajouterEvenement">
         <v-icon left> mdi-calendar-plus </v-icon>
-        ajouter
+        <span class="hidden-md-and-down">ajouter</span>
       </v-btn>
       <v-menu bottom right>
         <template v-slot:activator="{ on, attrs }">
           <v-btn small outlined color="primary" v-bind="attrs" v-on="on">
-            <span>affichage</span>
-            <v-icon right> mdi-menu-down </v-icon>
+            <span class="hidden-md-and-down">affichage</span>
+            <v-icon right> mdi-calendar-today </v-icon>
           </v-btn>
         </template>
         <v-list>
@@ -37,7 +37,9 @@
             <v-list-item-title>mois</v-list-item-title>
           </v-list-item>
           <v-list-item @click="type = 'category'">
-            <v-list-item-title>catégories</v-list-item-title>
+            <v-list-item-title class="hidden-md-and-down"
+              >catégories</v-list-item-title
+            >
           </v-list-item>
         </v-list>
       </v-menu>

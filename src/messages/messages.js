@@ -5,7 +5,7 @@ export const messages = [
     type: 'error'
   },
   { code: 'SAOK', message: 'sauvegarde effectuée', type: 'success' },
-  { code: 'SAKO', message: 'sauvegarde impossible', type: 'error' },
+  { code: 'SAKO', message: 'sauvegarde impossible :[PARAM]', type: 'error' },
   { code: 'SUOK', message: 'Suppression effectuée', type: 'success' },
   { code: 'SUKO', message: 'Suppression impossible', type: 'error' },
   { code: 'IMOK', message: "Chargement de l'image effectuée", type: 'success' },

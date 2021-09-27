@@ -14,9 +14,13 @@
           >
 
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog
+            overlay-color="blue-grey lighten-4"
+            v-model="dialog"
+            max-width="500px"
+          >
             <template v-slot:activator="{ on }">
-              <v-btn color="success" fab small v-on="on">
+              <v-btn outlined fab small v-on="on">
                 <v-icon dark>mdi-plus</v-icon>
               </v-btn>
             </template>
@@ -49,8 +53,10 @@
 
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Annuler</v-btn>
-                <v-btn color="blue darken-1" text @click="saveItem"
+                <v-btn color="primary" outlined text @click="close"
+                  >Annuler</v-btn
+                >
+                <v-btn color="primary" outlined text @click="saveItem"
                   >sauver</v-btn
                 >
               </v-card-actions>
@@ -117,7 +123,7 @@ export default {
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'Ajouter un type' : 'modifier un type'
+      return this.editedIndex === -1 ? 'Ajouter un prix' : 'modifier un prix'
     }
   },
 

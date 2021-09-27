@@ -33,7 +33,7 @@ export default {
   },
   methods: {
     getBanqueImage () {
-      this.banqueImage = this.$store.getters['getBanqueImage']
+      this.banqueImage = this.$store.getters['plan/getBanqueImage']
     },
     setImage (image) {
       this.$emit('setImage', image.url)
