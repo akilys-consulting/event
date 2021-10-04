@@ -43,13 +43,14 @@ export default {
   components: { profilForm },
 
   computed: {
-    ...mapGetters('cnx', ['getProfilPhoto', 'getDisplayName'])
+    ...mapGetters('cnx', ['getDisplayName'])
   },
 
   created () {
     let self = this
-    console.log('profil:Created')
-    this.urlProfilPhoto = this.getProfilPhoto
+    this.$store.dispatch('cnx/getProfilPhoto').then((data)=>{
+      this.urlProfilPhoto = data
+    })
 
     this.$store
       .dispatch('cnx/loadProfil')

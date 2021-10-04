@@ -47,9 +47,10 @@ const DEFINE_CATEMPLACEMENT = {
 const state = {
   currentPlan: DEFINE_PLAN,
   /* définition d'un emplacement */
-  currentEmplacement: DEFINE_EMPLACEMENT,
+  currentEmplacement: {},
   lstPlan: [],
-  banqueImage: []
+  banqueImage: [],
+  DisplayDetailEmplacement: false
 }
 
 const actions = {
@@ -261,6 +262,10 @@ const mutations = {
 
   setCurrentEmplacement (state, val) {
     state.currentEmplacement = val
+  },
+  
+  setDisplayDetailEmplacement (state) {
+    state.DisplayDetailEmplacement = !state.DisplayDetailEmplacement
   }
 }
 const getters = {
@@ -315,7 +320,7 @@ const getters = {
   getCurrentCatEmplacement (state) {
     let data = [DEFINE_CATEMPLACEMENT]
     if (
-      state.currentPlan.cat_emplacement !== {} &&
+      Object.keys(state.currentPlan.cat_emplacement).length >0  &&
       typeof state.currentPlan.cat_emplacement !== 'undefined'
     ) {
       data = JSON.parse(state.currentPlan.cat_emplacement)
@@ -325,7 +330,7 @@ const getters = {
     }
   },
   getIsEmplacementSelected (state) {
-    if (typeof state.currentEmplacement !== 'undefined') {
+    if (typeof state.currentEmplacement  !== 'undefined' ) {
       return state.currentEmplacement.id != null
     } else return false
   },

@@ -1,5 +1,5 @@
 {
-  "name": "event",
+  "name": "event-plan",
   "version": "1.0.0",
   "private": true,
   "description": "permet de gérer des évènements avec leur planning",

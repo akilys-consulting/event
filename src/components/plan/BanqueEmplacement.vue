@@ -3,11 +3,11 @@
     <v-list>
       <v-list-item-group>
         <v-list-item v-for="(image, name) in banqueEmplacement" :key="name">
-          <v-list-item-icon @click="setImage(image)">
+          <v-list-item-icon @click="setImage(image,$event)">
             <v-icon color="light-green lighten-3" v-text="image.icon"></v-icon>
           </v-list-item-icon>
 
-          <v-list-item-content @click="setImage(image)">
+          <v-list-item-content @click="setImage(image,$event)">
             <v-list-item-title v-text="image.name"></v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -54,7 +54,11 @@ export default {
           reject(false)
         })
     },
-    setImage (image) {
+    setImage (image,event) {
+          if (event) {
+      event.preventDefault()
+    }
+      console.log('etst')
       this.$emit('setemplacement', image.path)
     }
   }

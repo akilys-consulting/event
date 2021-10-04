@@ -2,9 +2,9 @@
   <v-hover v-slot:default="{ hover }">
     <v-card class="mx-auto">
       <v-img
-        :src="itemPlan.img_plan"
+        :src="getImgPlan"
         class="white--text align-end"
-        max-height="350"
+        max-height="250"
         max-width="450"
         gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
       >
@@ -63,6 +63,14 @@ export default {
   props: ['itemPlan'],
   mixins: [mixFunctions],
 
+computed: {
+  getImgPlan(){
+    if (this.itemPlan.img_plan )
+    return this.itemPlan.img_plan
+    else
+    return require('@/assets/defautPlan.jpg')
+  }
+},
   methods: {
     goto (element, destination) {
       console.log('element' + element)

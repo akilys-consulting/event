@@ -5,7 +5,7 @@ import { fb } from '@/plugins/firebaseInit'
 */
 // gestion de l'environnement
 const imgAvatarPath = 'image_avatar/'
-const imgDefaut = 'IMG_DEFAUT.jpg'
+const imgDefaut = 'IMG_DEFAUT.png'
 
 const state = {
   user: null,
@@ -166,6 +166,25 @@ const actions = {
           })
       }
     })
+  },
+   async getProfilPhoto(state) {
+     return new Promise((resolve, reject) => {
+       if (state.currentProfil && state.currentProfil.photoURL) {
+         resolve(state.currentProfil.photoURL)
+       } else if (state.user && state.user.photoURL) {
+         resolve(state.user.photoURL)
+       } else {
+         let urlRetourned = null
+         fb.file
+           .ref()
+           .child(imgAvatarPath + imgDefaut)
+           .getDownloadURL()
+           .then(function (url) {
+             resolve(url)
+           })
+           .catch((error) => { reject(error.message) })
+       }
+     })
   }
 }
 const mutations = {
@@ -226,27 +245,6 @@ const getters = {
     return imgAvatarPath + state.user.uid
   },
 
-  // permet de récupérer la photo d'un profil
-  // soit via goole soit via le profil
-  // si on trouve rien on met la photo par defaut
-  getProfilPhoto (state, getters) {
-    if (state.currentProfil && state.currentProfil.photoURL) {
-      return state.currentProfil.photoURL
-    } else if (state.user && state.user.photoURL) {
-      return state.user.photoURL
-    } else {
-      let urlRetourned = null
-      fb.file
-        .ref()
-        .child(getters.getDefaultAvatarImg)
-        .getDownloadURL()
-        .then(function (url) {
-          urlRetourned = url
-        })
-        .catch(() => {})
-      return urlRetourned
-    }
-  },
   getDisplayName (state) {
     if (state.user.displayName) return state.user.displayName
     else return null

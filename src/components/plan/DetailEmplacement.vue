@@ -57,13 +57,13 @@ export default {
     this.planId = this.$store.getters['plan/getCurrentPlanId']
   },
   computed: {
-    ...mapState(['DisplayDetailEmplacement']),
+    ...mapState('plan',['DisplayDetailEmplacement']),
     ...mapState('plan', { currentEmplacement: 'currentEmplacement' })
   },
   methods: {
     closewindows () {
-      this.$store.commit('setDisplayDetailEmplacement')
-      this.$store.commit('ResetCurrentStand')
+      this.$store.commit('plan/setDisplayDetailEmplacement')
+      this.$store.commit('plan/setInitCurrentEmplacement')
     },
     saveEmplacement () {
       this.$store.dispatch('plan/saveEmplacement', this.currentEmplacement)

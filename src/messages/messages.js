@@ -11,12 +11,15 @@ export const messages = [
   { code: 'IMOK', message: "Chargement de l'image effectuée", type: 'success' },
   { code: 'IMKO', message: "Chargement de l'image en erreur", type: 'error' },
   { code: 'IDKO', message: "Affichage de l'image impossible", type: 'error' },
+ { code: 'CNAA', message: "Affichage de l'avatar impossible [PARAM]", type: 'warning' },
   {
     code: 'NDAT',
     message: 'Aucune données en base',
     type: 'warning'
   },
-
+  
+  // gestion du plan 
+  { code : 'SLIN', message: 'vous devez sélectionner un objet',type:'success'},
   // message connexion
   {
     code: 'DLOJ',

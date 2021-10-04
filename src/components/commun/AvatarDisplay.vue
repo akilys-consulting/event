@@ -40,13 +40,14 @@ export default {
       file: null
     }
   },
-  computed: {
-    ...mapGetters('cnx', ['getProfilPhoto'])
-  },
 
-  created () {
+  mounted () {
     // récupération de l'avatar (google ou storage)
-    this.urlImg = this.getProfilPhoto
+    this.$store.dispatch('cnx/getProfilPhoto').then((url)=>{
+        this.urlImg = url
+    }).catch((error)=>{
+      self.$store.dispatch('displayMessage', {'code':'IMOK',param:error})
+    })
   },
   methods: {
     UploadFile (file) {

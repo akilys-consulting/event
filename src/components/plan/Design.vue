@@ -358,9 +358,9 @@ export default {
     // permet de charger les infos d'un stand et d'affichage le fomr de modif
     loadDetailEmplacement () {
       if (this.$store.getters['plan/getIsEmplacementSelected']) {
-        this.$store.commit('setDisplayDetailEmplacement')
+        this.$store.commit('plan/setDisplayDetailEmplacement')
       } else {
-        this.$store.dispatch('displayMessage', 'SLIN')
+        this.$store.dispatch('displayMessage', {code:'SLIN',param:null})
       }
     },
     // appelé après la modif des infos du stand
