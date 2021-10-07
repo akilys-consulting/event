@@ -31,21 +31,17 @@
         <v-card flat>
           <v-card-text>
             <v-row>
-              <v-col cols="12" sm="12" md="12">
+              <v-col cols="10" sm="10" md="10">
                 <v-text-field
                   v-model="currentplan.nom"
                   label="Nom du plan"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="12" md="12">
-                <v-text-field
-                  id="autocomplete"
-                  ref="autocomplete"
-                  :value="currentplan.ville.adr"
-                  placeholder="Search"
-                  onfocus="value = ''"
-                  type="text"
-                />
+                            <v-col cols="2" sm="2" md="2">
+    <v-switch
+      v-model="currentplan.actif"
+      label="actif"
+    ></v-switch>
               </v-col>
             </v-row>
             <v-row align="center" justify="center">
@@ -65,12 +61,10 @@
   </v-container>
 </template>
 <script>
-import adrmanagement from '@/components/commun/AdrManagement'
 import CatEmplacement from '@/components/plan/CatEmplacement'
 export default {
   name: 'planform',
   components: {
-    adrmanagement,
     CatEmplacement
   },
   data () {
@@ -125,37 +119,13 @@ export default {
     // chargement des données
   },
 
-  mounted () {
-    let self = this
-    let currentField = document.getElementById('autocomplete')
-
-    this.autocomplete = new window.google.maps.places.Autocomplete(currentField)
-
-    this.autocomplete.addListener('place_changed', () => {
-      let place = this.autocomplete.getPlace()
-
-      console.log(' adr' + place['formatted_address'])
-      console.log(' adr' + self.currentplan.ville.adr)
-
-      self.currentplan.ville.latLng.lat = place.geometry.location.lat()
-      self.currentplan.ville.latLng.lng = place.geometry.location.lng()
-      self.currentplan.ville.adr = place['formatted_address']
-    })
-  },
 
   methods: {
-    getAddressData (addressData, placeResultData, id) {
-      this.localisation = addressData
-    },
 
     changePlan: function () {
       this.$store.commit('setModifUser')
     },
-    updateadresse (localisation) {
-      this.localisation = localisation
-      this.currentplan.ville = localisation
-      this.$store.commit('setModifUser')
-    },
+
     // manage save all options
     saveplan () {
       this.$store.dispatch('startWaiting')

@@ -17,7 +17,6 @@
           </v-row>
         </template>
 
-        <v-card-title>{{ displayVille(itemPlan.ville) }}</v-card-title>
         <v-card-title>{{ itemPlan.nom }}</v-card-title>
         <v-expand-transition>
           <div v-if="hover">
@@ -63,6 +62,9 @@ export default {
   props: ['itemPlan'],
   mixins: [mixFunctions],
 
+created() {
+  console.log('item : '+ this.itemPlan.id)
+},
 computed: {
   getImgPlan(){
     if (this.itemPlan.img_plan )

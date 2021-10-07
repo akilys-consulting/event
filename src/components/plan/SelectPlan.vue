@@ -15,10 +15,9 @@
     <v-row v-if="plans.length > 1">
       <v-col cols="12">
         <v-data-iterator
-          :items="plans"
+          :items="filteredItems"
           :items-per-page.sync="itemsPerPage"
           :page="page"
-          :search="search"
           :sort-by="sortBy.toLowerCase()"
           :sort-desc="sortDesc"
           hide-default-footer
@@ -32,6 +31,7 @@
                 flat
                 solo-inverted
                 hide-details
+                @click:clear="clearSearch"
                 prepend-inner-icon="mdi-magnify"
                 label="chercher..."
               ></v-text-field>
@@ -42,7 +42,7 @@
             <v-row>
               <v-col
                 v-for="item in props.items"
-                :key="item.id"
+                :key="item.nom"
                 cols="12"
                 sm="6"
                 md="4"
@@ -121,8 +121,7 @@ export default {
       sortDesc: false,
       page: 1,
       itemsPerPage: 4,
-      sortBy: 'ville',
-      keys: [],
+      sortBy: 'nom',
       performingRequest: false,
       errorMsg: '',
       plans: []
@@ -143,7 +142,6 @@ export default {
           querySnapshot.forEach(function data (plan) {
             var currentPlan = plan.data()
             currentPlan.id = plan.id
-            self.keys.push(self.computedville(currentPlan.ville))
             self.plans.push(currentPlan)
           })
         }
@@ -158,11 +156,16 @@ export default {
     numberOfPages () {
       return Math.ceil(this.plans.length / this.itemsPerPage)
     },
-    filteredKeys () {
-      return this.keys.filter((key) => key !== `ville`)
-    }
+        filteredItems () {
+      return this.plans.filter((row) => {
+        return row.nom.toUpperCase().includes(this.search.toUpperCase())
+      })
+    },
   },
   methods: {
+    clearSearch() {
+      this.search = ''
+    },
     computedville: function (item) {
       let ville = item.adr.split(',')
       return ville[ville.length - 3]

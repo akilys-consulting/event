@@ -19,7 +19,8 @@ const DEFINE_PLAN = {
   ville: { adr: null, latLng: { lat: null, lng: null } },
   cat_emplacement: {},
   type_emplacement: null,
-  count_emplacement: 1
+  count_emplacement: 1,
+  actif: false
 }
 
 const DEFINE_EMPLACEMENT = {
