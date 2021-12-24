@@ -11,16 +11,30 @@ const IMG_DEFAUT = 'IMG_DEFAUT.jpg'
 const DEFINE_EVENT = {
   id: -1,
   nom: null,
-  adresse: {},
+  localisation: { adr: '', latLgn: { lat: '', long: '' } },
   plan: null,
   planning: [],
+  minisite: null,
   like: 0
 }
 
 const state = {
   currentEventId: null,
   // pemret de stocker l'event courant ( event + programmation)
-  currentEvent: null,
+  currentEvent: {
+    id: -1,
+    nom: null,
+    localisation: { adr: '', latLgn: { lat: '', long: '' } },
+    plan: null,
+    planning: [],
+    minisite: null,
+    prix: null,
+    like: 0,
+    categorie: null,
+    organisateur: null,
+    organisation: null
+  },
+
   // mémorise la plannifiation à partir de a programmation
   planning: [],
   // utiliser pour définir le type de programmation
@@ -56,21 +70,24 @@ const state = {
 const actions = {
   // sauvegarde de l'évent courant en base
   saveEvent ({ state, dispatch }) {
+    console.log(
+      'current Event ' + state.currentEvent.id + ' ' + state.currentEvent.nom
+    )
     return new Promise((resolve, reject) => {
       if (state.currentEvent.id == -1) {
         let execute = dispatch('insertEvent')
-        execute.then(data => {
+        execute.then((data) => {
           resolve(data)
         })
-        execute.catch(error => {
+        execute.catch((error) => {
           reject(error)
         })
       } else {
         let execute = dispatch('updateEvent')
-        execute.then(data => {
+        execute.then((data) => {
           resolve(data)
         })
-        execute.catch(error => {
+        execute.catch((error) => {
           reject(error)
         })
       }
@@ -82,7 +99,7 @@ const actions = {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       delete event.id
       if (typeof rootState.cnx.currentProfil.organisation !== 'undefined') {
-        event.organisation = rootState.currentProfil.organisation
+        event.organisation = rootState.cnx.currentProfil.organisation
       }
       let execute = fb.eventCollection.add(event)
       execute.then(function (data) {
@@ -128,7 +145,7 @@ const actions = {
 
         resolve()
       })
-      execute.catch(error => {
+      execute.catch((error) => {
         reject(error)
       })
     })
@@ -162,7 +179,7 @@ const actions = {
           })
           resolve(true)
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error)
         })
     })
@@ -170,11 +187,11 @@ const actions = {
 
   // parcours la programmation afin de définir toutes les dates
   // de l'évènement
-  // met à jour le state calendar
+  // met à jour le state planning
   decodePlanning ({ state, getters }, event) {
     let record = event
     if (event.planning.length > 0) {
-      event.planning.forEach(prog => {
+      event.planning.forEach((prog) => {
         let currentDate = moment(prog.dtDebut)
         let finDate = moment(prog.dtFin)
         let guard = 0
@@ -200,7 +217,7 @@ const actions = {
 
   addLike2Event ({ state, dispatch }) {
     let eventDoc = fb.eventCollection.doc(state.currentEvent.id)
-    eventDoc.update({ like: ++state.currentEvent.like }).catch(error => {
+    eventDoc.update({ like: ++state.currentEvent.like }).catch((error) => {
       dispatch(
         'displayMessage',
         { code: 'ADMIN', param: error.message },
@@ -214,10 +231,13 @@ const mutations = {
   setInitEvent (state) {
     state.currentEvent = JSON.parse(JSON.stringify(DEFINE_EVENT))
   },
+  setEvent (state, data) {
+    state.currentEvent = data
+  },
 
   // definir l'event courant
   setCurrentEventByPlanning (state, planning) {
-    state.currentEvent = state.events.find(element => element.id == planning)
+    state.currentEvent = state.events.find((element) => element.id == planning)
   },
 
   // ajout d'une image à l'event courant
@@ -254,13 +274,13 @@ const getters = {
   // retourne les catégories
   getCategories (state) {
     let nomCategorie = []
-    state.CONST_CATEGORIE.forEach(data => {
+    state.CONST_CATEGORIE.forEach((data) => {
       nomCategorie.push(data.nom)
     })
     return nomCategorie
   },
-  getColorCategorie: state => cat => {
-    return state.CONST_CATEGORIE.find(x => x.nom === cat).couleur
+  getColorCategorie: (state) => (cat) => {
+    return state.CONST_CATEGORIE.find((x) => x.nom === cat).couleur
   },
   getEVT_SRCH_CAT (state) {
     return state.EVT_SRCH_CAT

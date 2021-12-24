@@ -242,7 +242,12 @@ export default {
             })
             this.$store.dispatch('stopWaiting')
           })
-      })
+      }).catch((err) => {
+            self.$store.dispatch('displayMessage', {
+              code: 'LOAS',
+              param: err.message
+            })
+            this.$store.dispatch('stopWaiting')})
     },
 
     chargerStand: function () {
@@ -386,7 +391,7 @@ export default {
       let plan_fond = this.$store.getters['plan/getPlanPlanJson']
 
       return new Promise((resolve, reject) => {
-        if (typeof plan_fond !== 'undefined' && plan_fond !== null) {
+        if (typeof plan_fond !== 'undefined' && plan_fond ) {
           self.canvas.loadFromJSON(plan_fond, function () {
             resolve(true)
           })

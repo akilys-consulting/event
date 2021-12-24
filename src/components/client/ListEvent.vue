@@ -8,23 +8,12 @@
       class="elevation-1"
       :items="filteredItems"
       :sort-by="['category', 'start']"
-      group-by="start"
       item-key="name+start"
       :show="!firstLoad"
       :items-per-page="5"
       no-results-text="Pas d'évènement trouvé"
       no-data-text="Pas d'évènement trouvé"
-      show-group-by
     >
-      <template v-slot:group.header="{ items, isOpen, toggle }">
-        <th colspan="2">
-          <v-icon @click="toggle"
-            >{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
-          </v-icon>
-
-          {{ displayDate(items[0].start) }}
-        </th>
-      </template>
       <template v-slot:item="{ item }">
         <displayEvent
           :key="item.start + item.end + item.nom"

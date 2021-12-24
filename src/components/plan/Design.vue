@@ -10,7 +10,7 @@
     <v-row>
       <v-col cols="12">
         <p class="font-weight-light">
-          {{ displayVille(plan.ville) }}-{{ plan.nom }}
+          {{ plan.nom }}
         </p>
         <v-btn-toggle>
           <v-tooltip bottom>

@@ -18,6 +18,7 @@ const state = {
 }
 
 const actions = {
+
   //
   // ajout du profil sur création utilisateur
   async createProfil ({ state, dispatch }, data) {

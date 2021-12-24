@@ -8,12 +8,18 @@ import profilForm from '@/components/connexion/ProfilForm'
 import designPlan from '@/components/plan/Design'
 import selectPlan from '@/components/plan/SelectPlan'
 import planform from '@/components/plan/FormPlan'
+import importEvent from '@/components/event/ImportEvent'
 
 export const routes = [
   {
     path: '/',
     name: 'listEvent',
     component: listEvent
+  },
+  {
+    path: '/importEvent',
+    name: 'importEvent',
+    component: importEvent
   },
   {
     path: '/login',

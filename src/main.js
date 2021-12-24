@@ -9,6 +9,8 @@ import '@/plugins/editorHtml'
 import '@/plugins/fireauth'
 import 'leaflet/dist/leaflet.css'
 
+import '@/plugins/addToCalendar'
+
 Vue.config.productionTip = false
 let vue = null
 if (!vue) {

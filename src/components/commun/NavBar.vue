@@ -30,6 +30,11 @@
           <v-icon>mdi-view-list</v-icon>
           <span class="hidden-md-and-down">Sorties</span>
         </v-btn>
+<v-btn v-if="isAuthenticated && isAdmin"
+text align="center" justify="center" to="/importEvent">
+          <v-icon>mdi-import</v-icon>
+          <span class="hidden-md-and-down">import</span>
+        </v-btn>
 
         <v-btn
           align="center"

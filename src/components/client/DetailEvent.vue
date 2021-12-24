@@ -1,69 +1,52 @@
 <template>
   <v-card>
-    <v-card-title>
-      <v-row align="center" justify="center">
-        <v-col cols="auto">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn fab x-small color="primary" @click="refreshList" v-on="on">
-                <v-icon>mdi-arrow-left</v-icon>
-              </v-btn>
-            </template>
-            <span>retour à la liste</span>
-          </v-tooltip>
-        </v-col>
-        <v-col md="10" class="subtitle-2" lg="11">
-          {{ event.nom }}
-        </v-col>
-      </v-row>
-    </v-card-title>
-    <v-spacer></v-spacer>
-
-      <v-row>
-        <v-col cols="12">
-          {{ event.categorie }} - {{ event.localisation.adr }}</v-col
-        >
-      </v-row>
-      <v-row
-        ><v-col cols="12"
-          ><div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
-        </v-col></v-row
-      >
-
-      <add-to-calendar
-        :title="event.nom"
-        :location="event.localisation.adr"
-        :start="new Date(currentPlanning.start)"
-        :end="new Date(currentPlanning.end)"
-        :details="displayMiniSite"
-        inline-template
-      >
-        <div>
-          <google-calendar id="google-calendar">
-            <v-btn small rounded plain>
-              <img
-                style="height:30px;width:30px"
-                class="icon_image"
-                src="@/assets/google-calendar.png"
-              />
-              ajouter au calendrier
+    <v-row>
+      <v-col cols="6">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn fab small color="primary" @click="refreshList" v-on="on">
+              <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
-          </google-calendar>
-        </div>
-      </add-to-calendar>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn fab small color="primary" @click="refreshList" v-on="on">
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
-        </template>
-        <span>retour à la liste</span> </v-tooltip
-      >{{ event.nom }}</v-card-title
-    >
-    <v-card-subtitle
-      >{{ event.categorie }} - {{ event.localisation.adr }}
+          </template>
+          <span>retour à la liste</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="6">
+        <add-to-calendar
+          :title="event.nom"
+          :location="event.localisation.adr"
+          :details="displayMiniSite"
+          inline-template
+        >
+          <div>
+            <google-calendar id="google-calendar">
+              <v-btn small rounded plain>
+                <img
+                  style="height: 30px; width: 30px"
+                  class="icon_image"
+                  src="@/assets/google-calendar.png"
+                />
+                calendrier
+              </v-btn>
+            </google-calendar>
+          </div>
+        </add-to-calendar>
+      </v-col>
+    </v-row>
+    <v-card-title> {{ event.nom }}</v-card-title>
+
+    <v-card-subtitle>
+      organisé par : {{ event.organisateur }} 
+      <v-btn v-if="event.urlsite"
+ fab  small color="primary" :href="event.urlsite" target="_blank">
+      <v-icon dark>
+        mdi-search-web
+      </v-icon></v-btn
+><br>
+      {{ event.localisation.adr }}
       <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
     </v-card-subtitle>
+
     <v-card-text>
       <v-row>
         <v-col lg="6" sm="6" xs="12">
@@ -73,16 +56,7 @@
             height="250"
             width="auto"
           ></displayImage>
-          <v-btn
 
-            v-if="event.urlsite"
-
-            small
-            color="primary"
-            text
-            :href="event.urlsite"
-            target="_blank"
-          >
             Lien vers site organisateur
           </v-btn>
         </v-col>
@@ -104,7 +78,7 @@
     <v-card-text
       class="subtitle-2"
       v-if="event.minisite"
-      v-html="displayMiniSite"
+      v-html="event.minisite"
     ></v-card-text>
     <v-card-text class="subtitle-2" v-else
       >Aucune description n'a été fourni</v-card-text
@@ -147,9 +121,7 @@ export default {
         iconUrl: marker,
         iconSize: [32, 37],
         iconAnchor: [16, 37]
-      }),
-      makerEvent: null
-
+      })
     }
   },
 
@@ -165,6 +137,15 @@ export default {
         'DD/MM/YYYY HH:mm'
       )
     },
+    // format la date de début pour l'addOn calendar
+    calendarDebut: function () {
+      return moment(this.currentPlanning.start, 'YYYY-MM-DD HH:mm')
+    },
+    // format la date de finb pour l'addOn calendar
+    calendarFin: function () {
+      return moment(this.currentPlanning.end, 'YYYY-MM-DD HH:mm')
+    },
+
     displayMiniSite () {
       return 'Pas de description'
     },
@@ -182,12 +163,12 @@ export default {
     }
 
     this.currentPlanning = this.planning.find(
-      element => element.id == this.$route.params.currentPlanning
+      (element) => element.id == this.$route.params.currentPlanning
     )
     this.event = this.events.find(
-      element => element.id == this.currentPlanning.eventid
+      (element) => element.id == this.currentPlanning.eventid
     )
-    console.log('minisiste' + this.event.minisite)
+    // console.log('minisiste' + this.event.minisite)
 
     this.center = [
       this.event.localisation.latLng.lat,

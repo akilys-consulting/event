@@ -25,7 +25,6 @@ const errorCode = [
 
 if (!firebase.apps.length) firebase.initializeApp(config)
 
-// firebase utils
 const db = firebase.firestore()
 const auth = firebase.auth()
 const authObj = firebase.auth

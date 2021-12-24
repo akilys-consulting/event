@@ -9,12 +9,10 @@
           ></v-progress-circularl>
         </v-row>
       </template>
-      <v-card-title>{{ itemPlanning.nom }}</v-card-title>
+      <v-card-title>{{ getNom }}</v-card-title>
       <v-card-text @click="detailEvent(itemPlanning)">
-
         <v-row class="">
           <v-col cols="6" lg="4">
-
             <displayImage
               :fileName="itemPlanning.eventid"
               rep="image_event"
@@ -120,13 +118,17 @@ export default {
     getPrix () {
       let event = this.getEvent()
       return event.prix ? event.prix + '€' : 'Free!'
+    },
+    getNom () {
+      let event = this.getEvent()
+      return event.nom
     }
   },
 
   methods: {
     getEvent () {
       let searchIdEvent = this.itemPlanning.eventid
-      return this.events.find(element => element.id == searchIdEvent)
+      return this.events.find((element) => element.id == searchIdEvent)
     },
     detailEvent (element) {
       this.$router.push({
