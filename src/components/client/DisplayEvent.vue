@@ -1,6 +1,6 @@
 <template>
   <v-hover v-slot="{ hover }">
-    <v-card :elevation="hover ? 12 : 2" :class="{ 'on-hover': hover }">
+    <v-card :elevation="hover ? 12 : 6" :class="{ 'on-hover': hover }">
       <template v-slot:placeholder>
         <v-row class="fill-height ma-0" align="center" justify="center">
           <v-progress-circularl
@@ -166,6 +166,6 @@ export default {
 }
 
 .v-card:not(.on-hover) {
-  opacity: 0.6;
+  opacity: 0.7;
 }
 </style>

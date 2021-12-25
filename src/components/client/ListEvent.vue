@@ -4,23 +4,36 @@
       <email />
     </v-dialog>
     <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
-    <v-data-table
-      class="elevation-1"
+    <v-data-iterator
+      hide-default-footer
+      :page.sync="page"
       :items="filteredItems"
-      :sort-by="['category', 'start']"
-      item-key="name+start"
-      :show="!firstLoad"
-      :items-per-page="5"
+      :items-per-page="getItemsPerPage"
       no-results-text="Pas d'évènement trouvé"
       no-data-text="Pas d'évènement trouvé"
     >
-      <template v-slot:item="{ item }">
-        <displayEvent
-          :key="item.start + item.end + item.nom"
-          :itemPlanning="item"
-        />
+      <template v-slot:default="{ items }">
+        <v-row>
+          <v-col v-for="item in items" :key="item.name" cols="12" lg="3" md="4">
+            <displayEvent
+              :key="item.start + item.end + item.nom"
+              :itemPlanning="item"
+          /></v-col>
+        </v-row>
       </template>
-    </v-data-table>
+      <template v-slot:footer>
+        <v-row align="center" justify="center">
+          <v-btn dark x-small @click="formerPage">
+            <v-icon>mdi-chevron-left</v-icon>
+          </v-btn>
+          Page {{ page }} of {{ numberOfPages }}
+
+          <v-btn x-small dark @click="nextPage">
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-btn></v-row
+        >
+      </template>
+    </v-data-iterator>
   </div>
 </template>
 
@@ -37,11 +50,13 @@ export default {
   components: { displayEvent, email },
   data () {
     return {
-      firstLoad: true,
-      itemsPerPageArray: [4, 8, 12],
-      sortDesc: false,
       page: 1,
-      itemsPerPage: 4,
+      pageCount: 0,
+
+      firstLoad: true,
+      items_per_page: [5, 15, 20],
+      sortDesc: false,
+      itemsPerPage: 5,
       // planning: [],
       key: 1,
       DisplaySend2email: false
@@ -69,6 +84,20 @@ export default {
     computedville: function (item) {
       let ville = item.adr.split(',')
       return ville[ville.length - 3]
+    },
+    getItemsPerPage () {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return 3
+        case 'sm':
+          return 3
+        case 'md':
+          return 6
+        case 'lg':
+          return 8
+        case 'xl':
+          return 8
+      }
     }
   },
   async created () {
