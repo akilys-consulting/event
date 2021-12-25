@@ -40,10 +40,9 @@
             <span>Sauvegarder le profil</span>
           </v-tooltip>
           <v-btn icon color="accent" text @click="menuProfil = false">
-            <v-icon>
-              mdi-close-box
-            </v-icon>
+            <v-icon> mdi-close-box </v-icon>
           </v-btn>
+          <themeManagement />
         </v-toolbar>
 
         <v-card-text>
@@ -84,16 +83,18 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import adrmanagement from '@/components/commun/AdrManagement'
 import AvatarDisplay from '../commun/AvatarDisplay.vue'
+import themeManagement from '@/components/commun/ThemeManagement'
 
 export default {
   name: 'profil',
-  components: { adrmanagement, AvatarDisplay },
+  components: { adrmanagement, AvatarDisplay, themeManagement },
   data () {
     return {
       menuProfil: false,
+      viewTheme: false,
 
       profil: { nom: '', prenom: '', date: null, localisation: null },
-      rules: { required: value => !!value || 'obligatoire.' },
+      rules: { required: (value) => !!value || 'obligatoire.' },
       menu1: false,
       localisation: null
     }

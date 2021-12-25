@@ -7,9 +7,7 @@
       offset-x
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text v-bind="attrs" v-on="on">
-          Mon compte
-        </v-btn>
+        <v-btn text v-bind="attrs" v-on="on"> Mon compte </v-btn>
       </template>
       <v-card>
         <v-card-actions>
@@ -21,6 +19,7 @@
           </v-btn>
         </v-card-actions>
       </v-card>
+
       <profilForm @closeProfilDetail="closeDetail"></profilForm>
     </v-menu>
   </div>
@@ -48,13 +47,13 @@ export default {
 
   created () {
     let self = this
-    this.$store.dispatch('cnx/getProfilPhoto').then((data)=>{
+    this.$store.dispatch('cnx/getProfilPhoto').then((data) => {
       this.urlProfilPhoto = data
     })
 
     this.$store
       .dispatch('cnx/loadProfil')
-      .then(data => {
+      .then((data) => {
         if (data.exists) {
           console.log('then' + data.exists)
           self.profil = data.data()
