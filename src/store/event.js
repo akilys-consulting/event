@@ -198,26 +198,30 @@ const actions = {
         while (currentDate <= finDate && guard++ <= 4000) {
           let planningId = record.id + guard
           // creation de l'évènement
-          let newPlanning = {
-            id: planningId,
-            eventid: record.id,
-            color: getters.getColorCategorie(record.categorie),
-            category: record.categorie,
-            name: record.nom,
-            prix: record.prix,
-            start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut,
-            end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
+          if (currentDate.isAfter()) {
+            let newPlanning = {
+              id: planningId,
+              eventid: record.id,
+              color: getters.getColorCategorie(record.categorie),
+              category: record.categorie,
+              name: record.nom,
+              prix: record.prix,
+              start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut,
+              end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
+            }
+            state.planning.push(newPlanning)
           }
-          state.planning.push(newPlanning)
           currentDate = currentDate.add(1, prog.type)
         }
       })
     }
   },
 
-  addLike2Event ({ state, dispatch }) {
-    let eventDoc = fb.eventCollection.doc(state.currentEvent.id)
-    eventDoc.update({ like: ++state.currentEvent.like }).catch((error) => {
+  addLike2Event ({ state, dispatch }, event) {
+    console.log('id' + event.id)
+    console.log(event.like)
+    let eventDoc = fb.eventCollection.doc(event.id)
+    eventDoc.update({ like: event.like }).catch((error) => {
       dispatch(
         'displayMessage',
         { code: 'ADMIN', param: error.message },
@@ -253,7 +257,6 @@ const mutations = {
     state.EVT_ACTIVE_SEARCH = true
   },
   clearActiveSearch (state) {
-    console.log('clear search')
     state.EVT_ACTIVE_SEARCH = false
   },
   setEVT_SRCH_CAT (state, value) {

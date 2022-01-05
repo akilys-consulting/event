@@ -3,46 +3,46 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn
-            small
-            outlined
-            color="primary"
-            v-on="on"
-            :to="{ name: 'listEvent' }"
-          >
+          <v-btn v-on="on" :to="{ name: 'listEvent' }">
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
-        <span class="hidden-md-and-down">retour aux évènements</span>
+        <span>retour aux évènements</span>
       </v-tooltip>
-      <v-btn small outlined color="primary" @click="ajouterEvenement">
-        <v-icon left> mdi-calendar-plus </v-icon>
-        <span class="hidden-md-and-down">ajouter</span>
-      </v-btn>
-      <v-menu bottom right>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" @click="ajouterEvenement">
+            <v-icon> mdi-calendar-plus </v-icon>
+          </v-btn>
+        </template>
+        <span>ajouter un évènement</span>
+      </v-tooltip>
+      <v-menu bottom open-on-hover>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn small outlined color="primary" v-bind="attrs" v-on="on">
-            <span class="hidden-md-and-down">affichage</span>
+          <v-btn v-bind="attrs" v-on="on">
             <v-icon right> mdi-calendar-today </v-icon>
           </v-btn>
         </template>
+
         <v-list>
-          <v-list-item @click="type = 'day'">
-            <v-list-item-title>jour</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'week'">
-            <v-list-item-title>semaine</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'month'">
-            <v-list-item-title>mois</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'category'">
-            <v-list-item-title class="hidden-md-and-down"
-              >catégories</v-list-item-title
+          <v-list-item-group
+            @change="console.log(value)"
+            v-model="selectedType"
+          >
+            <v-list-item
+              v-for="(item, i) in typeToLabel"
+              :value="item.type"
+              :key="i"
             >
-          </v-list-item>
+              <v-list-item-title>{{ item.label }}</v-list-item-title>
+            </v-list-item>
+          </v-list-item-group>
         </v-list>
       </v-menu>
+      <v-spacer></v-spacer>
+      <v-toolbar-title v-if="$refs.calendar">
+        {{ $refs.calendar.title }}
+      </v-toolbar-title>
 
       <v-btn icon small @click="prev">
         <v-icon> mdi-chevron-left </v-icon>
@@ -51,9 +51,6 @@
         <v-icon> mdi-chevron-right </v-icon>
       </v-btn>
     </v-toolbar>
-    <v-toolbar-title v-if="$refs.calendar">
-      {{ $refs.calendar.title }}
-    </v-toolbar-title>
 
     <v-calendar
       ref="calendar"
@@ -64,7 +61,7 @@
       :weekdays="weekday"
       :categories="getCategories"
       :event-color="getEventColor"
-      :type="type"
+      :type="selectedType"
       @click:event="showEvent"
       @click:more="viewDay"
       @click:date="viewDay"
@@ -78,13 +75,15 @@ export default {
   data: () => ({
     focus: '',
     type: 'day',
-    typeToLabel: {
-      month: 'Month',
-      week: 'Week',
-      day: 'Day',
-      '4day': '4 Days'
-    },
+    typeToLabel: [
+      { type: 'month', label: 'Mois' },
+      { type: 'week', label: 'Semaine' },
+      { type: 'day', label: 'Jour' },
+      { type: '4day', label: '4jours' },
+      { type: 'category', label: 'Categories' }
+    ],
     selectedEvent: {},
+    selectedType: 'week',
     weekday: [1, 2, 3, 4, 5, 6, 0]
   }),
 

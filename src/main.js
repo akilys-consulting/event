@@ -1,15 +1,17 @@
 import Vue from 'vue'
+
+import '@/plugins/fireauth'
+
 import router from '@/router'
 import App from './App'
 import { store } from '@/store/store.js'
 
-import VuetifyConf from '@/plugins/vuetify'
 import '@/plugins/editorHtml'
 
-import '@/plugins/fireauth'
 import 'leaflet/dist/leaflet.css'
 
 import '@/plugins/addToCalendar'
+import VuetifyConf from '@/plugins/vuetify'
 
 Vue.config.productionTip = false
 let vue = null

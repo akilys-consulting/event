@@ -48,7 +48,51 @@ export const store = new Vuex.Store({
     countStand: 0,
     numCmd: 1,
     remiseMode: false,
-    paypalData: {}
+    paypalData: {},
+    themes: [
+      {
+        name: 'vert',
+        dark: {
+          primary: '#90AB47',
+          accent: '#9D00E0',
+          secondary: '#9ECBB4',
+          success: '#74F25A',
+          info: '#BCEDAD',
+          warning: '#FB8C00',
+          error: '#EA4848'
+        },
+        light: {
+          primary: '#1976D2',
+          accent: '#9D00E0',
+          secondary: '#30b1dc',
+          success: '#4CAF50',
+          info: '#2196F3',
+          warning: '#FB8C00',
+          error: '#FF5252'
+        }
+      },
+      {
+        name: 'marron',
+        dark: {
+          primary: '#A1887F',
+          accent: '#9D00E0',
+          secondary: '#689F38',
+          success: '#43A047',
+          info: '#78909C',
+          warning: '#FB8C00',
+          error: '#E65100'
+        },
+        light: {
+          primary: '#ffa450',
+          accent: '#9D00E0',
+          secondary: '#92de4e',
+          success: '#6dff74',
+          info: '#7365ff',
+          warning: '#2e8ac0',
+          error: '#ff5e3c'
+        }
+      }
+    ]
   },
 
   actions: {
@@ -67,7 +111,6 @@ export const store = new Vuex.Store({
       for (var i = 0; i < messages.length; i++) {
         if (messages[i]['code'] == param.code) {
           let displayedmessage = messages[i]
-          console.log('error' + param.param)
           if (param && typeof param.param !== 'undefined') {
             displayedmessage.message = messages[i].message.replace(
               '[PARAM]',
@@ -153,11 +196,6 @@ export const store = new Vuex.Store({
       state.display = true
     },
 
-    /* configuration du profil courant */
-    async setUserProfile (state, val) {
-      state.currentProfil = val
-    },
-
     /* etat affichage info de chargement */
     setWaiting (state, val) {
       state.waiting = val
@@ -188,26 +226,11 @@ export const store = new Vuex.Store({
       if (typeof state.currentUser.uid === 'undefined') return false
       else return true
     },
-    getProfil (state) {
-      return state.currentProfil
-    },
-    getOrganisation (state) {
-      return state.currentProfil.organisation
-    },
 
     getUserUid (state) {
       return state.currentUser.uid
     },
-    isAdmin (state) {
-      if (state.currentUser) {
-        if (
-          typeof state.currentProfil.organisation === 'function' ||
-          state.currentProfil.organisation === ''
-        ) {
-          return false
-        } else return true
-      } else return false
-    },
+
     getUserInfo (state) {
       return state.currentUser
     },

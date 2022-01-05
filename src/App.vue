@@ -50,6 +50,7 @@
 import navbar from '@/components/commun/NavBar'
 import chargement from '@/components/commun/Chargement'
 import { mapState } from 'vuex'
+
 export default {
   data () {
     return {
@@ -66,3 +67,8 @@ export default {
   }
 }
 </script>
+<style>
+.v-application {
+  font-family: 'Darker Grotesque', sans-cherif !important;
+}
+</style>

@@ -5,59 +5,75 @@
         <v-row class="fill-height ma-0" align="center" justify="center">
           <v-progress-circularl
             indeterminate
-            color="grey lighten-5"
+            color="#6600A1"
           ></v-progress-circularl>
         </v-row>
       </template>
-      <v-card-title>{{ getNom }}</v-card-title>
+      <v-card-title>{{ currentEvent.nom }}</v-card-title>
       <v-card-text @click="detailEvent(itemPlanning)">
-        <v-row class="">
-          <v-col cols="6" lg="4">
-            <displayImage
-              :fileName="itemPlanning.eventid"
-              rep="image_event"
-              height="80"
-              width="150"
-            ></displayImage>
-          </v-col>
-          <v-col cols="6" class="hidden-lg-and-up">
-            <v-avatar tile color="pink">
-              {{ getPrix }}
-            </v-avatar>
-          </v-col>
-
-          <EmailManagement :content="getHtml" />
-          <v-col cols="auto">
-            <v-card-subtitle
-              >{{ itemPlanning.category }} - {{ getAdresseEvent() }}
-              <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
-            </v-card-subtitle>
-          </v-col>
-          <v-col cols="3" class="hidden-md-and-down">
-            <v-avatar tile color="pink">
-              {{ getPrix }}
-            </v-avatar>
-          </v-col>
-        </v-row>
+        <displayImage
+          :fileName="itemPlanning.eventid"
+          rep="image_event"
+          height="120"
+          width="100%"
+        ></displayImage>
+        <EmailManagement :content="getHtml" />
+        <v-card-subtitle
+          >{{ itemPlanning.category }} - {{ getAdresseEvent() }}
+          <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
+        </v-card-subtitle>
       </v-card-text>
       <v-card-actions>
+        <v-spacer></v-spacer>
+
         <v-badge
           v-if="nbLike > 0"
           overlap
           bordered
           color="error"
           :content="nbLike"
+        >                  <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+          <v-btn icon v-on="on">
+            <v-icon small @click="addLike()">mdi-heart</v-icon>
+          </v-btn>
+                      </template>
+            <span>j'aime</span>
+          </v-tooltip>
+          </v-badge
         >
-          <v-btn icon>
-            <v-icon @click="addLike()">mdi-heart</v-icon>
-          </v-btn></v-badge
+                        <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+        <v-btn icon v-on="on" v-if="!nbLike">
+          <v-icon small @click="addLike()">mdi-heart</v-icon>
+        </v-btn>
+                              </template>
+            <span>j'aime</span>
+          </v-tooltip>
+                        <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+        <v-btn icon v-on="on">
+          <v-icon small @click="sendEmail">mdi-share-variant-outline</v-icon>
+        </v-btn>
+                                      </template>
+            <span>partager</span>
+          </v-tooltip></spacer>
+                  <v-tooltip bottom>
+<template v-slot:activator="{ on }">
+        <v-icon v-on="on" x-small
+ v-for="index in getPrix" :key="index"
+          >mdi-currency-eur</v-icon
         >
-        <v-btn icon v-if="!nbLike">
-          <v-icon @click="addLike()">mdi-heart</v-icon>
-        </v-btn>
-        <v-btn icon>
-          <v-icon @click="sendEmail">mdi-email-send-outline</v-icon>
-        </v-btn>
+                </template>
+            <span>€ <10,€€ <30, €€€>30</span>
+          </v-tooltip>
+        <v-tooltip bottom>
+<template v-slot:activator="{ on }">
+
+        <v-icon small v-on="on" v-if="getPrix == 0">mdi-currency-eur-off</v-icon>
+        </template>
+            <span>Gratuit</span>
+          </v-tooltip>
       </v-card-actions>
     </v-card>
   </v-hover>
@@ -65,6 +81,8 @@
 
 <script>
 import moment from 'moment'
+import axios from 'axios'
+
 import mixFunctions from '@/components/commun/Functions'
 import displayImage from '@/components/commun/DisplayImage'
 import EmailManagement from '@/components/commun/EmailManagement'
@@ -77,7 +95,8 @@ export default {
       isAdmin: false,
       urlImg: null,
       displayImg: false,
-      calculNbLike: false
+      calculNbLike: false,
+      currentEvent: {}
     }
   },
   components: {
@@ -102,34 +121,32 @@ export default {
       )
     },
     nbLike () {
-      let currentEvent = this.getEvent()
-      return currentEvent.like
+      return this.currentEvent.like.length
     },
     getHtml () {
-      let event = this.getEvent()
       return {
-        nom: event.nom,
-        adr: event.localisation.adr,
+        nom: this.currentEvent.nom,
+        adr: this.currentEvent.localisation.adr,
         debut: this.DateDebut,
         fin: this.DateFin,
-        description: event.minisite ? event.minisite : 'Pas de description'
+        description: this.currentEvent.minisite ? this.currentEvent.minisite : 'Pas de description'
       }
     },
     getPrix () {
-      let event = this.getEvent()
-      return event.prix ? event.prix + '€' : 'Free!'
-    },
-    getNom () {
-      let event = this.getEvent()
-      return event.nom
+      if (!this.currentEvent.prix) return 0
+      if (this.currentEvent.prix <= 10) return 1
+      if (this.currentEvent.prix > 10 && this.currentEvent.prix <= 30) return 2
+      if (this.currentEvent.prix > 30) return 3
     }
   },
 
+  created () {
+    let searchIdEvent = this.itemPlanning.eventid
+    this.currentEvent = this.events.find((element) => element.id == searchIdEvent)
+  },
+
   methods: {
-    getEvent () {
-      let searchIdEvent = this.itemPlanning.eventid
-      return this.events.find((element) => element.id == searchIdEvent)
-    },
+
     detailEvent (element) {
       this.$router.push({
         name: 'clientdetailEvent',
@@ -137,19 +154,23 @@ export default {
       })
     },
     getAdresseEvent () {
-      let event = this.getEvent()
-      if (event && typeof event.localisation !== 'undefined') {
-        return event.localisation.adr
+      if (this.currentEvent && typeof this.currentEvent.localisation !== 'undefined') {
+        return this.currentEvent.localisation.adr
       } else return null
     },
+
+    async readIP () {
+      return axios.get('https://api.ipify.org?format=json')
+    },
+
     // add like to event
-    addLike () {
-      console.log('addlike')
-      this.$store.commit(
-        'event/setCurrentEventByPlanning',
-        this.itemPlanning.eventid
-      )
-      this.$store.dispatch('event/addLike2Event')
+    async addLike () {
+      await this.readIP().then((response) => {
+        if (!this.currentEvent.like.find(element => element === response.data.ip)) {
+          this.currentEvent.like.push(response.data.ip)
+          this.$store.dispatch('event/addLike2Event',this.currentEvent)
+        }
+      })
     },
 
     sendEmail () {
@@ -161,11 +182,9 @@ export default {
 </script>
 
 <style scoped>
-.v-card {
-  transition: opacity 0.4s ease-in-out;
-}
+.v-badge--bordered
+{
+  border-width:none;
 
-.v-card:not(.on-hover) {
-  opacity: 0.7;
 }
 </style>

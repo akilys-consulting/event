@@ -27,7 +27,6 @@ export default {
     }
   },
 
-
   props: ['fileName', 'rep', 'height', 'width', 'planning', 'event'],
 
   created () {
@@ -41,7 +40,7 @@ export default {
         .ref()
         .child(this.rep + '/IMG_DEFAUT.jpg')
         .getDownloadURL()
-      file.then(url => {
+      file.then((url) => {
         self.urlImg = url
         self.displayImg = true
         self.loadPhoto = false

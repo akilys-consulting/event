@@ -153,6 +153,10 @@ export default {
       })
     }
   },
+  mounted () {
+    this.$store.commit('setDisplayMenuOn')
+    this.$store.commit('event/clearActiveSearch')
+  },
   methods: {
     analyse (data) {
       this.$store.commit('setWaiting', true)

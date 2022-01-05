@@ -1,10 +1,11 @@
 import Vue from 'vue'
+import { mapState } from 'vuex'
+
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import fr from 'vuetify/lib/locale/fr'
-import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
-import 'typeface-roboto/index.css'
+import { store } from '@/store/store.js'
 
 Vue.use(Vuetify)
 const opts = {
@@ -21,7 +22,7 @@ const opts = {
     themes: {
       dark: {
         primary: '#90AB47',
-        accent: '#FF4081',
+        accent: '#9D00E0',
         secondary: '#9ECBB4',
         success: '#74F25A',
         info: '#BCEDAD',
@@ -30,7 +31,7 @@ const opts = {
       },
       light: {
         primary: '#1976D2',
-        accent: '#e91e63',
+        accent: '#9D00E0',
         secondary: '#30b1dc',
         success: '#4CAF50',
         info: '#2196F3',

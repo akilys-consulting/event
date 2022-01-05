@@ -1,48 +1,52 @@
 <template>
   <v-card>
-    <v-row>
-      <v-col cols="6">
+      <v-toolbar flat>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn fab small color="primary" @click="refreshList" v-on="on">
+            <v-btn icon @click="refreshList" v-on="on">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
           </template>
           <span>retour à la liste</span>
         </v-tooltip>
-      </v-col>
-      <v-col cols="6">
+
         <add-to-calendar
           :title="event.nom"
           :location="event.localisation.adr"
           :details="displayMiniSite"
           inline-template
         >
-          <div>
             <google-calendar id="google-calendar">
-              <v-btn small rounded plain>
-                <img
-                  style="height: 30px; width: 30px"
-                  class="icon_image"
-                  src="@/assets/google-calendar.png"
-                />
-                calendrier
-              </v-btn>
+                      <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+              <v-btn icon v-on="on">
+                <v-icon>mdi-calendar-plus</v-icon></v-btn>
+                          </template>
+          <span>ajouter à votre calendrier</span>
+        </v-tooltip>
             </google-calendar>
-          </div>
         </add-to-calendar>
-      </v-col>
-    </v-row>
-    <v-card-title> {{ event.nom }}</v-card-title>
-
-    <v-card-subtitle>
-      organisé par : {{ event.organisateur }} 
-      <v-btn v-if="event.urlsite"
- fab  small color="primary" :href="event.urlsite" target="_blank">
+                              <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+        <v-btn icon
+ v-on="on"
+  v-if="event.urlsite"
+  :href="event.urlsite"
+  target="_blank"
+>
       <v-icon dark>
         mdi-search-web
-      </v-icon></v-btn
-><br>
+      </v-icon></v-btn>
+                                </template>
+          <span>visiter le site de l'organisateur</span>
+        </v-tooltip>
+      </v-toolbar>
+    <v-card-title> {{ event.nom }}</v-card-title>
+
+    <v-card-subtitle v-if="event.organisateurs">
+      organisé par : {{ event.organisateur }} 
+    </v-card-subtitle>
+    <v-card-subtitle>
       {{ event.localisation.adr }}
       <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
     </v-card-subtitle>
@@ -168,7 +172,6 @@ export default {
     this.event = this.events.find(
       (element) => element.id == this.currentPlanning.eventid
     )
-    // console.log('minisiste' + this.event.minisite)
 
     this.center = [
       this.event.localisation.latLng.lat,

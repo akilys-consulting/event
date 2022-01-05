@@ -45,15 +45,7 @@ text align="center" justify="center" to="/importEvent">
           <v-icon>mdi-calendar-edit</v-icon>
           <span class="hidden-md-and-down">Calendrier</span>
         </v-btn>
-        <v-btn
-        text
-          align="center"
-          justify="center"
-          v-if="isAuthenticated && isAdmin"
-          to="/selectplan">
-        <v-icon>mdi-floor-plan</v-icon>
-          <span class="hidden-md-and-down">plan</span>
-        </v-btn>
+
         <v-btn text align="center" justify="center"
 class="hidden-md-and-up"  @click.stop="drawer = !drawer">
           <v-icon>mdi-magnify</v-icon>
@@ -106,7 +98,6 @@ export default {
     ...mapState(['display']),
     ...mapState('cnx', ['isconnected']),
     ...mapState('event', ['EVT_ACTIVE_SEARCH']),
-
     ...mapGetters('cnx', ['isAuthenticated', 'isAdmin'])
   }
 

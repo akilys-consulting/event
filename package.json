@@ -29,9 +29,7 @@
     "papaparse": "^5.3.1",
     "perf_hooks": "0.0.1",
     "places.js": "^1.19.0",
-    "roboto-fontface": "*",
     "sass-loader": "10.1.1",
-    "typeface-roboto": "^1.1.13",
     "vue": "^2.5.2",
     "vue-add-to-calendar": "^1.0.7",
     "vue-class-component": "^7.2.6",
@@ -39,6 +37,7 @@
     "vue-router": "^3.0.1",
     "vue2-leaflet": "^2.6.0",
     "vuetify": "^2.5.8",
+    "vuetify-loader": "^1.7.3",
     "vuex": "^3.6.2"
   },
   "devDependencies": {

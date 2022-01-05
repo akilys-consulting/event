@@ -4,7 +4,7 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn outlined color="primary" 
+          <v-btn 
             v-on="on"
             :to="{ name: 'calendrier' }"
           >
@@ -13,17 +13,26 @@
         </template>
         <span>retour au calendrier</span>
       </v-tooltip>
-
-      <v-spacer></v-spacer>
-      <v-btn outlined color="primary"
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+      <v-btn
+        v-on="on"
         :disabled="!valid"
         @click="saveEvent"
       >
         <v-icon>mdi-content-save-outline</v-icon>
       </v-btn>
-      <v-btn outlined color="primary">
+        </template>
+        <span>sauvegarder évènement</span>
+      </v-tooltip>
+            <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+      <v-btn v-on="on">
         <v-icon>mdi-delete-outline</v-icon>
       </v-btn>
+              </template>
+        <span>supprimer évènement</span>
+      </v-tooltip>
     </v-toolbar>
 <v-card>
 
@@ -114,7 +123,7 @@
                 <v-col cols="6">
                   <v-text-field
                     v-model="currentEvent.prix"
-                    label="Prix de la place"
+                    label="Prix"
                     :rules="[rules.digits]"
                     v-if="currentEvent.payant"
                   ></v-text-field

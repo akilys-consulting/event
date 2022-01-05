@@ -14,7 +14,16 @@
     >
       <template v-slot:default="{ items }">
         <v-row>
-          <v-col v-for="item in items" :key="item.name" cols="12" lg="3" md="4">
+          <v-col
+            v-for="item in items"
+            :key="item.start + item.end + item.name"
+            cols="12"
+            xs="12"
+            sm="6"
+            lg="3"
+            md="4"
+            class="d-flex child-flex"
+          >
             <displayEvent
               :key="item.start + item.end + item.nom"
               :itemPlanning="item"
@@ -23,12 +32,12 @@
       </template>
       <template v-slot:footer>
         <v-row align="center" justify="center">
-          <v-btn dark x-small @click="formerPage">
+          <v-btn icon @click="formerPage">
             <v-icon>mdi-chevron-left</v-icon>
           </v-btn>
           Page {{ page }} of {{ numberOfPages }}
 
-          <v-btn x-small dark @click="nextPage">
+          <v-btn icon @click="nextPage">
             <v-icon>mdi-chevron-right</v-icon>
           </v-btn></v-row
         >
@@ -90,7 +99,7 @@ export default {
         case 'xs':
           return 3
         case 'sm':
-          return 3
+          return 4
         case 'md':
           return 6
         case 'lg':
@@ -105,11 +114,9 @@ export default {
     this.$store.commit('setDisplayMenuOn')
     this.$store.commit('event/setActiveSearch')
 
-    console.log('listEvent : created')
-
     // charger les events via la liste des events et leurs planning
     this.$store.dispatch('startWaiting')
-    let execute = this.$store
+    this.$store
       .dispatch('event/loadPlanning')
       .then(() => {
         // les events sont chargés
@@ -146,10 +153,9 @@ export default {
       if (this.getEVT_SRCH_CRITERE) {
         critereMatch =
           critereMatch &&
-          (row.name
+          row.name
             .toUpperCase()
-            .includes(this.getEVT_SRCH_CRITERE.toUpperCase()) ||
-            this.getAdresseEvent(row.id))
+            .includes(this.getEVT_SRCH_CRITERE.toUpperCase())
       }
 
       if (this.getEVT_SRCH_GRATUIT) {
@@ -159,21 +165,16 @@ export default {
       return critereMatch
     },
 
-    getAdresseEvent (eventId) {
-      let search = this.critere
-      let event = null
-      event = this.events.find((element) => {
+    getAdresseEvent (row) {
+      let event = this.events.find((element) => {
         if (typeof element.localisation === 'undefined') return false
         else {
-          return (
-            element.localisation.adr
-              .toUpperCase()
-              .includes(search.toUpperCase()) && element.id == eventId
-          )
+          return element.localisation.adr
+            .toUpperCase()
+            .includes(this.getEVT_SRCH_CRITERE.toUpperCase())
         }
       })
-      if (event) return true
-      else return false
+      return !!event
     },
 
     nextPage () {

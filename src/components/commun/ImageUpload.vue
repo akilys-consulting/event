@@ -7,12 +7,17 @@
             v-model="file"
             show-size
             dense
+            v-if="this.fileName != -1"
             accept="image/png, image/jpeg, image/bmp image/svg"
             :placeholder="placeholderImg"
             prepend-icon="mdi-camera"
             @change="UploadFile"
             @click.stop
           ></v-file-input>
+          <v-else
+            >L'image ne peut être changée que si l'évènement est
+            sauvegardé</v-else
+          >
         </v-col>
 
         <v-col cols="12">
@@ -54,6 +59,7 @@ export default {
   },
 
   created () {
+    console.log('id' + this.fileName)
     this.localImg = this.fileName
     this.displayImage()
   },
@@ -87,19 +93,19 @@ export default {
         typeof this.localImg !== 'undefined' &&
         this.localImg !== -1
       ) {
-        const file = fb.file
+        fb.file
           .ref()
           .child(this.rep + '/' + this.localImg)
           .getDownloadURL()
-        file.then(function (url) {
-          self.urlImg = url
-          self.displayImg = true
-          self.loadPhoto = false
-          self.placeholderImg = "Changer d'image"
-        })
-        file.catch(function () {
-          self.getDefaultImg()
-        })
+          .then(function (url) {
+            self.urlImg = url
+            self.displayImg = true
+            self.loadPhoto = false
+            self.placeholderImg = "Changer d'image"
+          })
+          .catch(function () {
+            self.getDefaultImg()
+          })
       } else {
         self.getDefaultImg()
       }
@@ -110,22 +116,24 @@ export default {
       // récupération du nom de l'image
       if (typeof file !== 'undefined' && file != null) {
         this.$store.dispatch('startWaiting')
-        var storageRef = fb.file.ref()
-
-        // on va détruire l'image qui existait
-        // storageRef.child(this.filename).delete();
-        storageRef.child(this.rep + '/' + self.fileName).put(file)
-        storageRef.then(function (snapshot) {
-          self.$store.dispatch('stopWaiting')
-          self.$store.dispatch('displayMessage', 'IMOK')
-          self.localImg = self.fileName
-          self.displayImage()
-          self.file = null
-        })
-        storageRef.catch(() => {
-          self.$store.dispatch('stopWaiting')
-          self.$store.dispatch('displayMessage', 'IMKO')
-        })
+        fb.file
+          .ref()
+          // on va détruire l'image qui existait
+          // storageRef.child(this.filename).delete();
+          .child(this.rep + '/' + self.fileName)
+          .put(file)
+          .then(function (snapshot) {
+            console.log('fichier' + self.fileName)
+            self.$store.dispatch('stopWaiting')
+            self.$store.dispatch('displayMessage', 'IMOK')
+            self.localImg = self.fileName
+            self.displayImage()
+            self.file = null
+          })
+          .catch(() => {
+            self.$store.dispatch('stopWaiting')
+            self.$store.dispatch('displayMessage', 'IMKO')
+          })
       }
     }
   }

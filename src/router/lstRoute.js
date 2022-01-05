@@ -17,32 +17,34 @@ export const routes = [
     component: listEvent
   },
   {
-    path: '/importEvent',
-    name: 'importEvent',
-    component: importEvent
-  },
-  {
     path: '/login',
     name: 'login',
     component: login
-  },
-  {
-    path: '/profil',
-    name: 'voirProfil',
-    component: profilForm
   },
   {
     path: '/creation',
     name: 'creation',
     component: signUp
   },
-
   {
     path: '/detailEvent',
     name: 'clientdetailEvent',
     component: detailEvent
   },
 
+  {
+    path: '/profil',
+    name: 'voirProfil',
+    component: profilForm
+  },
+  {
+    path: '/importEvent',
+    name: 'importEvent',
+    component: importEvent,
+    meta: {
+      requiresAuth: true
+    }
+  },
   {
     path: '/calendrier',
     name: 'calendrier',
@@ -51,11 +53,13 @@ export const routes = [
       requiresAuth: true
     }
   },
-
   {
     path: '/formevent',
     name: 'formEvent',
-    component: formevent
+    component: formevent,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/plandesign',

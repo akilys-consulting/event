@@ -14,11 +14,11 @@ const state = {
     prenom: null,
     loalisation: { adr: null, latLng: { lat: null, lng: null } }
   },
-  profilLoaded: false
+  profilLoaded: false,
+  isconnected: false
 }
 
 const actions = {
-
   //
   // ajout du profil sur création utilisateur
   async createProfil ({ state, dispatch }, data) {
@@ -49,6 +49,8 @@ const actions = {
   // maj de l'évent courant en base
   saveProfil ({ state }, dataProfil) {
     return new Promise((resolve, reject) => {
+      console.log('save profil')
+      console.log(dataProfil)
       let profil = JSON.parse(JSON.stringify(dataProfil))
       let execute = fb.profilCollection
         .doc(state.user.uid)
@@ -130,62 +132,62 @@ const actions = {
      si cleAdmin de son profil correspond à un Id d'une  organisation
   */
   async isadmin ({ state, dispatch }) {
-    await fb.orgaCollection
-      .doc(state.currentProfil.cleAdmin)
-      .get()
-      .then((doc) => {
-        if (doc.exists) state.currentProfil.cleAdmin = true
-        else state.currentProfil.cleAdmin = false
-      })
-      .catch((error) => {
-        dispatch(
-          'displayMessage',
-          {
-            code: 'ADMIN',
-            param: error
-          },
-          { root: true }
-        )
-      })
+    if (state.currentProfil.cleAdmin) {
+      await fb.orgaCollection
+        .doc(state.currentProfil.cleAdmin)
+        .get()
+        .then((doc) => {
+          if (doc.exists) state.currentProfil.cleAdmin = doc.id
+          else state.currentProfil.cleAdmin = null
+        })
+        .catch((error) => {
+          dispatch(
+            'displayMessage',
+            {
+              code: 'ADMIN',
+              param: error
+            },
+            { root: true }
+          )
+        })
+    }
   },
 
-  async loadProfil ({ state, dispatch, commit, getters }) {
+  loadProfil ({ state, dispatch, commit, getters }) {
+    console.log(
+      'appel loadProfil' +
+        getters.isAuthenticated +
+        ' ' +
+        getters.isProfilLoaded
+    )
     return new Promise((resolve, reject) => {
-      if (getters.isAuthenticated && !getters.IsProfilLoaded) {
-        console.log('chargement du profil')
-        let profil = fb.profilCollection.doc(state.user.uid).get()
-        profil
+      if (getters.isAuthenticated && !getters.isProfilLoaded) {
+        console.log('before await')
+        fb.profilCollection
+          .doc(state.user.uid)
+          .get()
           .then((data) => {
-            if (data.exists) {
-              commit('setProfil', data.data())
-              dispatch('isadmin')
-            }
-            resolve()
+            console.log('after await')
+            commit('setProfil', data.data())
+            dispatch('getProfilPhoto')
+            dispatch('isadmin')
+            resolve(true)
           })
-          .catch((err) => {
-            reject(err)
-          })
+      } else {
+        resolve(true)
       }
     })
   },
-   async getProfilPhoto(state) {
-     return new Promise((resolve, reject) => {
-       if (state.currentProfil && state.currentProfil.photoURL) {
-         resolve(state.currentProfil.photoURL)
-       } else if (state.user && state.user.photoURL) {
-         resolve(state.user.photoURL)
-       } else {
-         let urlRetourned = null
-         fb.file
-           .ref()
-           .child(imgAvatarPath + imgDefaut)
-           .getDownloadURL()
-           .then(function (url) {
-             resolve(url)
-           })
-           .catch((error) => { reject(error.message) })
-       }
-     })
+  async getProfilPhoto ({ state }) {
+    if (state.currentProfil && state.currentProfil.photoURL) {
+    } else if (state.user && state.user.photoURL) {
+    } else {
+      let urlRetourned = await fb.file
+        .ref()
+        .child(imgAvatarPath + imgDefaut)
+        .getDownloadURL()
+      state.currentProfil.photoURL = urlRetourned.url
+    }
   }
 }
 const mutations = {
@@ -197,6 +199,7 @@ const mutations = {
     state.isconnected = false
   },
   setUser (state, connexion) {
+    console.log('connexion user' + connexion)
     if (connexion) {
       state.user = connexion
       state.isconnected = true
@@ -219,7 +222,7 @@ const mutations = {
 
 const getters = {
   isAuthenticated (state) {
-    return !!state.user
+    return state.isconnected
   },
 
   getUserUid (state) {
@@ -249,6 +252,16 @@ const getters = {
   getDisplayName (state) {
     if (state.user.displayName) return state.user.displayName
     else return null
+  },
+  getThemeProfilName (state) {
+    return typeof state.currentProfil.theme.name === 'undefined'
+      ? null
+      : state.currentProfil.theme.name
+  },
+  getThemeProfilMode (state) {
+    return typeof state.currentProfil.theme.dark === 'undefined'
+      ? null
+      : state.currentProfil.theme.dark
   }
 }
 

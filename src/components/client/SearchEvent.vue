@@ -14,6 +14,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
+            @click:clear="date = null"
             :value="formatedDate(date)"
             label="début après le"
             prepend-icon="mdi-calendar-month"
@@ -48,6 +49,7 @@
         append-icon="mdi-magnify"
         label="rechercher..."
         clearable
+        @click:clear="critere = null"
         color="white"
       ></v-text-field>
     </v-col>
@@ -56,7 +58,7 @@
         dense
         flat
         hide-details
-        color="pink"
+        color="accent"
         v-model="evtGratuit"
         label="Gratuit"
       ></v-switch>
@@ -122,7 +124,6 @@ export default {
   },
   methods: {
     formatedDate (date) {
-      console.log('date' + date)
       return date ? moment(date).format('DD/MM/YYYY') : null
     }
   }
