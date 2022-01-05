@@ -39,7 +39,7 @@
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-app-bar-title>Que faire </v-app-bar-title>
+
       <profil @closeProfil="menuProfil = false" />
 
       <template v-slot:extension v-if="EVT_ACTIVE_SEARCH">

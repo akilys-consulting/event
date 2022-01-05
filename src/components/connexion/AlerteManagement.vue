@@ -38,7 +38,7 @@
             v-model="currentProfil.alerte.categorie"
             hide-details
             flat
-            append-icon="mdi-filter-variant"
+            prepend-icon="mdi-list-status"
             clearable
             color="white"
             :items="getCategories"

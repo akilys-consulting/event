@@ -70,9 +70,6 @@ const state = {
 const actions = {
   // sauvegarde de l'évent courant en base
   saveEvent ({ state, dispatch }) {
-    console.log(
-      'current Event ' + state.currentEvent.id + ' ' + state.currentEvent.nom
-    )
     return new Promise((resolve, reject) => {
       if (state.currentEvent.id == -1) {
         let execute = dispatch('insertEvent')

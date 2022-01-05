@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-btn icon v-if="!isAuthenticated" to="/login"
+    <v-btn v-if="!isAuthenticated" icon v-on="on" to="/login"
       ><v-icon>mdi-account-arrow-right-outline </v-icon></v-btn
     >
 
@@ -80,7 +80,6 @@
             ></v-card-text>
           </v-tab-item>
           <themeManagement />
-          <alerteManagement />
         </v-tabs-items> </v-card
     ></v-menu>
   </div>
@@ -91,7 +90,6 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import AvatarDisplay from '../commun/AvatarDisplay.vue'
 import themeManagement from '@/components/connexion/ThemeManagement'
-import alerteManagement from '@/components/connexion/AlerteManagement'
 
 export default {
   name: 'profil',

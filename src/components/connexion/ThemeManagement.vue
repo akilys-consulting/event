@@ -2,10 +2,10 @@
   <v-tab-item>
     <v-card-text>
       <v-row>
-        <v-col cols="12"
+        <v-col cols="6"
           ><v-switch label="sombre" v-model="$vuetify.theme.dark" />
         </v-col>
-        <v-col cols="12"
+        <v-col cols="6"
           ><v-select
             v-model="$vuetify.theme.themes.name"
             :items="themes"

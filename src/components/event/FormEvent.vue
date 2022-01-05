@@ -4,7 +4,7 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn 
+          <v-btn
             v-on="on"
             :to="{ name: 'calendrier' }"
           >
@@ -172,7 +172,7 @@ export default {
       rules: {
         required: value => !!value || 'obligatoire.',
         digits: v => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
-        url: v => /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL',
+        url: v => /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL'
 
       },
       valid: true,
@@ -248,9 +248,9 @@ export default {
     } else this.$router.push({ name: 'calendrier' })
   },
 
-  mounted(){
+  mounted () {
     this.$store.commit('setDisplayMenuOn')
-this.$store.commit('event/clearActiveSearch')
+    this.$store.commit('event/clearActiveSearch')
   },
 
   methods: {
@@ -261,7 +261,7 @@ this.$store.commit('event/clearActiveSearch')
           this.localisation = plan.ville.adr
         })
         execute.catch(() => {
-          this.$store.dispatch('displayMessage', {code:'EVAD'})
+          this.$store.dispatch('displayMessage', {code: 'EVAD'})
         })
       }
     },
@@ -282,6 +282,10 @@ this.$store.commit('event/clearActiveSearch')
         execute.then(data => {
           this.$store.dispatch('stopWaiting')
           this.$store.dispatch('displayMessage', { code: 'SAOK' })
+          /* gestion de l 'alerting
+          on recherche dans tous les profils des alertes qui correspondent a l'event
+          si cela correspond => envoi du mail via email du profil */
+          this.$store.dispatch('cnx/alertingEvent')
         })
         execute.catch(() => {
           this.$store.dispatch('stopWaiting')

@@ -22,6 +22,9 @@ const state = {
 
 const actions = {
   //
+  // gestion de l'alerting
+  alertingEvent ({ rootState, state }) {},
+  //
   // ajout du profil sur création utilisateur
   async createProfil ({ state, dispatch }, data) {
     return fb.profilCollection
