@@ -54,12 +54,12 @@ export const store = new Vuex.Store({
         name: 'vert',
         dark: {
           primary: '#90AB47',
-          accent: '#9D00E0',
-          secondary: '#9ECBB4',
+          accent: '#9FD656',
+          secondary: '#9FED6B',
           success: '#74F25A',
           info: '#BCEDAD',
-          warning: '#FB8C00',
-          error: '#EA4848'
+          warning: '#EB6D00',
+          error: '#A31435'
         },
         light: {
           primary: '#1976D2',
@@ -74,9 +74,9 @@ export const store = new Vuex.Store({
       {
         name: 'marron',
         dark: {
-          primary: '#A1887F',
-          accent: '#9D00E0',
-          secondary: '#689F38',
+          primary: '#7F5636',
+          accent: '#B6D173',
+          secondary: '#D1905E',
           success: '#43A047',
           info: '#78909C',
           warning: '#FB8C00',

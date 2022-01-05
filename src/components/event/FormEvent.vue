@@ -248,6 +248,11 @@ export default {
     } else this.$router.push({ name: 'calendrier' })
   },
 
+  mounted(){
+    this.$store.commit('setDisplayMenuOn')
+this.$store.commit('event/clearActiveSearch')
+  },
+
   methods: {
     loadAdr (planId) {
       if (planId) {

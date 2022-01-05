@@ -58,7 +58,7 @@
         dense
         flat
         hide-details
-        color="accent"
+        color="secondary"
         v-model="evtGratuit"
         label="Gratuit"
       ></v-switch>

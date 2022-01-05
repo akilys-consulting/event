@@ -166,6 +166,7 @@ export default {
     // add like to event
     async addLike () {
       await this.readIP().then((response) => {
+        console.log('ip'+response.data.ip)
         if (!this.currentEvent.like.find(element => element === response.data.ip)) {
           this.currentEvent.like.push(response.data.ip)
           this.$store.dispatch('event/addLike2Event',this.currentEvent)

@@ -12,7 +12,9 @@ const state = {
   currentProfil: {
     nom: null,
     prenom: null,
-    loalisation: { adr: null, latLng: { lat: null, lng: null } }
+    loalisation: { adr: null, latLng: { lat: null, lng: null } },
+    theme: { name: null, drak: false },
+    alerte: { date: null, categorie: null, activate: false }
   },
   profilLoaded: false,
   isconnected: false
@@ -262,6 +264,16 @@ const getters = {
     return typeof state.currentProfil.theme.dark === 'undefined'
       ? null
       : state.currentProfil.theme.dark
+  },
+  getAlerteDate (state) {
+    return typeof state.currentProfil.alerte.date === 'undefined'
+      ? null
+      : state.currentProfil.alerte.date
+  },
+  getAlerteCategorie (state) {
+    return typeof state.currentProfil.alerte.categorie === 'undefined'
+      ? null
+      : state.currentProfil.alerte.categorie
   }
 }
 

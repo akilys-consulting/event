@@ -87,6 +87,16 @@ export const messages = [
     message: 'le format des dates est incorrect [PARAM]',
     type: 'error'
   },
+  {
+    code: 'AACT',
+    message: 'votre alerte est active',
+    type: 'success'
+  },
+  {
+    code: 'ADIS',
+    message: 'votre alerte est désactivée',
+    type: 'success'
+  },
   /*
       QUESTIONS
   */

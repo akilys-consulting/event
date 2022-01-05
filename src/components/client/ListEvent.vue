@@ -97,7 +97,7 @@ export default {
     getItemsPerPage () {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
-          return 3
+          return 10
         case 'sm':
           return 4
         case 'md':

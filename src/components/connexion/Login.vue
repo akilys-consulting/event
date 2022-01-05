@@ -22,7 +22,6 @@
 
             <v-text-field
               prepend-icon="mdi-lock"
-              filled
               label="Votre mot de passe"
               :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
               :type="show3 ? 'text' : 'password'"
@@ -43,7 +42,7 @@
               v-if="errorMsg !== ''"
               >{{ errorMsg }}</v-alert
             >
-            <v-btn @click="login" class="font-weight-thin" block
+            <v-btn plain @click="login" class="font-weight-thin" block
               >connexion</v-btn
             >
           </v-form>

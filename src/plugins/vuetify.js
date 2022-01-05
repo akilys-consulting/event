@@ -22,21 +22,21 @@ const opts = {
     themes: {
       dark: {
         primary: '#90AB47',
-        accent: '#9D00E0',
-        secondary: '#9ECBB4',
+        accent: '#9FD656',
+        secondary: '#9FED6B',
         success: '#74F25A',
         info: '#BCEDAD',
-        warning: '#FB8C00',
-        error: '#EA4848'
+        warning: '#EB6D00',
+        error: '#A31435'
       },
       light: {
-        primary: '#1976D2',
-        accent: '#9D00E0',
-        secondary: '#30b1dc',
+        primary: '#8D6E63',
+        accent: '#FFAB8C',
+        secondary: '#ED8D6B',
         success: '#4CAF50',
-        info: '#2196F3',
-        warning: '#FB8C00',
-        error: '#FF5252'
+        info: '#19A1B0',
+        warning: '#EB6D00',
+        error: '#A31435'
       }
     }
   }
