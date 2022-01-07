@@ -3,8 +3,8 @@
       <v-toolbar flat>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon @click="refreshList" v-on="on">
-              <v-icon>mdi-arrow-left</v-icon>
+            <v-btn plain icon @click="refreshList" v-on="on">
+              <v-icon >mdi-arrow-left</v-icon>
             </v-btn>
           </template>
           <span>retour à la liste</span>
@@ -19,7 +19,7 @@
             <google-calendar id="google-calendar">
                       <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-              <v-btn icon v-on="on">
+              <v-btn plain v-on="on">
                 <v-icon>mdi-calendar-plus</v-icon></v-btn>
                           </template>
           <span>ajouter à votre calendrier</span>
@@ -28,14 +28,14 @@
         </add-to-calendar>
                               <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-        <v-btn icon
+        <v-btn icon plain
  v-on="on"
   v-if="event.urlsite"
   :href="event.urlsite"
   target="_blank"
 >
       <v-icon dark>
-        mdi-search-web
+        mdi-web
       </v-icon></v-btn>
                                 </template>
           <span>visiter le site de l'organisateur</span>
@@ -202,5 +202,8 @@ export default {
 <style>
 .vue2leaflet-map {
   z-index: 0;
+}
+.vue-add-to-calendar { text-decoration: none;
+
 }
 </style>

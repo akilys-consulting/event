@@ -1,14 +1,13 @@
 <template>
   <div>
-    <v-btn v-if="!isAuthenticated" icon v-on="on" to="/login"
+    <v-btn v-if="!isAuthenticated" icon to="/login"
       ><v-icon>mdi-account-arrow-right-outline </v-icon></v-btn
     >
-
     <v-menu
-      v-else
       v-model="menuProfil"
       :close-on-content-click="false"
       :nudge-width="400"
+      v-if="isAuthenticated"
       offset-x
     >
       <template v-slot:activator="{ on, attrs }">
@@ -51,7 +50,6 @@
         <v-tabs v-model="tab">
           <v-tab>votre profil</v-tab>
           <v-tab>theme</v-tab>
-          <v-tab>alertes</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item>
@@ -96,7 +94,6 @@ export default {
   inject: ['theme'],
   components: {
     AvatarDisplay,
-    alerteManagement,
     themeManagement
   },
   data () {
@@ -130,6 +127,7 @@ export default {
   methods: {
     setTheme () {
       if (this.isAuthenticated) {
+        console.log('load theme' + this.getThemeProfilName)
         let theme = this.themes.find(
           (value) => value.name == this.getThemeProfilName
         )

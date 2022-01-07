@@ -7,7 +7,7 @@
           <v-form>
             <v-text-field
               label="votre email"
-              v-model="profil.email"
+              v-model="dataForm.email"
               prepend-icon="mdi-account"
             />
             <v-text-field
@@ -15,7 +15,7 @@
               :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
               :type="showPassword ? 'text' : 'password'"
               label="mot de passe"
-              v-model="profil.password"
+              v-model="dataForm.password"
               @click:append="showPassword = !showPassword"
             />
             <v-spacer />
@@ -29,8 +29,11 @@
               class="input-group--focused"
               @click:append="showPasswordRedo = !showPasswordRedo"
             />
-            <v-text-field v-model="profil.nom" label="Nom"></v-text-field>
-            <v-text-field v-model="profil.prenom" label="Prénom"></v-text-field>
+            <v-text-field v-model="dataForm.nom" label="Nom"></v-text-field>
+            <v-text-field
+              v-model="dataForm.prenom"
+              label="Prénom"
+            ></v-text-field>
             <!--<v-row>
               <v-col cols="6">
                 <v-switch
@@ -75,11 +78,11 @@
               >{{ errorMsg }}</v-alert
             ><v-row>
               <v-col cols="6"
-                ><v-btn @click="signUp" block :loading="waiting"
-                  >Création compte</v-btn
-                >
+                ><v-btn @click="signUp" plain>Création compte</v-btn>
               </v-col>
-              <v-col cols="6"><v-btn to="/">Annuler</v-btn> </v-col></v-row
+              <v-col cols="6"
+                ><v-btn plain to="/">Annuler</v-btn>
+              </v-col></v-row
             ></v-form
           ></v-col
         ></v-row
@@ -94,15 +97,11 @@ export default {
   name: 'signup',
   data () {
     return {
-      profil: {
+      dataForm: {},
+      infoLogin: {
         email: '',
         password: null,
-        passwordRedo: null,
-        nom: '',
-        prenom: '',
-        organisation: '',
-        admin_key: null,
-        adresse: {}
+        passwordRedo: null
       },
       errorMsg: '',
       showPassword: false,
@@ -114,29 +113,26 @@ export default {
   },
 
   computed: {
-    ...mapState(['waiting'])
+    ...mapState(['waiting']),
+    ...mapState('cnx', ['currentProfil'])
+  },
+  crated () {
+    this.dataForm = Object.assign({}, this.infoLogin, this.currentProfil)
   },
   methods: {
     async signUp () {
       this.$store.commit('setWaiting', true)
-      let self = this
-      if (this.profil.password !== this.profil.passwordRedo) {
+
+      if (this.dataForm.password !== this.dataForm.passwordRedo) {
         this.errorMsg = 'les mots de passe sont différents'
-        self.$store.commit('setWaiting', false)
       } else {
-        await this.$store
-          .dispatch('cnx/userCreate', this.profil)
-          .then(() => {
-            self.$store.commit('setWaiting', false)
-            self.$store.dispatch('displayMessage', {
-              code: 'CNXU',
-              param: null
-            })
-            self.$router.replace({ name: 'listEvent' }).catch(() => {})
-          })
-          .catch(() => {
-            self.$store.commit('setWaiting', false)
-          })
+        try {
+          await this.$store.dispatch('cnx/userCreate', this.dataForm)
+          this.$router.push('/')
+        } catch (error) {
+          this.$store.commit('setWaiting', false)
+        }
+        this.$store.commit('setWaiting', false)
       }
     }
   }

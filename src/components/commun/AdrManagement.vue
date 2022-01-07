@@ -7,7 +7,6 @@
       id="autocomplete"
       ref="autocomplete"
       v-model="localeadr.adr"
-      placeholder="Search"
       :label="libelleAdr == null ? 'Votre adresse' : libelleAdr"
       onfocus="value = ''"
       type="text"
@@ -50,15 +49,15 @@ export default {
 
     this.autocomplete.addListener('place_changed', () => {
       let place = this.autocomplete.getPlace()
-      let localeadr = { adr: null, latLng: { lat: 0, lng: 0 } }
-      localeadr = {
+      this.localeadr = { adr: null, latLng: { lat: 0, lng: 0 } }
+      this.localeadr = {
         adr: place['formatted_address'],
         latLng: {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng()
         }
       }
-      self.$emit('uptadr', self.localeadr)
+      this.localeadr.adr = this.$emit('uptadr', this.localeadr)
     })
   },
   methods: {}

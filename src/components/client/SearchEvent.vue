@@ -20,6 +20,8 @@
             prepend-icon="mdi-calendar-month"
             readonly
             clearable
+            flat
+            color="white"
             v-bind="attrs"
             v-on="on"
           ></v-text-field>
@@ -58,7 +60,6 @@
         dense
         flat
         hide-details
-        color="secondary"
         v-model="evtGratuit"
         label="Gratuit"
       ></v-switch>

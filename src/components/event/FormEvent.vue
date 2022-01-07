@@ -5,10 +5,11 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
+          plain
             v-on="on"
             :to="{ name: 'calendrier' }"
           >
-            <v-icon x-small>mdi-arrow-left</v-icon>
+            <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
         <span>retour au calendrier</span>
@@ -16,6 +17,8 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
       <v-btn
+      plain
+
         v-on="on"
         :disabled="!valid"
         @click="saveEvent"
@@ -27,7 +30,8 @@
       </v-tooltip>
             <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-      <v-btn v-on="on">
+      <v-btn v-on="on" plain
+>
         <v-icon>mdi-delete-outline</v-icon>
       </v-btn>
               </template>
@@ -49,9 +53,6 @@
                   rep="image_event"
                   @uploadfile="saveEvent"
                 />
-                <p v-else>
-                  Sauvegarder votre évènement et vous pourrez ajouter une image
-                </p>
               </v-col>
               <v-col cols="12" lg="6">
                 <editor
@@ -172,7 +173,7 @@ export default {
       rules: {
         required: value => !!value || 'obligatoire.',
         digits: v => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
-        url: v => /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL'
+        url: (v) => ( !v || /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL')
 
       },
       valid: true,
@@ -266,6 +267,7 @@ export default {
       }
     },
     updateadresse (localisation) {
+      console.log(localisation)
       this.localisation = localisation
       this.currentEvent.localisation = localisation
       this.$store.commit('setModifUser')
@@ -299,7 +301,7 @@ export default {
 
 <style>
 .ql-bubble .ql-editor:focus {
-  background-color: black;
+  background-color: transparent;
 }
 #quill-container {
   height: auto;
@@ -324,4 +326,5 @@ export default {
   font-size: small;
   height: 250px !important;
 }
+
 </style>

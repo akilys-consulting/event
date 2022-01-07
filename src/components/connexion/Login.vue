@@ -16,6 +16,7 @@
               v-model="email"
               :placeholder="autofillLogin ? ` Email` : null"
               name="login"
+              class="input-group--focused"
               prepend-icon="mdi-account"
               type="text"
             />
@@ -28,7 +29,6 @@
               name="password"
               :placeholder="autofill ? ` Mot de passe` : null"
               v-model="password"
-              class="input-group--focused"
               @click:append="show3 = !show3"
             />
             <v-spacer />
@@ -51,14 +51,14 @@
     </v-card-text>
     <v-card-text>
       <v-row align="center" justify="center">
-        <v-col cols="8" class="font-weight-thin">
+        <v-col cols="auto" class="font-weight-thin">
           Autre moyen de connexion
         </v-col>
         <v-col cols="4">
           <v-btn icon color="red" outlined @click="cnxgoogle"
             ><v-icon>mdi-google-plus</v-icon>
           </v-btn>
-          <v-btn icon outlined color="indigo lighten-2" @click="cnxgoogle">
+          <v-btn icon outlined color="indigo lighten-2" @click="cnxFacebook">
             <v-icon>mdi-facebook</v-icon></v-btn
           >
         </v-col>
@@ -78,6 +78,7 @@ export default {
   data () {
     return {
       show3: false,
+      dialog: true,
       email: '',
       password: '',
       autofill: false,
@@ -88,10 +89,6 @@ export default {
       url_img: '@/static/img/fond_app.jpg'
     }
   },
-  /*
-  created () {
-    this.$store.dispatch('clearData')
-  }, */
 
   mounted () {
     this.$store.commit('setDisplayMenuOff')
@@ -114,68 +111,22 @@ export default {
     }
   },
   methods: {
-    async login () {
-      let self = this
-      this.errorMsg = ''
-      this.displayalert = false
-      this.formError = ''
-      await this.$store
-        .dispatch('cnx/userLogin', {
-          email: this.email,
-          password: this.password
-        })
-        .then(() => {
-          // le user est connecté on peut récupérer son profil
-          console.log('login-ok')
-
-          self.$store
-            .dispatch('cnx/loadProfil')
-            .then(() => {
-              console.log('profil-ok')
-              self.$store.dispatch('displayMessage', {
-                code: 'CNXU',
-                param: null
-              })
-              this.$router.push('/')
-            })
-            .catch((err) => {
-              // le chargement du login a échoué
-              // on déconnecte
-              console.log('profil-erreur' + err.message)
-              this.$router.push('/')
-
-              self.$store.dispatch('displayMessage', {
-                code: 'ECNX',
-                param: err.message
-              })
-            })
-        })
-        .catch((error) => {
-          console.log('login-error')
-          self.$store.dispatch('displayMessage', {
-            code: 'ECNX',
-            param: error.message
-          })
-        })
-    },
-    async cnxgoogle () {
-      await this.$store.dispatch('cnx/connexionUserGoogle').then(() => {
+    cnxFacebook () {
+      this.$store.dispatch('cnx/connexionUserFacebook').then(() => {
+        // le user est connecté , on regarde s'il a un profil
         this.$store
           .dispatch('cnx/loadProfil')
           .then(() => {
-            console.log('profil-ok')
             this.$store.dispatch('displayMessage', {
               code: 'CNXU',
               param: null
             })
-            console.log('load default page')
             this.$store.commit('setDisplayMenuOn')
             this.$router.push('/')
           })
           .catch((err) => {
             // le chargement du login a échoué
-            // on déconnecte
-            console.log('profil-erreur' + err.message)
+            // on déconnecte console.log('profil-erreur' + err.message)
             this.$router.push('/')
             this.$store.dispatch('displayMessage', {
               code: 'ECNX',
@@ -183,19 +134,94 @@ export default {
             })
           })
       })
+    },
+    login () {
+      this.errorMsg = ''
+      let self = this
+      this.displayalert = false
+      this.formError = ''
+      // appel a la connexion firebase
+      this.$store
+        .dispatch('cnx/userLogin', {
+          email: this.email,
+          password: this.password
+        })
+        .then(() => {
+          // le user est connecté on peut récupérer son profil
+          console.log('user connecté')
+
+          this.$store
+            .dispatch('cnx/loadProfil')
+            .then(() => {
+              // utilisateur connecté et profil chargé
+              console.log('profil chargé')
+              self.$store.dispatch('displayMessage', {
+                code: 'CNXU',
+                param: null
+              })
+              console.log('chargement page principale')
+              this.$router.go(-1)
+            })
+            .catch((err) => {
+              // le chargement du login a échoué
+              // on appel la page des evenst en version non connecté
+              this.$router.push({ name: 'listEvent' })
+              // on indique à l'utilisateur que sa connexion a échouée
+              self.$store.dispatch('displayMessage', {
+                code: 'ECNX',
+                param: err.message
+              })
+            })
+        })
+        .catch((error) => {
+          console.log('login-error' + error.message)
+          self.$store.dispatch('displayMessage', {
+            code: 'ECNX',
+            param: error.message
+          })
+        })
+    },
+    cnxgoogle () {
+      let self = this
+      this.$store
+        .dispatch('cnx/connexionUserGoogle')
+        .then(() => {
+          // le user est connecté , on regarde s'il a un profil
+          this.$store
+            .dispatch('cnx/loadProfil')
+            .then(() => {
+              console.log('profil-ok')
+              this.$store.dispatch('displayMessage', {
+                code: 'CNXU',
+                param: null
+              })
+              console.log('load default page')
+              this.$store.commit('setDisplayMenuOn')
+              this.$router.push('/')
+            })
+            .catch((err) => {
+              // le chargement du login a échoué
+              // on déconnecte
+              console.log('profil-erreur' + err.message)
+              this.$router.push('/')
+              this.$store.dispatch('displayMessage', {
+                code: 'ECNX',
+                param: err.message
+              })
+            })
+        })
+        .catch((error) => {
+          this.$store.dispatch('displayMessage', {
+            code: 'ECNX',
+            param: error.message
+          })
+        })
     }
   }
 }
 </script>
 
 <style>
-#app {
-  background-image: url('~@/assets/fond.jpg') !important
-;
-}
-.v-btn:not(.v-btn--round).v-size--default {
-  min-width: 50%;
-}
 .login {
   margin-top: 15%;
   opacity: 0.8;

@@ -3,12 +3,16 @@
     <v-dialog v-model="DisplaySend2email">
       <email />
     </v-dialog>
-    <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
+    <v-skeleton-loader
+      v-if="firstLoad"
+      type="table-heading, list-item-two-line, image, table-tfoot"
+    ></v-skeleton-loader>
     <v-data-iterator
       hide-default-footer
       :page.sync="page"
       :items="filteredItems"
       :items-per-page="getItemsPerPage"
+      :sort-by="['start']"
       no-results-text="Pas d'évènement trouvé"
       no-data-text="Pas d'évènement trouvé"
     >
@@ -140,7 +144,11 @@ export default {
 
     searchByCritere (row) {
       let dateDebut = moment(row.start, 'YYYY-MM-DD')
-      let dateSearch = moment(this.getEVT_SRCH_DT, 'YYYY-MM-DD')
+      let dateSearch = moment(this.getEVT_SRCH_DT, 'YYYY-MM-DD').subtract(
+        1,
+        'days'
+      )
+
       let critereMatch = true
 
       if (this.getEVT_SRCH_DT) critereMatch = dateSearch.isBefore(dateDebut)

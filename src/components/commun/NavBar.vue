@@ -19,13 +19,7 @@
         <span class="hidden-md-and-down">Sorties</span>
       </v-btn>
 
-      <v-btn
-        v-if="isAuthenticated && isAdmin"
-        text
-        align="center"
-        justify="center"
-        to="/importEvent"
-      >
+      <v-btn v-if="isAuthenticated && isAdmin" text to="/importEvent">
         <v-icon>mdi-import</v-icon>
         <span class="hidden-md-and-down">import</span>
       </v-btn>
@@ -35,12 +29,11 @@
         <span class="hidden-md-and-down">Calendrier</span>
       </v-btn>
 
-      <v-btn text class="hidden-md-and-up" @click.stop="drawer = !drawer">
+      <v-btn class="hidden-md-and-up" text @click.stop="drawer = !drawer">
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-
-      <profil @closeProfil="menuProfil = false" />
+      <profil />
 
       <template v-slot:extension v-if="EVT_ACTIVE_SEARCH">
         <eventsearch class="hidden-sm-and-down"></eventsearch>

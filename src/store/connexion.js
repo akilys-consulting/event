@@ -6,12 +6,27 @@ import { fb } from '@/plugins/firebaseInit'
 // gestion de l'environnement
 const imgAvatarPath = 'image_avatar/'
 const imgDefaut = 'IMG_DEFAUT.png'
+const defaultProfil = {
+  nom: null,
+  prenom: null,
+  email: null,
+  displayName: null,
+  cleAdmin: null,
+  photoURL: null,
+  loalisation: { adr: null, latLng: { lat: null, lng: null } },
+  theme: { name: null, drak: false },
+  alerte: { date: null, categorie: null, activate: false }
+}
 
 const state = {
   user: null,
   currentProfil: {
     nom: null,
     prenom: null,
+    email: null,
+    displayName: null,
+    cleAdmin: null,
+    photoURL: null,
     loalisation: { adr: null, latLng: { lat: null, lng: null } },
     theme: { name: null, drak: false },
     alerte: { date: null, categorie: null, activate: false }
@@ -26,29 +41,39 @@ const actions = {
   alertingEvent ({ rootState, state }) {},
   //
   // ajout du profil sur création utilisateur
+  // data.user => récuépration des infos firebase après cration compte
+  // data.account => infos du formulaire de création du compte
   async createProfil ({ state, dispatch }, data) {
-    return fb.profilCollection
-      .doc(data.user.uid)
-      .set({
-        nom: data.account.nom || data.user.email.split('@')[0], // use part of the email as a username
-        prenom: data.account.prenom,
-        email: data.user.email,
-        organisation: data.account.organisation,
-        adresse: data.account.adresse,
-        cleAdmin: data.account.admin_key,
-        photoURL: data.user.uid, // supply a default profile image for all users
-        displayName: data.account.nom + ' ' + data.account.prenom
-      })
-      .catch((error) => {
-        dispatch(
-          'displayMessage',
-          {
-            code: 'CEPR',
-            param: error.message
-          },
-          { root: true }
-        )
-      })
+    return new Promise((resolve, reject) => {
+      fb.profilCollection
+        .doc(data.user.uid)
+        .set({
+          nom: data.account.nom,
+          prenom: data.account.prenom,
+          email: data.account.email,
+          organisation: data.account.organisation,
+          adresse: data.account.adresse,
+          cleAdmin: null,
+          photoURL: null,
+          displayName: data.account.nom + ' ' + data.account.prenom,
+          theme: data.account.theme,
+          alerte: data.account.alerte
+        })
+        .then((data) => {
+          resolve(true)
+        })
+        .catch((error) => {
+          dispatch(
+            'displayMessage',
+            {
+              code: 'CEPR',
+              param: error.message
+            },
+            { root: true }
+          )
+          reject(error)
+        })
+    })
   },
 
   // maj de l'évent courant en base
@@ -72,66 +97,119 @@ const actions = {
   //
   // procédure de création via service firebase.auth
   async userCreate ({ dispatch, commit }, account) {
-    return fb.auth
-      .createUserWithEmailAndPassword(account.email, account.password)
-      .then(({ user }) => {
-        commit('setUser', user.user)
-        return dispatch('createProfil', { account, user })
-      })
-      .catch((error) => {
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            dispatch(
-              'displayMessage',
-              {
-                code: 'CEEM',
-                param: ''
-              },
-              { root: true }
-            )
-            break
-          default:
-            dispatch(
-              'displayMessage',
-              {
-                code: 'CEPR',
-                param: error.message
-              },
-              { root: true }
-            )
-            break
-        }
-      })
+    return new Promise((resolve, reject) => {
+      fb.auth
+        .createUserWithEmailAndPassword(account.email, account.password)
+        .then(({ user }) => {
+          commit('setUser', user.user)
+          dispatch('createProfil', { account, user })
+            .then(() => resolve(true))
+            .catch((error) => reject(error))
+        })
+        .catch((error) => {
+          // gestion des codes erreurs
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              dispatch(
+                'displayMessage',
+                {
+                  code: 'CEPR',
+                  param: 'cet email est déjà attribué'
+                },
+                { root: true }
+              )
+              reject(error)
+              break
+            case 'auth/weak-password':
+              dispatch(
+                'displayMessage',
+                {
+                  code: 'CEPR',
+                  param: 'mot de passe inférieur à 6 caractères'
+                },
+                { root: true }
+              )
+              break
+            default:
+              dispatch(
+                'displayMessage',
+                {
+                  code: 'CEPR',
+                  param: error.message
+                },
+                { root: true }
+              )
+              reject(error)
+              break
+          }
+        })
+    })
   },
 
   //
   // procédure de connexion via firebase.auth
   userLogin (context, account) {
-    return fb.auth
-      .signInWithEmailAndPassword(account.email, account.password)
-      .then((data) => {
-        context.commit('setUser', data.user)
-      })
-  },
-
-  disconnect ({ commit }) {
-    return fb.auth.signOut().then(() => {
-      commit('clearUser')
-      commit('clearProfil')
+    return new Promise((resolve, reject) => {
+      fb.auth
+        .signInWithEmailAndPassword(account.email, account.password)
+        .then((data) => {
+          context.commit('setUser', data.user)
+          resolve()
+        })
+        .catch((error) => {
+          reject(error)
+        })
     })
   },
 
-  connexionUserGoogle (context) {
-    let provider = new fb.authObj.GoogleAuthProvider()
-    return fb.auth
-      .signInWithPopup(provider)
-      .then((result) => {
-        context.commit('setUser', result.user)
-      })
-      .catch((err) => {
-        console.log(err) // This will give you all the information needed to further debug any errors
-      })
+  async disconnect ({ commit }) {
+    await fb.auth.signOut()
+    commit('clearUser')
+    commit('clearProfil')
   },
+
+  connexionUserGoogle (context) {
+    // appel a provider google
+    return new Promise((resolve, reject) => {
+      let provider = new fb.authObj.GoogleAuthProvider()
+      fb.auth
+        .signInWithPopup(provider)
+        .then((result) => {
+          console.log('cnxGoogle')
+          // connexion réussi
+          // on regarder si profil initialisé
+          console.log(result)
+          context.commit('setUser', result.user)
+          resolve(true)
+        })
+        .catch((err) => {
+          console.log(err) // This will give you all the information needed to further debug any errors
+          reject(err)
+        })
+    })
+  },
+
+  connexionUserFacebook (context) {
+    // appel a provider google
+    return new Promise((resolve, reject) => {
+      let provider = new fb.authObj.FacebookAuthProvider()
+      fb.auth
+        .signInWithPopup(provider)
+        .then((result) => {
+          console.log('cnxfacebook')
+          // connexion réussi
+          // on regarder si profil initialisé
+          console.log(result)
+          context.commit('setUser', result.user)
+          resolve(true)
+        })
+        .catch((err) => {
+          console.log(err) // This will give you all the information needed to further debug any errors
+          reject(err)
+        })
+    })
+  },
+
   /*
      on peut savoir si un user est de type admin
      si cleAdmin de son profil correspond à un Id d'une  organisation
@@ -172,27 +250,58 @@ const actions = {
           .doc(state.user.uid)
           .get()
           .then((data) => {
-            console.log('after await')
-            commit('setProfil', data.data())
+            if (data.exists) {
+              console.log('after await' + data.exists)
+
+              commit('setProfil', data.data())
+            } else {
+              // profil par defaut
+              console.log('default profil')
+              commit('setProfil', defaultProfil)
+            }
             dispatch('getProfilPhoto')
-            dispatch('isadmin')
-            resolve(true)
+              .then(() => {
+                dispatch('isadmin')
+                resolve(true)
+              })
+              // erreur sur chargement de la photo
+              .catch((error) => {
+                reject(error)
+              })
+          })
+          // erreur sur chargement du profil
+          .catch((error) => {
+            reject(error)
           })
       } else {
         resolve(true)
       }
     })
   },
-  async getProfilPhoto ({ state }) {
-    if (state.currentProfil && state.currentProfil.photoURL) {
-    } else if (state.user && state.user.photoURL) {
-    } else {
-      let urlRetourned = await fb.file
-        .ref()
-        .child(imgAvatarPath + imgDefaut)
-        .getDownloadURL()
-      state.currentProfil.photoURL = urlRetourned.url
-    }
+  getProfilPhoto ({ state }) {
+    console.log(state.currentProfil + state.currentProfil.photoURL)
+    return new Promise((resolve, reject) => {
+      // sur une connexion google user conitent l'url de la photo
+      if (state.user.photoURL) {
+        state.currentProfil.photoURL = state.user.photoURL
+        resolve()
+      }
+      if (!state.currentProfil.photoURL) {
+        fb.file
+          .ref()
+          .child(imgAvatarPath + imgDefaut)
+          .getDownloadURL()
+          .then((url) => {
+            state.currentProfil.photoURL = url
+            resolve()
+          })
+          .catch((error) => {
+            reject(error)
+          })
+      } else {
+        resolve()
+      }
+    })
   }
 }
 const mutations = {

@@ -14,12 +14,12 @@
         <displayImage
           :fileName="itemPlanning.eventid"
           rep="image_event"
-          height="120"
-          width="100%"
+          height="150"
+          width="250"
         ></displayImage>
         <EmailManagement :content="getHtml" />
         <v-card-subtitle
-          >{{ itemPlanning.category }} - {{ getAdresseEvent() }}
+          >{{ itemPlanning.category }}<div>{{ getAdresseEvent() }}</div>
           <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
         </v-card-subtitle>
       </v-card-text>
@@ -166,7 +166,7 @@ export default {
     // add like to event
     async addLike () {
       await this.readIP().then((response) => {
-        console.log('ip'+response.data.ip)
+        alert('ip'+response.data.ip)
         if (!this.currentEvent.like.find(element => element === response.data.ip)) {
           this.currentEvent.like.push(response.data.ip)
           this.$store.dispatch('event/addLike2Event',this.currentEvent)

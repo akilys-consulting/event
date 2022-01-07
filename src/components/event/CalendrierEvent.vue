@@ -3,15 +3,7 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn v-on="on" :to="{ name: 'listEvent' }">
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
-        </template>
-        <span>retour aux évènements</span>
-      </v-tooltip>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn v-on="on" @click="ajouterEvenement">
+          <v-btn plain v-on="on" @click="ajouterEvenement">
             <v-icon> mdi-calendar-plus </v-icon>
           </v-btn>
         </template>
@@ -19,8 +11,8 @@
       </v-tooltip>
       <v-menu bottom open-on-hover>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn v-bind="attrs" v-on="on">
-            <v-icon right> mdi-calendar-today </v-icon>
+          <v-btn plain v-bind="attrs" v-on="on">
+            <v-icon> mdi-calendar-search </v-icon>
           </v-btn>
         </template>
 
@@ -83,7 +75,7 @@ export default {
       { type: 'category', label: 'Categories' }
     ],
     selectedEvent: {},
-    selectedType: 'week',
+    selectedType: 'month',
     weekday: [1, 2, 3, 4, 5, 6, 0]
   }),
 

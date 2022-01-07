@@ -18,14 +18,13 @@
 
       <v-footer app height="40">
         <v-col class="text-center" cols="12">
-          {{ new Date().getFullYear() }} —
-          <strong>AKILYS</strong>
+          <strong>Sortie-toulouse@{{ new Date().getFullYear() }} </strong>
         </v-col>
       </v-footer>
     </v-app>
     <v-bottom-sheet
       inset
-      :open-delay="message.timeout"
+      :open-delay="timeout"
       v-model="message.display"
       :overlay-color="message.type"
       overlay-opacity="0.2"
@@ -54,7 +53,8 @@ import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      user: false
+      user: false,
+      timeout: 2000
     }
   },
   components: { navbar, chargement },

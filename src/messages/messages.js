@@ -51,11 +51,6 @@ export const messages = [
     type: 'success'
   },
   {
-    code: 'CEEM',
-    message: 'création impossible, cet email est déjà attribué',
-    type: 'error'
-  },
-  {
     code: 'CEPR',
     message: 'création impossible : [PARAM]',
     type: 'error'
