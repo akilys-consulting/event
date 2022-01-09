@@ -7,7 +7,7 @@
       id="autocomplete"
       ref="autocomplete"
       v-model="localeadr.adr"
-      :label="libelleAdr == null ? 'Votre adresse' : libelleAdr"
+      label="Votre adresse"
       onfocus="value = ''"
       type="text"
     />

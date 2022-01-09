@@ -1,12 +1,10 @@
 import { fb } from '@/plugins/firebaseInit'
 import moment from 'moment'
+import emailjs from 'emailjs-com'
+
 /*
     Définition des modèles base
 */
-
-const PATH_IMAGE = 'image_event'
-
-const IMG_DEFAUT = 'IMG_DEFAUT.jpg'
 
 const DEFINE_EVENT = {
   id: -1,
@@ -50,6 +48,7 @@ const state = {
   EVT_SRCH_DT: null,
   EVT_ACTIVE_SEARCH: false,
   EVT_SRCH_GRATUIT: false,
+  EVT_SRCH_ENFANT: false,
 
   // permet de charger en mémoire tous les events
   events: [],
@@ -128,7 +127,7 @@ const actions = {
     })
   },
   // chargement des events en mémoire depuis la base
-  loadEvent ({ state, dispatch }) {
+  loadEvent ({ state }) {
     state.events = []
     state.calendar = []
     return new Promise((resolve, reject) => {
@@ -148,7 +147,7 @@ const actions = {
     })
   },
   // chargement des events et du planning depuis les events en base
-  async loadPlanning ({ state, dispatch, rootState, rootGetters }) {
+  loadPlanning ({ state, dispatch, rootState, rootGetters }) {
     state.events = []
     state.planning = []
     // récupération du profil
@@ -202,6 +201,7 @@ const actions = {
               color: getters.getColorCategorie(record.categorie),
               category: record.categorie,
               name: record.nom,
+              enfant: record.enfant,
               prix: record.prix,
               start: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureDebut,
               end: currentDate.format('YYYY-MM-DD') + ' ' + prog.heureFin
@@ -224,6 +224,47 @@ const actions = {
         { code: 'ADMIN', param: error.message },
         { root: true }
       )
+    })
+  },
+
+  ManageAlerte ({ state, dispatch }) {
+    // on analyse l'event qui vient d'être créé
+    return new Promise((resolve, reject) => {
+      dispatch('decodePlanning', state.currentEvent)
+      // les données sont dans state.planning
+      // il faut maintenent retrouver les enresitrements qui corrspondent à des alertes
+      dispatch('cnx/getAlertingUser', null, { root: true })
+        .then((alertes) => {
+          // on recherche les alertes qui match
+          state.planning.forEach((data) => {
+            alertes.forEach((alert) => {
+              if (
+                alert.alert.date === data.start.substring(0, 10) &&
+                alert.alert.categorie === data.category
+              ) {
+                let templateParams = {
+                  event_contact: alert.email,
+                  event_name: data.name,
+                  date_debut: data.start,
+                  date_fin: data.end,
+                  event_adr: state.currentEvent.localisation.adr,
+                  event_description: state.currentEvent.minisite
+                }
+                /* emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
+                emailjs
+                  .send('gmail', 'template_buy6lvg', templateParams)
+                  .catch((error) => {
+                    reject(error)
+                  }) */
+              }
+            })
+          })
+          resolve(true)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+      // les alertes user sont chargées dans state
     })
   }
 }
@@ -267,6 +308,9 @@ const mutations = {
   },
   setEVT_SRCH_GRATUIT (state, value) {
     state.EVT_SRCH_GRATUIT = value
+  },
+  setEVT_SRCH_ENFANT (state, value) {
+    state.EVT_SRCH_ENFANT = value
   }
 }
 
@@ -293,6 +337,9 @@ const getters = {
   },
   getEVT_SRCH_GRATUIT (state) {
     return state.EVT_SRCH_GRATUIT
+  },
+  getEVT_SRCH_ENFANT (state) {
+    return state.EVT_SRCH_ENFANT
   },
   // récupérer l'event courant
   getCurrentEvent (state) {
@@ -327,10 +374,6 @@ const getters = {
     return state.currentEvent.localisation.adr
   },
 
-  // récupérer le chemin d'accès aux images des events
-  getEventImgPath () {
-    return PATH_IMAGE
-  },
   getNbLike (state) {
     return state.currentEvent.like
   },

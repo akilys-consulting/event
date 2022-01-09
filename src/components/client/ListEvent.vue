@@ -3,10 +3,7 @@
     <v-dialog v-model="DisplaySend2email">
       <email />
     </v-dialog>
-    <v-skeleton-loader
-      v-if="firstLoad"
-      type="table-heading, list-item-two-line, image, table-tfoot"
-    ></v-skeleton-loader>
+    <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
     <v-data-iterator
       hide-default-footer
       :page.sync="page"
@@ -81,7 +78,8 @@ export default {
       'getEVT_SRCH_DT',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_CRITERE',
-      'getEVT_SRCH_GRATUIT'
+      'getEVT_SRCH_GRATUIT',
+      'getEVT_SRCH_ENFANT'
     ]),
 
     numberOfPages () {
@@ -125,7 +123,7 @@ export default {
       .then(() => {
         // les events sont chargés
         // self.planning = self.$store.getters['event/getAllPlanning']
-        self.$store.dispatch('stopWaiting')
+        this.$store.dispatch('stopWaiting')
         this.firstLoad = false
       })
       .catch((error) => {
@@ -167,7 +165,11 @@ export default {
       }
 
       if (this.getEVT_SRCH_GRATUIT) {
-        critereMatch = critereMatch && !row.prix
+        critereMatch = critereMatch && !row.payant
+      }
+      if (this.getEVT_SRCH_ENFANT) {
+        console.log('enfant' + row.enfant)
+        critereMatch = critereMatch && row.enfant
       }
 
       return critereMatch

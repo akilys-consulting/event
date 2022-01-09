@@ -78,8 +78,4 @@ export default {
   }
 }
 </script>
-<style scoped>
-menu {
-  text-align: center;
-}
-</style>
+<style scoped></style>

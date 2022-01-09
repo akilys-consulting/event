@@ -63,7 +63,14 @@
         v-model="evtGratuit"
         label="Gratuit"
       ></v-switch>
-    </v-col>
+      <v-switch
+        dense
+        flat
+        hide-details
+        v-model="evtEnfant"
+        label="spectacle Enfants"
+      ></v-switch
+    ></v-col>
   </v-row>
 </template>
 
@@ -81,13 +88,15 @@ export default {
       'CONST_CATEGORIE',
       'EVT_SRCH_CAT',
       'EVT_SRCH_CRITERE',
-      'EVT_SRCH_DT'
+      'EVT_SRCH_DT',
+      'EVT_SRCH_ENFANT'
     ]),
     ...mapGetters('event', [
       'getCategories',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_DT',
-      'getEVT_SRCH_CRITERE'
+      'getEVT_SRCH_CRITERE',
+      'getEVT_SRCH_ENFANT'
     ]),
 
     critere: {
@@ -120,6 +129,14 @@ export default {
       },
       set (value) {
         this.$store.commit('event/setEVT_SRCH_GRATUIT', value)
+      }
+    },
+    evtEnfant: {
+      get () {
+        return this.getEVT_SRCH_ENFANT
+      },
+      set (value) {
+        this.$store.commit('event/setEVT_SRCH_ENFANT', value)
       }
     }
   },

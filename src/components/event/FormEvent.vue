@@ -115,13 +115,13 @@
                     @uptadr="updateadresse"
                     :adresse="currentEvent.localisation"
                 /></v-col>
-                <v-col cols="6">
+                <v-col cols="4">
                   <v-switch
                     v-model="currentEvent.payant"
                     label="payant ?"
                   ></v-switch>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="4">
                   <v-text-field
                     v-model="currentEvent.prix"
                     label="Prix"
@@ -129,6 +129,15 @@
                     v-if="currentEvent.payant"
                   ></v-text-field
                 ></v-col>
+                <v-col cols="4">
+                  <v-switch
+                    dense
+                    flat
+                    hide-details
+                    v-model="currentEvent.enfant"
+                    label="spetacle Enfants"
+                  ></v-switch>
+</v-col>
               </v-row> </v-form
           ></v-card-text>
         </v-card>
@@ -158,6 +167,7 @@ export default {
   data () {
     return {
       currentEvent: null,
+      public: ['Tous', 'adultes', 'Enfants'],
       check: true,
       plan: false,
       EventImage: [],
@@ -173,7 +183,7 @@ export default {
       rules: {
         required: value => !!value || 'obligatoire.',
         digits: v => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
-        url: (v) => ( !v || /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL')
+        url: (v) => (!v || /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL')
 
       },
       valid: true,
@@ -280,19 +290,19 @@ export default {
         this.$store.dispatch('startWaiting')
         // appel a la fonction de génération des évents
 
-        let execute = this.$store.dispatch('event/saveEvent')
-        execute.then(data => {
+        this.$store.dispatch('event/saveEvent').then(data => {
           this.$store.dispatch('stopWaiting')
           this.$store.dispatch('displayMessage', { code: 'SAOK' })
           /* gestion de l 'alerting
           on recherche dans tous les profils des alertes qui correspondent a l'event
           si cela correspond => envoi du mail via email du profil */
-          this.$store.dispatch('cnx/alertingEvent')
+          console.log('event/ManageAlerte')
+          this.$store.dispatch('event/ManageAlerte')
         })
-        execute.catch(() => {
-          this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', { code: 'SAKO' })
-        })
+          .catch(() => {
+            this.$store.dispatch('stopWaiting')
+            this.$store.dispatch('displayMessage', { code: 'SAKO' })
+          })
       } else this.$store.dispatch('displayMessage', { code: 'EADC' })
     }
   }

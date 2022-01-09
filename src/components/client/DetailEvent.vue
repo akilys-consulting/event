@@ -72,7 +72,7 @@
             style="height: 300px;width=auto"
           >
             <l-tile-layer :url="url" />
-            <l-marker :icon="warehouse_icon" :lat-lng="[43.6142, 1.4155]">
+            <l-marker :icon="warehouse_icon" :lat-lng="[event.localisation.latLng.lat, event.localisation.latLng.lng]">
             </l-marker>
           </l-map>
         </v-col>
@@ -110,7 +110,7 @@ export default {
   },
   data () {
     return {
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
       center: [],
       zoom: 12,
       mapOptions: {

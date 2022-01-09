@@ -31,6 +31,7 @@ const state = {
     theme: { name: null, drak: false },
     alerte: { date: null, categorie: null, activate: false }
   },
+  userAlert: [],
   profilLoaded: false,
   isconnected: false
 }
@@ -38,7 +39,27 @@ const state = {
 const actions = {
   //
   // gestion de l'alerting
-  alertingEvent ({ rootState, state }) {},
+  getAlertingUser ({ state }) {
+    let userAlert = []
+    return new Promise((resolve, reject) => {
+      fb.profilCollection
+        .where('alerte.activate', '==', true)
+        .get()
+        .then(function (querySnapshot) {
+          querySnapshot.forEach(function data (result) {
+            let values = {
+              alert: result.data().alerte,
+              email: result.data().email
+            }
+            userAlert.push(values)
+          })
+          resolve(userAlert)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  },
   //
   // ajout du profil sur création utilisateur
   // data.user => récuépration des infos firebase après cration compte
@@ -214,9 +235,9 @@ const actions = {
      on peut savoir si un user est de type admin
      si cleAdmin de son profil correspond à un Id d'une  organisation
   */
-  async isadmin ({ state, dispatch }) {
+  isadmin ({ state, dispatch }) {
     if (state.currentProfil.cleAdmin) {
-      await fb.orgaCollection
+      fb.orgaCollection
         .doc(state.currentProfil.cleAdmin)
         .get()
         .then((doc) => {
@@ -351,7 +372,7 @@ const getters = {
     return state.profilLoaded
   },
   isAdmin (state) {
-    return state.currentProfil.cleAdmin
+    return !!state.currentProfil.cleAdmin
   },
   getDefaultAvatarImg () {
     return imgAvatarPath + imgDefaut
