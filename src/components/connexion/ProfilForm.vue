@@ -23,33 +23,28 @@
           <v-spacer></v-spacer>
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-              <v-btn icon v-on="on" @click="deconnexion()"
+              <v-btn color="red" dark icon v-on="on" @click="deconnexion()"
                 ><v-icon>mdi-account-remove-outline</v-icon></v-btn
               >
             </template>
-            <span>déconnexion</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="saveProfil" icon>
-                <v-icon>mdi-content-save-outline</v-icon>
-              </v-btn>
-            </template>
-            <span>Sauvegarder le profil</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon v-on="on" @click="menuProfil = false">
-                <v-icon> mdi-close-box </v-icon>
-              </v-btn>
-            </template>
-            <span>fermer</span>
-          </v-tooltip>
+            <span>déconnexion</span></v-tooltip
+          >
+
+          <v-btn @click="saveProfil" icon>
+            <v-icon>mdi-content-save-outline</v-icon>
+          </v-btn>
+
+          <v-btn icon @click="menuProfil = false">
+            <v-icon> mdi-close-box </v-icon>
+          </v-btn>
         </v-toolbar>
 
-        <v-tabs v-model="tab">
-          <v-tab>votre profil</v-tab>
+        <v-tabs v-model="tab" show-arrows>
+          <v-tab>profil</v-tab>
+          <v-tab>connexion</v-tab>
+
           <v-tab>theme</v-tab>
+          <v-tab>alerte</v-tab>
         </v-tabs>
         <v-tabs-items v-model="tab">
           <v-tab-item>
@@ -77,7 +72,9 @@
                 </v-row> </v-form
             ></v-card-text>
           </v-tab-item>
+          <compteManagement />
           <themeManagement />
+          <alerteManagement />
         </v-tabs-items> </v-card
     ></v-menu>
   </div>
@@ -88,13 +85,17 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment'
 import AvatarDisplay from '../commun/AvatarDisplay.vue'
 import themeManagement from '@/components/connexion/ThemeManagement'
+import alerteManagement from '@/components/connexion/AlerteManagement'
+import compteManagement from '@/components/connexion/CompteManagement'
 
 export default {
   name: 'profil',
   inject: ['theme'],
   components: {
     AvatarDisplay,
-    themeManagement
+    themeManagement,
+    alerteManagement,
+    compteManagement
   },
   data () {
     return {
