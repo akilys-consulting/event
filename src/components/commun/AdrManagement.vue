@@ -42,10 +42,14 @@ export default {
     if (typeof this.adresse !== 'undefined') this.localeadr = this.adresse
   },
   mounted () {
-    let self = this
+    // permet d'effacer le placeholder par défaut de Google
+    document.getElementById(this.id).setAttribute('placeholder', '')
     let currentField = document.getElementById('autocomplete')
 
-    this.autocomplete = new window.google.maps.places.Autocomplete(currentField)
+    this.autocomplete = new window.google.maps.places.Autocomplete(
+      currentField,
+      { componentRestrictions: { country: 'fr' } }
+    )
 
     this.autocomplete.addListener('place_changed', () => {
       let place = this.autocomplete.getPlace()

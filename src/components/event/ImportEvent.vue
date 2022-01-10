@@ -145,7 +145,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('event', ['currentEvent']),
+    ...mapState('event', ['currentEvent', 'typeProgrammation']),
     insertedEvent: function () {
       return this.readedEvent.filter((ligne) => {
         console.log('ligne ok' + ligne.message)
@@ -159,13 +159,15 @@ export default {
   },
   methods: {
     analyse (data) {
-      this.$store.commit('setWaiting', true)
-      console.log('debut analyse')
-      // analyse des fichiers csv
-      this.getCsvFile()
+      if (data) {
+        this.$store.commit('setWaiting', true)
+        console.log('debut analyse')
+        // analyse des fichiers csv
+        this.getCsvFile()
+      }
     },
     getCsvFile () {
-      var self = this
+      let self = this
       JSZip.loadAsync(this.file).then(function (content) {
         Object.keys(content.files).forEach(function (filename) {
           console.log('fichier ' + filename)
@@ -207,6 +209,8 @@ export default {
       file = file.replace(/^\ufeff/, '')
 
       let contentCsv = Papa.parse(file, this.config)
+      // on récupère le nb d'éléments pour pouvoir clore l'analyse quand c'est fini
+      let nbevent = contentCsv.data.length
 
       contentCsv.data.forEach((ligne) => {
         // chargement de l'event
@@ -244,31 +248,47 @@ export default {
             this.getImgFile(ligne.image).then((data) => {
               eventCheck.image = data
               this.readedEvent.push(eventCheck)
+              if (nbevent >= contentCsv.data.length) {
+                this.$store.commit('setWaiting', false)
+              }
+
               this.stepCpt = 2
-              this.$store.commit('setWaiting', false)
             })
           } else {
             this.readedEvent.push(eventCheck)
             this.stepCpt = 2
-            this.$store.commit('setWaiting', false)
+            if (nbevent >= contentCsv.data.length) {
+              this.$store.commit('setWaiting', false)
+            }
           }
+          nbevent++
         })
-
+        //
         console.log(JSON.stringify(this.currentEvent))
       })
     },
     async saveAnalysedEvents () {
+      let Event2insert = { nom: null }
+      //  tri du tabeleau suivant le nom de l'event
+      this.readedEvent.sort(function compare (a, b) {
+        if (a.nom < b.nom) return -1
+        if (a.nom > b.nom) return 1
+        return 0
+      })
+
       this.readedEvent.forEach(async (data, index) => {
         // sauvegarde des events validés
         if (!data.message) {
           // sauvegarde de l'event
           console.log('sauvegarde de ' + data.nom)
-          let Event2insert = JSON.parse(JSON.stringify(data))
-          Event2insert.id = -1
-          let imgBase64 = data.image
+          // gestion des doublons
+          if (Event2insert.nom != data.nom) {
+            Event2insert = JSON.parse(JSON.stringify(data))
+            Event2insert.id = -1
+            let imgBase64 = data.image
 
-          // gestion du planning
-
+            // gestion du planning
+          }
           Event2insert.planning.push({
             dtDebut: data.dateDebut,
             dtFin: data.dateFin,
@@ -355,6 +375,13 @@ export default {
       }
       if (!ligne.nom) message += ' nom vide'
 
+      // contrôle du type
+      if (
+        !this.typeProgrammation.find((element) => element.text === ligne.type)
+      ) {
+        message += ' le type est inconnu'
+      }
+
       // contrôle adresse
       let ctrlAdr = ligne.adresse.replace(' ', '+')
       await axios
@@ -372,7 +399,7 @@ export default {
               latLgn: { lat: coord[0], long: coord[1] }
             }
           } else {
-            message += 'adresse non contrôlée'
+            message += ' adresse non contrôlée'
             console.log(Number(adr.score) > 0.9)
             return message
           }

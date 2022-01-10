@@ -121,22 +121,18 @@ export default {
     ...mapState('cnx', ['currentProfil'])
   },
   mounted () {
-    console.log('before mounted from profil')
-    console.log('profil' + this.isAuthenticated)
     this.setTheme()
   },
   methods: {
     setTheme () {
       if (this.isAuthenticated) {
-        console.log('load theme' + this.getThemeProfilName)
         let theme = this.themes.find(
-          (value) => value.name == this.getThemeProfilName
+          (value) => value.name === this.getThemeProfilName
         )
         const name = theme.name
         const dark = theme.dark
         const light = theme.light // set themes
         Object.keys(dark).forEach((i) => {
-          console.log('set' + dark[i])
           this.$vuetify.theme.themes.dark[i] = dark[i]
         })
         Object.keys(light).forEach((i) => {
@@ -161,7 +157,6 @@ export default {
         dark: this.$vuetify.theme.dark
       }
       this.currentProfil.theme = currentTheme
-      console.log(this.currentProfil.theme)
 
       this.$store.dispatch('cnx/saveProfil', this.currentProfil).then(() => {
         this.$store.dispatch('displayMessage', { code: 'SAOK', param: null })
@@ -177,7 +172,6 @@ export default {
     },
 
     deconnexion () {
-      console.log('demande de deconnexion')
       this.$store.dispatch('cnx/disconnect').then(() => {
         this.$store.dispatch('displayMessage', { code: 'DCNX', param: null })
       })
@@ -185,11 +179,9 @@ export default {
       this.$router.push('/').catch(() => {})
     },
     closeForm () {
-      console.log('fermeture detail')
       this.$emit('closeProfilDetail')
     },
     updateadresse (localisation) {
-      console.log('localisation ' + localisation)
       this.localisation = localisation
       this.currentProfil.localisation = localisation
     }

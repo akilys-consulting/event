@@ -100,8 +100,6 @@ const actions = {
   // maj de l'évent courant en base
   saveProfil ({ state }, dataProfil) {
     return new Promise((resolve, reject) => {
-      console.log('save profil')
-      console.log(dataProfil)
       let profil = JSON.parse(JSON.stringify(dataProfil))
       let execute = fb.profilCollection
         .doc(state.user.uid)
@@ -323,6 +321,114 @@ const actions = {
         resolve()
       }
     })
+  },
+  // fonction de modification de l'email d'un utilisateur
+  updateEmail ({ state, dispatch }, newEmail) {
+    let user = fb.auth.currentUser
+
+    user
+      .updateEmail(newEmail)
+      .then(() => {
+        user
+          .sendEmailVerification()
+          .then(() => {
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CNEM',
+                param: newEmail
+              },
+              { root: true }
+            )
+            dispatch('disconnect')
+          })
+          .catch((error) => {
+            dispatch(
+              'displayMessage',
+              {
+                code: 'ADMIN',
+                param: error.message
+              },
+              { root: true }
+            )
+          })
+      })
+      .catch((error) => {
+        // gestion des codes erreurs
+        switch (error.code) {
+          case 'auth/invalid-email':
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CEPR',
+                param: "cet email n'est pas valide"
+              },
+              { root: true }
+            )
+            break
+          case 'auth/email-already-in-use':
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CEPR',
+                param: 'cet email est déjà utilisé'
+              },
+              { root: true }
+            )
+            break
+          case 'auth/requires-recent-login':
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CEPR',
+                param: 'cet email était déjà votre ancien email'
+              },
+              { root: true }
+            )
+            break
+        }
+      })
+  },
+  // fonction de modification de l'email d'un utilisateur
+  updatePassword ({ state, dispatch }, newPassword) {
+    fb.auth
+      .updatePassword(newPassword)
+      .then(() => {
+        dispatch(
+          'displayMessage',
+          {
+            code: 'CNPW',
+            param: null
+          },
+          { root: true }
+        )
+        dispatch('disconnect')
+      })
+      .catch((error) => {
+        // gestion des codes erreurs
+        switch (error.code) {
+          case 'auth/weak-password':
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CEPR',
+                param: 'le mot de passe est trop simple'
+              },
+              { root: true }
+            )
+            break
+          case 'auth/requires-recent-login':
+            dispatch(
+              'displayMessage',
+              {
+                code: 'CEPR',
+                param: 'ce mot de passe a déjà été utilisé'
+              },
+              { root: true }
+            )
+            break
+        }
+      })
   }
 }
 const mutations = {

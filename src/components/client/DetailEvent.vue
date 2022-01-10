@@ -1,50 +1,50 @@
 <template>
   <v-card>
-      <v-toolbar flat>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn plain icon @click="refreshList" v-on="on">
-              <v-icon >mdi-arrow-left</v-icon>
-            </v-btn>
-          </template>
-          <span>retour à la liste</span>
-        </v-tooltip>
+    <v-toolbar flat>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn plain icon @click="refreshList" v-on="on">
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-btn>
+        </template>
+        <span>retour à la liste</span>
+      </v-tooltip>
 
-        <add-to-calendar
-          :title="event.nom"
-          :location="event.localisation.adr"
-          :details="displayMiniSite"
-          inline-template
-        >
-            <google-calendar id="google-calendar">
-                      <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-              <v-btn plain v-on="on">
-                <v-icon>mdi-calendar-plus</v-icon></v-btn>
-                          </template>
-          <span>ajouter à votre calendrier</span>
-        </v-tooltip>
-            </google-calendar>
-        </add-to-calendar>
-                              <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-        <v-btn icon plain
- v-on="on"
-  v-if="event.urlsite"
-  :href="event.urlsite"
-  target="_blank"
->
-      <v-icon dark>
-        mdi-web
-      </v-icon></v-btn>
-                                </template>
-          <span>visiter le site de l'organisateur</span>
-        </v-tooltip>
-      </v-toolbar>
+      <add-to-calendar
+        :title="event.nom"
+        :location="event.localisation.adr"
+        :details="displayMiniSite"
+        inline-template
+      >
+        <google-calendar id="google-calendar">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn plain v-on="on"> <v-icon>mdi-calendar-plus</v-icon></v-btn>
+            </template>
+            <span>ajouter à votre calendrier</span>
+          </v-tooltip>
+        </google-calendar>
+      </add-to-calendar>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            icon
+            plain
+            v-on="on"
+            v-if="event.urlsite"
+            :href="event.urlsite"
+            target="_blank"
+          >
+            <v-icon dark> mdi-web </v-icon></v-btn
+          >
+        </template>
+        <span>visiter le site de l'organisateur</span>
+      </v-tooltip>
+    </v-toolbar>
     <v-card-title> {{ event.nom }}</v-card-title>
 
     <v-card-subtitle v-if="event.organisateurs">
-      organisé par : {{ event.organisateur }} 
+      organisé par : {{ event.organisateur }}
     </v-card-subtitle>
     <v-card-subtitle>
       {{ event.localisation.adr }}
@@ -61,18 +61,23 @@
             width="auto"
           ></displayImage>
 
-            Lien vers site organisateur
-          </v-btn>
+          Lien vers site organisateur
         </v-col>
         <v-col lg="6" sm="6" xm="12">
           <l-map
             :zoom="zoom"
             :options="mapOptions"
             :center="center"
-            style="height: 300px;width=auto"
+            style="height: 300px; width: auto"
           >
             <l-tile-layer :url="url" />
-            <l-marker :icon="warehouse_icon" :lat-lng="[event.localisation.latLng.lat, event.localisation.latLng.lng]">
+            <l-marker
+              :icon="warehouse_icon"
+              :lat-lng="[
+                event.localisation.latLng.lat,
+                event.localisation.latLng.lng
+              ]"
+            >
             </l-marker>
           </l-map>
         </v-col>
@@ -167,10 +172,10 @@ export default {
     }
 
     this.currentPlanning = this.planning.find(
-      (element) => element.id == this.$route.params.currentPlanning
+      (element) => element.id === this.$route.params.currentPlanning
     )
     this.event = this.events.find(
-      (element) => element.id == this.currentPlanning.eventid
+      (element) => element.id === this.currentPlanning.eventid
     )
 
     this.center = [
@@ -203,7 +208,7 @@ export default {
 .vue2leaflet-map {
   z-index: 0;
 }
-.vue-add-to-calendar { text-decoration: none;
-
+.vue-add-to-calendar {
+  text-decoration: none;
 }
 </style>

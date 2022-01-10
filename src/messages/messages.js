@@ -60,6 +60,16 @@ export const messages = [
     message: 'Impossible de récupérer votre profil',
     type: 'error'
   },
+  {
+    code: 'CNEM',
+    message: 'un email de validation a été envoyé à [PARAM]',
+    type: 'success'
+  },
+  {
+    code: 'CNPW',
+    message: 'votre mot de passe a été changé, veuillez vous reconnecter',
+    type: 'success'
+  },
 
   { code: 'LIMG', message: 'Impossible de charger une image', type: 'error' },
   {
