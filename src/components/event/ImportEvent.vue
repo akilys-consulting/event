@@ -137,13 +137,14 @@ import JSZip from 'JSZip'
 import Papa from 'papaparse'
 import moment from 'moment'
 import axios from 'axios'
-import convert from 'image-file-resize'
+import mixFunctions from '@/components/commun/Functions'
 
 import { mapState } from 'vuex'
 import { fb } from '@/plugins/firebaseInit'
 
 export default {
   name: 'ImportEvent',
+  mixins: [mixFunctions],
 
   data () {
     return {
@@ -185,7 +186,12 @@ export default {
     }
   },
   computed: {
-    ...mapState('event', ['currentEvent', 'typeProgrammation']),
+    ...mapState('event', [
+      'currentEvent',
+      'typeProgrammation',
+      'CONST_RESIZE_HEIGHT',
+      'CONST_RESIZE_WIDTH'
+    ]),
     insertedEvent: function () {
       return this.readedEvent.filter((ligne) => {
         return ligne.message.length === 0
@@ -259,23 +265,19 @@ export default {
                         .dataUrlToFile(image64, filename.split('.').pop())
                         .then((reponse) => {
                           // on resize l'image
-                          convert({
-                            file: reponse,
-                            width: 150,
-                            height: 150,
-                            type: filename.split('.').pop()
-                          }).then((resp) => {
-                            // la reponse est unobjet file
-                            // on convertit en base64
-                            var reader = new FileReader()
-                            reader.readAsDataURL(resp)
-                            reader.onload = function () {
-                              resolve({
-                                type: filename.split('.').pop(),
-                                img: reader.result
-                              })
-                            }
-                          })
+                          console.log('avant consertion image')
+
+                          self
+                            .resizeImage({
+                              file: image64,
+                              width: self.CONST_RESIZE_WIDTH,
+                              height: self.CONST_RESIZE_HEIGHT,
+                              type: filename.split('.').pop()
+                            })
+                            .then((resp) => {
+                              console.log('consertion image')
+                              resolve({ type: resp.type, img: resp.data })
+                            })
                         })
                     })
 
@@ -315,6 +317,7 @@ export default {
           eventCheck.type = ligne.type
 
           // adr management
+          console.log('localisation' + response.localisation.adr)
           eventCheck.localisation = response.localisation
 
           // chargement de la programmation
@@ -497,15 +500,17 @@ export default {
         .get(
           'https://api-adresse.data.gouv.fr/search/?q=' + ctrlAdr + '&limit=1'
         )
-        .then((response) => {
+        .then((retour) => {
           // recherche des coordonnées
-          let adr = response.data.features[0].properties
-          let coord = response.data.features[0].geometry.coordinates
-          console.log(adr.label + ' ' + adr.score)
+          let adr = retour.data.features[0].properties
+          let coord = retour.data.features[0].geometry.coordinates
+          console.log(
+            adr.label + ' ' + Number(adr.score) + Number(adr.score) > 0.8
+          )
           if (Number(adr.score) > 0.8) {
             response.localisation = {
               adr: adr.label,
-              latLgn: { lat: coord[0], long: coord[1] }
+              latLng: { lat: coord[0], lng: coord[1] }
             }
           } else {
             response.message.push(' adresse non contrôlée')

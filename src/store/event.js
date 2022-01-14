@@ -61,6 +61,8 @@ const state = {
     { nom: 'sport', couleur: 'teal lighten-2', icon: '' },
     { nom: 'theatre', couleur: 'teal lighten-2', icon: '' }
   ],
+  CONST_RESIZE_HEIGHT: 250,
+  CONST_RESIZE_WIDTH: 250,
   currentPlanning: null,
   searchPlanningId: null,
   currentImgUrl: null,

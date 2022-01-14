@@ -14,67 +14,67 @@
         <displayImage
           :fileName="itemPlanning.eventid"
           rep="image_event"
-          height="50"
+          height="150"
           width="100"
         ></displayImage>
         <EmailManagement :content="getHtml" />
         <v-card-subtitle
-          >{{ itemPlanning.category }}<div>{{ getAdresseEvent() }}</div>
-          <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
-        </v-card-subtitle>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
+          >{{ itemPlanning.category }}
+          <span class="orange--text">{{ DateDebut }} - {{ DateFin }}</span>
 
+          <div>{{ getAdresseEvent() }}</div>
+        </v-card-subtitle>
         <v-badge
           v-if="nbLike > 0"
           overlap
           bordered
           color="error"
           :content="nbLike"
-        >                  <v-tooltip bottom>
+        >
+          <v-tooltip bottom>
             <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on">
-            <v-icon small @click="addLike()">mdi-heart</v-icon>
-          </v-btn>
-                      </template>
+              <v-btn icon v-on="on">
+                <v-icon small @click="addLike()">mdi-heart</v-icon>
+              </v-btn>
+            </template>
             <span>j'aime</span>
           </v-tooltip>
-          </v-badge
-        >
-                        <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-        <v-btn icon v-on="on" v-if="!nbLike">
-          <v-icon small @click="addLike()">mdi-heart</v-icon>
-        </v-btn>
-                              </template>
-            <span>j'aime</span>
-          </v-tooltip>
-                        <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-        <v-btn icon v-on="on">
-          <v-icon small @click="sendEmail">mdi-share-variant-outline</v-icon>
-        </v-btn>
-                                      </template>
-            <span>partager</span>
-          </v-tooltip></spacer>
-                  <v-tooltip bottom>
-<template v-slot:activator="{ on }">
-        <v-icon v-on="on" x-small
- v-for="index in getPrix" :key="index"
-          >mdi-currency-eur</v-icon
-        >
-                </template>
-            <span>€ <10,€€ <30, €€€>30</span>
-          </v-tooltip>
+        </v-badge>
         <v-tooltip bottom>
-<template v-slot:activator="{ on }">
-
-        <v-icon small v-on="on" v-if="getPrix == 0">mdi-currency-eur-off</v-icon>
-        </template>
-            <span>Gratuit</span>
-          </v-tooltip>
-      </v-card-actions>
+          <template v-slot:activator="{ on }">
+            <v-btn icon v-on="on" v-if="!nbLike">
+              <v-icon small @click="addLike()">mdi-heart</v-icon>
+            </v-btn>
+          </template>
+          <span>j'aime</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn icon v-on="on">
+              <v-icon small @click="sendEmail"
+                >mdi-share-variant-outline</v-icon
+              >
+            </v-btn>
+          </template>
+          <span>partager</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" x-small v-for="index in getPrix" :key="index"
+              >mdi-currency-eur</v-icon
+            >
+          </template>
+          <span>€ &lt;10,€€ &lt; 30, €€€>30</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-icon small v-on="on" v-if="getPrix == 0"
+              >mdi-currency-eur-off</v-icon
+            >
+          </template>
+          <span>Gratuit</span>
+        </v-tooltip>
+      </v-card-text>
     </v-card>
   </v-hover>
 </template>
@@ -111,14 +111,14 @@ export default {
     ...mapState('event', ['events']), // assuming you are using namespaced modules
 
     DateDebut: function () {
-      return moment(this.itemPlanning.start, 'YYYY-MM-DD HH:mm').format(
-        'DD/MM/YYYY HH:mm'
-      )
+      return moment(this.itemPlanning.start, 'YYYY-MM-DD HH:mm')
+        .lang('fr')
+        .format('DD MMMM HH:mm')
     },
     DateFin: function () {
-      return moment(this.itemPlanning.end, 'YYYY-MM-DD HH:mm').format(
-        'DD/MM/YYYY HH:mm'
-      )
+      return moment(this.itemPlanning.end, 'YYYY-MM-DD HH:mm')
+        .lang('fr')
+        .format('HH:mm')
     },
     nbLike () {
       return 0
@@ -129,7 +129,9 @@ export default {
         adr: this.currentEvent.localisation.adr,
         debut: this.DateDebut,
         fin: this.DateFin,
-        description: this.currentEvent.minisite ? this.currentEvent.minisite : 'Pas de description'
+        description: this.currentEvent.minisite
+          ? this.currentEvent.minisite
+          : 'Pas de description'
       }
     },
     getPrix () {
@@ -142,12 +144,13 @@ export default {
 
   created () {
     let searchIdEvent = this.itemPlanning.eventid
-    this.currentEvent = this.events.find((element) => element.id == searchIdEvent)
+    this.currentEvent = this.events.find(
+      (element) => element.id == searchIdEvent
+    )
     console.log(this.currentEvent)
   },
 
   methods: {
-
     detailEvent (element) {
       this.$router.push({
         name: 'clientdetailEvent',
@@ -155,7 +158,10 @@ export default {
       })
     },
     getAdresseEvent () {
-      if (this.currentEvent && typeof this.currentEvent.localisation !== 'undefined') {
+      if (
+        this.currentEvent &&
+        typeof this.currentEvent.localisation !== 'undefined'
+      ) {
         return this.currentEvent.localisation.adr
       } else return null
     },
@@ -167,10 +173,14 @@ export default {
     // add like to event
     async addLike () {
       await this.readIP().then((response) => {
-        alert('ip'+response.data.ip)
-        if (!this.currentEvent.like.find(element => element === response.data.ip)) {
+        alert('ip' + response.data.ip)
+        if (
+          !this.currentEvent.like.find(
+            (element) => element === response.data.ip
+          )
+        ) {
           this.currentEvent.like.push(response.data.ip)
-          this.$store.dispatch('event/addLike2Event',this.currentEvent)
+          this.$store.dispatch('event/addLike2Event', this.currentEvent)
         }
       })
     },
@@ -184,9 +194,7 @@ export default {
 </script>
 
 <style scoped>
-.v-badge--bordered
-{
-  border-width:none;
-
+.v-badge--bordered {
+  border-width: none;
 }
 </style>
