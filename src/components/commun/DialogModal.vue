@@ -2,16 +2,11 @@
   <v-dialog
     overlay-opacity="0.4"
     overlay-color="white"
-    v-model="dialog"
+    v-model="this.dialog"
     :max-width="options.width"
     @keydown.esc="cancel"
   >
     <v-card>
-      <v-toolbar dark dense flat>
-        <v-toolbar-title class="white--text">{{
-          question.titre
-        }}</v-toolbar-title>
-      </v-toolbar>
       <v-card-text class="pa-4">{{ question.message }} ?</v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
@@ -23,39 +18,37 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-
 export default {
-  data: () => ({
-    dialog: false,
-    resolve: null,
-    reject: null,
-    options: {
-      color: 'primary',
-      width: 290,
-      zIndex: 200
+  data () {
+    return {
+      answer: null,
+      dialog: false,
+      question: { display: false, message: '' },
+      options: {
+        color: 'primary',
+        width: 290,
+        zIndex: 200
+      }
     }
-  }),
-  computed: {
-    ...mapState(['question'])
   },
+
   methods: {
     open () {
+      this.question = this.$store.getters.getQuestion
       this.dialog = true
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve
-        this.reject = reject
+      return new Promise((resolve) => {
+        this.answer = resolve
       })
     },
     agree () {
       this.dialog = false
       this.$store.commit('setInitQuestion')
-      this.resolve(true)
+      this.answer(true)
     },
     cancel () {
       this.dialog = false
       this.$store.commit('setInitQuestion')
-      this.resolve(false)
+      this.answer(false)
     }
   }
 }

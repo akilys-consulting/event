@@ -165,7 +165,8 @@ export default {
       }
 
       if (this.getEVT_SRCH_GRATUIT) {
-        critereMatch = critereMatch && !row.payant
+        console.log('gratuit' + row.payant)
+        critereMatch = critereMatch && !row.prix
       }
       if (this.getEVT_SRCH_ENFANT) {
         console.log('enfant' + row.enfant)

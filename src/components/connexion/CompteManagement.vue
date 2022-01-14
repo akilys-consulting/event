@@ -108,7 +108,14 @@ export default {
   methods: {
     updateEmail () {
       // appel
-      this.$store.dispatch('cnx/updateEmail', this.newEmail)
+      try {
+        this.$store.dispatch('cnx/updateEmail', this.newEmail)
+      } catch (error) {
+        this.$store.dispatch('displayMessage', {
+          code: 'ADMIN',
+          param: error.message
+        })
+      }
     },
     activeFrmPassword () {
       this.memoSearch = this.EVT_ACTIVE_SEARCH
@@ -120,12 +127,19 @@ export default {
       this.displayFrmPassword = false
     },
 
-    updatMotDePasse () {
+    async updatMotDePasse () {
       if (this.password !== this.passwordRedo) {
         this.errorMsg = 'les mots de passe sont différents'
       } else {
-        this.$store.dispatch('cnx/updatePassword', this.password)
-        this.DesactiveFrmPassword()
+        try {
+          await this.$store.dispatch('cnx/updatePassword', this.password)
+          this.DesactiveFrmPassword()
+        } catch (error) {
+          this.$store.dispatch('displayMessage', {
+            code: 'ADMIN',
+            param: error.message
+          })
+        }
       }
     }
   }

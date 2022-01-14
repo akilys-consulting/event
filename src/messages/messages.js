@@ -56,13 +56,18 @@ export const messages = [
     type: 'error'
   },
   {
+    code: 'MEPR',
+    message: 'modification impossible : [PARAM]',
+    type: 'error'
+  },
+  {
     code: 'CGPR',
     message: 'Impossible de récupérer votre profil',
     type: 'error'
   },
   {
     code: 'CNEM',
-    message: 'un email de validation a été envoyé à [PARAM]',
+    message: 'votre email [PARAM] à été modifié',
     type: 'success'
   },
   {
@@ -93,6 +98,11 @@ export const messages = [
     type: 'error'
   },
   {
+    code: 'DTER',
+    message: 'date/heure de fin trop petite ',
+    type: 'error'
+  },
+  {
     code: 'AACT',
     message: 'votre alerte est active',
     type: 'success'
@@ -106,18 +116,15 @@ export const messages = [
       QUESTIONS
   */
   {
-    code: 'GMOD',
-    message: 'Voulez-vous savegarder vos modifications  ?',
-    type: 'question'
+    code: 'QMOD',
+    message: 'Voulez-vous sauvegarder vos modifications  ?'
   },
   {
     code: 'QSOS',
-    message: 'voulez-vous supprimer cette option',
-    type: 'question'
+    message: 'voulez-vous supprimer cette option'
   },
   {
     code: 'QADR',
-    message: 'voulez-vous sauvegarder la valeur [PARAM]',
-    type: 'question'
+    message: 'voulez-vous sauvegarder la valeur [PARAM]'
   }
 ]

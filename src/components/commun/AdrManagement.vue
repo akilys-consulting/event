@@ -1,8 +1,6 @@
 <template>
   <div>
-    <dialogmodal ref="checkModif" :message="codeQuestion">
-      <example-slot :key="codeQuestion.display"></example-slot>
-    </dialogmodal>
+    <dialogmodal ref="checkModif"> </dialogmodal>
     <v-text-field
       id="autocomplete"
       ref="autocomplete"
@@ -24,10 +22,6 @@ export default {
   props: ['adresse', 'libelleAdr'],
   data () {
     return {
-      codeQuestion: {
-        code: 'GMOD',
-        display: false
-      },
       localeadr: {
         adr: '',
         latLgt: {
@@ -38,12 +32,13 @@ export default {
     }
   },
   created () {
-    console.log('adrManagement' + this.adresse)
+    console.log('adrManagement')
+    console.log(this.adresse)
     if (typeof this.adresse !== 'undefined') this.localeadr = this.adresse
   },
   mounted () {
     // permet d'effacer le placeholder par défaut de Google
-    document.getElementById(this.id).setAttribute('placeholder', '')
+    document.getElementById('autocomplete').setAttribute('placeholder', '')
     let currentField = document.getElementById('autocomplete')
 
     this.autocomplete = new window.google.maps.places.Autocomplete(
@@ -61,7 +56,7 @@ export default {
           lng: place.geometry.location.lng()
         }
       }
-      this.localeadr.adr = this.$emit('uptadr', this.localeadr)
+      this.$emit('uptadr', this.localeadr)
     })
   },
   methods: {}

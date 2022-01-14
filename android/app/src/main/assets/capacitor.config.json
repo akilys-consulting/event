@@ -1,6 +1,6 @@
 {
-	"appId": "com.sortietoulouse.app",
-	"appName": "event-plan",
+	"appId": "com.sortie.app",
+	"appName": "sortietoulouse",
 	"webDir": "dist",
 	"bundledWebRuntime": false
 }

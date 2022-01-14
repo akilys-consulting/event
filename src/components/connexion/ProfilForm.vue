@@ -68,6 +68,14 @@
                       required
                       :rules="[rules.required]"
                     ></v-text-field>
+                    <v-col cols="12">
+                      <v-text-field
+                        v-model="currentProfil.dsiplayName"
+                        label="nom affiché"
+                        required
+                        :rules="[rules.required]"
+                      ></v-text-field>
+                    </v-col>
                   </v-col>
                 </v-row> </v-form
             ></v-card-text>
@@ -129,17 +137,20 @@ export default {
         let theme = this.themes.find(
           (value) => value.name === this.getThemeProfilName
         )
-        const name = theme.name
-        const dark = theme.dark
-        const light = theme.light // set themes
-        Object.keys(dark).forEach((i) => {
-          this.$vuetify.theme.themes.dark[i] = dark[i]
-        })
-        Object.keys(light).forEach((i) => {
-          this.$vuetify.theme.themes.light[i] = light[i]
-        }) // also save theme name to disable selection
-        this.$vuetify.theme.themes.name = name
-        this.$vuetify.theme.dark = this.getThemeProfilMode
+        // si un theme est défini pour l'utilisateur
+        if (theme) {
+          const name = theme.name
+          const dark = theme.dark
+          const light = theme.light // set themes
+          Object.keys(dark).forEach((i) => {
+            this.$vuetify.theme.themes.dark[i] = dark[i]
+          })
+          Object.keys(light).forEach((i) => {
+            this.$vuetify.theme.themes.light[i] = light[i]
+          }) // also save theme name to disable selection
+          this.$vuetify.theme.themes.name = name
+          this.$vuetify.theme.dark = this.getThemeProfilMode
+        }
       }
     },
 

@@ -4,11 +4,7 @@
     <v-toolbar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn
-          plain
-            v-on="on"
-            :to="{ name: 'calendrier' }"
-          >
+          <v-btn plain v-on="on" :to="{ name: 'calendrier' }">
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
@@ -16,131 +12,110 @@
       </v-tooltip>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-      <v-btn
-      plain
-
-        v-on="on"
-        :disabled="!valid"
-        @click="saveEvent"
-      >
-        <v-icon>mdi-content-save-outline</v-icon>
-      </v-btn>
+          <v-btn plain v-on="on" :disabled="!valid" @click="saveEvent">
+            <v-icon>mdi-content-save-outline</v-icon>
+          </v-btn>
         </template>
         <span>sauvegarder évènement</span>
       </v-tooltip>
-            <v-tooltip bottom>
+      <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-      <v-btn v-on="on" plain
->
-        <v-icon>mdi-delete-outline</v-icon>
-      </v-btn>
-              </template>
+          <v-btn v-on="on" plain>
+            <v-icon>mdi-delete-outline</v-icon>
+          </v-btn>
+        </template>
         <span>supprimer évènement</span>
       </v-tooltip>
     </v-toolbar>
-<v-card>
+    <v-card>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12">
+            <programmation ref="programmation" />
+          </v-col>
 
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <programmation ref="programmation" />
-              </v-col>
+          <v-col cols="12" lg="6">
+            <imageUpload
+              v-if="currentEvent"
+              :fileName="getImage"
+              rep="image_event"
+              @uploadfile="saveEvent"
+            />
+          </v-col>
+          <v-col cols="12" lg="6">
+            <editor
+              class="subtitle-1"
+              v-model="currentEvent.minisite"
+              :options="editorOption"
+              placeholder="merci de saisir une description à votre évènement"
+            ></editor>
+          </v-col>
+        </v-row>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-row>
+            <v-col cols="12" lg="6" md="6">
+              <v-text-field
+                v-model="currentEvent.nom"
+                label="Nom évènement"
+                required
+                :rules="[rules.required]"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" lg="6" md="6">
+              <v-select
+                v-model="currentEvent.categorie"
+                :rules="[rules.required]"
+                required
+                :items="getCategorie"
+                label="Catégorie"
+              ></v-select
+            ></v-col>
 
-              <v-col cols="12" lg="6">
-                <imageUpload
-                  v-if="currentEvent"
-                  :fileName="getImage"
-                  rep="image_event"
-                  @uploadfile="saveEvent"
-                />
-              </v-col>
-              <v-col cols="12" lg="6">
-                <editor
-                  class="subtitle-1"
-                  v-model="currentEvent.minisite"
-                  :options="editorOption"
-                  placeholder="merci de saisir une description à votre évènement"
-                ></editor>
-              </v-col>
-            </v-row>
-            <v-form ref="form" v-model="valid" lazy-validation>
-              <v-row>
-                <v-col cols="12" lg="6" md="6">
-                  <v-text-field
-                    v-model="currentEvent.nom"
-                    label="Nom évènement"
-                    required
-                    :rules="[rules.required]"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" lg="6" md="6">
-                  <v-select
-                    v-model="currentEvent.categorie"
-                    :rules="[rules.required]"
-                    required
-                    :items="getCategorie"
-                    label="Catégorie"
-                  ></v-select
-                ></v-col>
-
-                <v-col cols="12" lg="6" md="6">
-                  <v-text-field
-                    v-model="currentEvent.organisateur"
-                    label="Organisateur"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" lg="6" md="6">
-                  <v-text-field
-                  :rules="[rules.url]"
-                    v-model="currentEvent.urlsite"
-                    label="lien vers spectacle"
-                  ></v-text-field
-                ></v-col>
-                <!--
-                <v-col cols="12" lg="6" md="6">
-                  <v-select
-                    v-model="currentEvent.plan"
-                    :items="lstPlans"
-                    clearable
-                    label="plan"
-                    item-text="text"
-                    item-value="value"
-                    @change="loadAdr"
-                    @click:clear="localisation = null"
-                  ></v-select>
-                -->
-                </v-col
-                ><v-col cols="12" >
-                  <adrmanagement
-                    @uptadr="updateadresse"
-                    :adresse="currentEvent.localisation"
-                /></v-col>
-                <v-col cols="4">
-                  <v-switch
-                    v-model="currentEvent.payant"
-                    label="payant ?"
-                  ></v-switch>
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field
-                    v-model="currentEvent.prix"
-                    label="Prix"
-                    :rules="[rules.digits]"
-                    v-if="currentEvent.payant"
-                  ></v-text-field
-                ></v-col>
-                <v-col cols="4">
-                  <v-switch
-                    dense
-                    flat
-                    hide-details
-                    v-model="currentEvent.enfant"
-                    label="spetacle Enfants"
-                  ></v-switch>
-</v-col>
-              </v-row> </v-form
-          ></v-card-text>
-        </v-card>
+            <v-col cols="12" lg="6" md="6">
+              <v-text-field
+                v-model="currentEvent.organisateur"
+                label="Organisateur"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" lg="6" md="6">
+              <v-text-field
+                :rules="[rules.url]"
+                v-model="currentEvent.urlsite"
+                label="lien vers spectacle"
+              ></v-text-field
+            ></v-col>
+            <v-col cols="12">
+              <adrmanagement
+                @uptadr="updateadresse"
+                :adresse="currentEvent.localisation"
+            /></v-col>
+            <v-col cols="4">
+              <v-switch
+                v-model="payant"
+                value="isPayant"
+                label="payant ?"
+              ></v-switch>
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                v-model="currentEvent.prix"
+                label="Prix"
+                :rules="[rules.digits]"
+                v-if="payant"
+              ></v-text-field
+            ></v-col>
+            <v-col cols="4">
+              <v-switch
+                dense
+                flat
+                hide-details
+                v-model="currentEvent.enfant"
+                label="spetacle Enfants"
+              ></v-switch>
+            </v-col>
+          </v-row> </v-form
+      ></v-card-text>
+    </v-card>
   </div>
 </template>
 <script>
@@ -167,29 +142,24 @@ export default {
   data () {
     return {
       currentEvent: null,
+      payant: false,
       public: ['Tous', 'adultes', 'Enfants'],
       check: true,
-      plan: false,
-      EventImage: [],
-      lstPlans: [],
-      codeQuestion: {
-        code: 'GMOD',
-        display: false
-      },
-      localisation: null,
       tab: null,
-      ImageFileName: false,
-
       rules: {
-        required: value => !!value || 'obligatoire.',
-        digits: v => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
-        url: (v) => (!v || /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(v) || 'une URL')
-
+        required: (value) => !!value || 'obligatoire.',
+        digits: (v) => /^[0-9]+(,[0-9]+)?$/.test(v) || 'un nombre',
+        url: (v) =>
+          !v ||
+          /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/.test(
+            v
+          ) ||
+          'une URL'
       },
       valid: true,
       editorOption: {
         theme: 'bubble',
-        placeholder: 'Compose an epic...',
+        placeholder: 'saisir votre texte...',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'],
@@ -213,37 +183,39 @@ export default {
   },
   computed: {
     ...mapState('event', ['CONST_CATEGORIE']),
-    ...mapState['currentProfil'],
     getImage () {
       return this.currentEvent !== null ? this.currentEvent.id : null
     },
     getCategorie () {
       let nomCategorie = []
-      this.CONST_CATEGORIE.forEach(data => {
+      this.CONST_CATEGORIE.forEach((data) => {
         nomCategorie.push(data.nom)
       })
       return nomCategorie
+    },
+    isPayant () {
+      return !!this.currentEvent.prix
     }
   },
+  //
+  // gestion des modifications non sauvegardées
   beforeRouteLeave (to, from, next) {
-    /*
-    let self = this;
     if (this.$store.getters.getModifUser) {
-      this.$refs.checkModif
-        .open("sauvegarde", "voulez-vous sauvegarder ?", {
-          color: "red",
-          width: "300",
-        })
-        .then((data) => {
-          if (data)
-            self.sauvegarderPlan().then((data) => {
-              next();
-            });
-          next();
-        });
-      this.$store.commit("initModifUser");
-    } else */
-    next()
+      this.$store.dispatch('displayQuestion', { code: 'QMOD' })
+
+      this.$refs.checkModif.open().then((reponse) => {
+        if (reponse) {
+          this.saveEvent()
+            .then(() => {
+              next()
+            })
+            .catch(() => {
+              // done
+            })
+        } else next()
+      })
+      this.$store.commit('initModifUser')
+    } else next()
   },
   updated () {
     if (this.currentEvent == null) {
@@ -251,11 +223,10 @@ export default {
     }
   },
   created () {
-    // this.$store.commit('initModifUser')
+    this.$store.commit('initModifUser')
     this.currentEvent = this.$store.getters['event/getCurrentEvent']
 
     if (this.currentEvent) {
-      this.EventImage = []
     } else this.$router.push({ name: 'calendrier' })
   },
 
@@ -265,45 +236,43 @@ export default {
   },
 
   methods: {
-    loadAdr (planId) {
-      if (planId) {
-        let execute = this.$store.dispatch('plan/getPlan', planId)
-        execute.then(plan => {
-          this.localisation = plan.ville.adr
-        })
-        execute.catch(() => {
-          this.$store.dispatch('displayMessage', {code: 'EVAD'})
-        })
-      }
-    },
     updateadresse (localisation) {
-      console.log(localisation)
-      this.localisation = localisation
       this.currentEvent.localisation = localisation
       this.$store.commit('setModifUser')
     },
-
     // manage save all options
     saveEvent () {
-      if (this.$refs.form.validate() && this.currentEvent.planning.length > 0) {
-        /* this.$store.commit("setModifUser"); */
-        this.$store.dispatch('startWaiting')
-        // appel a la fonction de génération des évents
+      return new Promise((resolve, reject) => {
+        if (
+          this.$refs.form.validate() &&
+          this.currentEvent.planning.length > 0
+        ) {
+          this.$store.dispatch('startWaiting')
+          // appel a la fonction de génération des évents
 
-        this.$store.dispatch('event/saveEvent').then(data => {
-          this.$store.dispatch('stopWaiting')
-          this.$store.dispatch('displayMessage', { code: 'SAOK' })
-          /* gestion de l 'alerting
+          this.$store
+            .dispatch('event/saveEvent')
+            .then((data) => {
+              this.$store.dispatch('stopWaiting')
+              this.$store.dispatch('displayMessage', { code: 'SAOK' })
+              /* gestion de l 'alerting
           on recherche dans tous les profils des alertes qui correspondent a l'event
           si cela correspond => envoi du mail via email du profil */
-          console.log('event/ManageAlerte')
-          this.$store.dispatch('event/ManageAlerte')
-        })
-          .catch(() => {
-            this.$store.dispatch('stopWaiting')
-            this.$store.dispatch('displayMessage', { code: 'SAKO' })
-          })
-      } else this.$store.dispatch('displayMessage', { code: 'EADC' })
+              console.log('event/ManageAlerte')
+              this.$store.dispatch('event/ManageAlerte')
+              resolve()
+            })
+            .catch((error) => {
+              this.$store.dispatch('stopWaiting')
+              this.$store.dispatch('displayMessage', { code: 'SAKO' })
+              reject(error)
+            })
+        } else {
+          this.$store.commit('setModifUser')
+          this.$store.dispatch('displayMessage', { code: 'EADC' })
+          reject(new Error('champs vides'))
+        }
+      })
     }
   }
 }
@@ -336,5 +305,4 @@ export default {
   font-size: small;
   height: 250px !important;
 }
-
 </style>

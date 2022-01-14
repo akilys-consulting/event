@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">event-plan</string>
-    <string name="title_activity_main">event-plan</string>
-    <string name="package_name">com.sortietoulouse.app</string>
-    <string name="custom_url_scheme">com.sortietoulouse.app</string>
+    <string name="app_name">sortietoulouse</string>
+    <string name="title_activity_main">sortietoulouse</string>
+    <string name="package_name">com.sortie.app</string>
+    <string name="custom_url_scheme">com.sortie.app</string>
 </resources>

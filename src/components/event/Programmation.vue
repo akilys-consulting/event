@@ -1,7 +1,6 @@
 <template>
   <div>
-    <dialogmodal ref="questionDelete" @responseOK="confirmedelete(item)">
-    </dialogmodal>
+    <dialogmodal ref="questionDelete"> </dialogmodal>
 
     <v-dialog
       overlay-opacity="0.4"
@@ -170,7 +169,7 @@
     <v-card hover evevation="15">
       <v-card-title
         >Programmation
-        <v-btn x-small @click.stop="dialog = true">
+        <v-btn x-small fab @click.stop="displayFormProg">
           <v-icon x-small dark>mdi-plus</v-icon>
         </v-btn>
       </v-card-title>
@@ -219,6 +218,7 @@ export default {
   components: { dialogmodal },
   data: () => ({
     dialog: false,
+    code: 'QSOS',
     currentIndex: null,
     planning: [],
     headers: [
@@ -276,6 +276,10 @@ export default {
   },
 
   methods: {
+    displayFormProg () {
+      this.dialog = true
+      this.$refs.form.reset()
+    },
     displayDtFr (dt) {
       return moment(dt).format('DD/MM/YYYY')
     },
@@ -284,6 +288,7 @@ export default {
     },
     initialize () {
       this.planning = this.$store.getters['event/getPlanning']
+      this.$store.dispatch('displayQuestion', this.code)
     },
     propagationDate () {
       this.$refs.menu_DD.save(this.editedItem.dtDebut)
@@ -302,11 +307,14 @@ export default {
       return date ? moment(date).format('DD/MM/YYYY') : null
     },
     deleteItem (item) {
+      console.log('deleteItem')
       this.currentIndex = this.planning.indexOf(item)
-      this.$store.dispatch('displayQuestion', 'QSOS')
-      let execute = this.$refs.questionDelete.open()
-      execute.then((response) => {
-        if (response) this.confirmedelete()
+      this.$store.dispatch('displayQuestion', { code: 'QSOS' })
+
+      this.$refs.questionDelete.open().then((response) => {
+        if (response) {
+          this.confirmedelete(item)
+        }
       })
     },
 
@@ -318,7 +326,7 @@ export default {
 
     modifyItem () {
       this.$store.commit('event/setPlanning', this.planning)
-      this.$store.commit('setModifUser')
+      // this.$store.commit('setModifUser')
     },
 
     close () {
@@ -329,17 +337,35 @@ export default {
 
     saveItem () {
       // on reformatte les dates
-      this.$refs.form.validate()
-      if (typeof this.planning === 'undefined') this.v = []
-      if (this.editedIndex > -1) {
-        Object.assign(this.planning[this.editedIndex], this.editedItem)
-        this.modifyItem()
-      } else {
-        this.planning.push(this.editedItem)
-        this.modifyItem()
+      if (this.$refs.form.validate()) {
+        // on efface les erreurs du forms.validate
+        if (typeof this.planning === 'undefined') this.v = []
+
+        let duree = moment.duration(this.editedItem.heureDebut, 'HH:mm')
+        let momentDtDebut = moment(this.editedItem.dtDebut, 'YYYY MM DD').add(
+          duree
+        )
+        duree = moment.duration(this.editedItem.heureFin, 'HH:mm')
+        let momentDtFin = moment(this.editedItem.dtFin, 'YYYY MM DD').add(duree)
+
+        console.log(moment(momentDtFin).isBefore(momentDtDebut))
+        if (!moment(momentDtFin).isBefore(momentDtDebut)) {
+          if (this.editedItem.dtDebut) {
+            if (this.editedIndex > -1) {
+              Object.assign(this.planning[this.editedIndex], this.editedItem)
+              this.modifyItem()
+            } else {
+              this.planning.push(this.editedItem)
+              this.modifyItem()
+            }
+          }
+          this.close()
+        } else {
+          this.$store.dispatch('displayMessage', { code: 'DTER' })
+        }
+
+        // this.$store.commit('setModifUser')
       }
-      this.close()
-      this.$store.commit('setModifUser')
     }
   }
 }

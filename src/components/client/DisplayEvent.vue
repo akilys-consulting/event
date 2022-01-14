@@ -14,8 +14,8 @@
         <displayImage
           :fileName="itemPlanning.eventid"
           rep="image_event"
-          height="150"
-          width="250"
+          height="50"
+          width="100"
         ></displayImage>
         <EmailManagement :content="getHtml" />
         <v-card-subtitle
@@ -121,7 +121,7 @@ export default {
       )
     },
     nbLike () {
-      return this.currentEvent.like.length
+      return 0
     },
     getHtml () {
       return {
@@ -143,6 +143,7 @@ export default {
   created () {
     let searchIdEvent = this.itemPlanning.eventid
     this.currentEvent = this.events.find((element) => element.id == searchIdEvent)
+    console.log(this.currentEvent)
   },
 
   methods: {

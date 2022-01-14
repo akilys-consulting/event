@@ -1,8 +1,10 @@
+import { CapacitorConfig } from '@capacitor/cli';
+
 const config: CapacitorConfig = {
-  appId: 'com.sortietoulouse.app',
-  appName: 'event-plan',
+  appId: 'com.sortie.app',
+  appName: 'sortietoulouse',
   webDir: 'dist',
   bundledWebRuntime: false
-}
+};
 
-export default config
+export default config;

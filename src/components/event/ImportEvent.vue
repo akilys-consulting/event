@@ -12,11 +12,12 @@
           <v-divider></v-divider>
 
           <v-stepper-step
-            :rules="[() => check]"
+            :rules="[() => checkImport]"
             :complete="stepCpt > 2"
             step="2"
           >
-            analyse
+            <small v-if="!checkImport">analyse avec erreur</small>
+            <small v-if="checkImport">analyse sans erreur</small>
           </v-stepper-step>
 
           <v-divider></v-divider>
@@ -45,31 +46,70 @@
                 :items="readedEvent"
                 :items-per-page="5"
                 class="elevation-1"
-                ><template v-slot:item.message="{ item }">
-                  <v-chip :color="item.message ? 'red' : 'green'" dark>
-                    {{ item.message ? item.message : 'OK' }}
+              >
+                <template v-slot:item.message="{ item }">
+                  <v-chip
+                    outlined
+                    color="success"
+                    v-if="item.message.length == 0"
+                  >
+                    validé
                   </v-chip>
+
+                  <v-menu open-on-hover>
+                    <template v-slot:activator="{ on }">
+                      <v-badge
+                        overlap
+                        v-if="item.message.length > 0"
+                        color="red"
+                        :content="item.message.length"
+                      >
+                        <v-chip
+                          outlined
+                          v-on="on"
+                          v-if="item.message.length > 0"
+                        >
+                          rejeté
+                        </v-chip>
+                      </v-badge>
+                    </template>
+                    <v-card color="red accent-2" dark>
+                      <v-col cols="12" v-for="item in item.message" :key="item">
+                        {{ item }}
+                      </v-col>
+                    </v-card>
+                  </v-menu>
                 </template>
                 <template v-slot:item.image="{ item }">
                   <v-img
                     max-height="100"
                     max-width="150"
-                    :src="'data:image/jpeg;base64,' + item.image"
+                    :src="item.image.img"
                   />
                 </template>
               </v-data-table>
             </v-card-text>
 
             <v-btn color="primary" @click="saveAnalysedEvents">
-              Continue
+              Importer
             </v-btn>
 
-            <v-btn text @click="stepCpt = 1"> Cancel </v-btn>
+            <v-btn text @click="initImport"> rejouer import </v-btn>
           </v-stepper-content>
 
           <v-stepper-content step="3">
             <v-card-title>Evènements insérés avec succès </v-card-title>
             <v-card-text class="mb-12" color="grey lighten-1" height="200px">
+              <v-progress-linear
+                v-model="nbInserted"
+                color="blue-grey"
+                height="25"
+              >
+                <template v-slot:default="{ value }">
+                  <strong>{{ Math.ceil(value) }}%</strong>
+                </template>
+              </v-progress-linear>
+
               <v-data-table
                 :headers="headersResults"
                 :items="insertedEvent"
@@ -80,15 +120,11 @@
                   <v-img
                     max-height="100"
                     max-width="150"
-                    :src="'data:image/jpeg;base64,' + item.image"
+                    :src="item.image.img"
                   />
                 </template>
               </v-data-table>
             </v-card-text>
-
-            <v-btn color="primary" @click="stepCpt = 1"> Continue </v-btn>
-
-            <v-btn text> Cancel </v-btn>
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
@@ -101,6 +137,7 @@ import JSZip from 'JSZip'
 import Papa from 'papaparse'
 import moment from 'moment'
 import axios from 'axios'
+import convert from 'image-file-resize'
 
 import { mapState } from 'vuex'
 import { fb } from '@/plugins/firebaseInit'
@@ -111,6 +148,8 @@ export default {
   data () {
     return {
       stepCpt: 1,
+      checkImport: true,
+      nbInserted: 0,
       headers: [
         { text: 'Image', value: 'image' },
         { text: 'Nom', value: 'nom' },
@@ -137,6 +176,7 @@ export default {
 
       file: null,
       config: { header: true, encoding: 'UTF-8-BOM', skipEmptyLines: true },
+      Event2insert: { nom: null, planning: [] },
       contentZip: [],
       contentCsv: {},
       readedEvent: [],
@@ -148,9 +188,11 @@ export default {
     ...mapState('event', ['currentEvent', 'typeProgrammation']),
     insertedEvent: function () {
       return this.readedEvent.filter((ligne) => {
-        console.log('ligne ok' + ligne.message)
-        return ligne.message === true
+        return ligne.message.length === 0
       })
+    },
+    displayShipError (message) {
+      return message.length > 0 ? 'ERROR' : 'SUCESS'
     }
   },
   mounted () {
@@ -158,6 +200,11 @@ export default {
     this.$store.commit('event/clearActiveSearch')
   },
   methods: {
+    initImport () {
+      this.stepCpt = 1
+      this.checkImport = true
+      this.file = null
+    },
     analyse (data) {
       if (data) {
         this.$store.commit('setWaiting', true)
@@ -165,6 +212,12 @@ export default {
         // analyse des fichiers csv
         this.getCsvFile()
       }
+    },
+
+    async dataUrlToFile (dataUrl, fileName) {
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+      return new File([blob], fileName, { type: 'image/png' })
     },
     getCsvFile () {
       let self = this
@@ -183,6 +236,7 @@ export default {
       })
     },
     async getImgFile (imgName) {
+      let self = this
       return new Promise((resolve, reject) => {
         JSZip.loadAsync(this.file).then(function (content) {
           Object.keys(content.files).forEach(function (filename) {
@@ -190,11 +244,41 @@ export default {
               switch (filename.split('.').pop()) {
                 case 'png':
                 case 'jpg':
+                case 'jpeg':
                   content.files[filename]
                     .async('base64')
                     .then(function (fileData) {
-                      resolve(fileData)
+                      // on récupère l'image en base64, on ajoute l'encodage
+                      let image64 =
+                        'data:image/' +
+                        filename.split('.').pop() +
+                        ';base64,' +
+                        fileData
+                      // on convertit l'image base64 en objet file
+                      self
+                        .dataUrlToFile(image64, filename.split('.').pop())
+                        .then((reponse) => {
+                          // on resize l'image
+                          convert({
+                            file: reponse,
+                            width: 150,
+                            height: 150,
+                            type: filename.split('.').pop()
+                          }).then((resp) => {
+                            // la reponse est unobjet file
+                            // on convertit en base64
+                            var reader = new FileReader()
+                            reader.readAsDataURL(resp)
+                            reader.onload = function () {
+                              resolve({
+                                type: filename.split('.').pop(),
+                                img: reader.result
+                              })
+                            }
+                          })
+                        })
                     })
+
                   break
                 default: // afficher erreur lecture fichier
               }
@@ -216,59 +300,58 @@ export default {
         // chargement de l'event
         let eventCheck = { localisation: { adr: null }, planning: [] }
         // check event
-        this.analyseCheck(ligne).then((message) => {
-          console.log('ess' + message)
-          eventCheck.message = message
-          this.check = !eventCheck.message
+        this.analyseCheck(ligne).then((response) => {
+          eventCheck.message = response.message
+          this.check = !eventCheck.message.length > 0
 
           // load data
           eventCheck.nom = ligne.nom
           eventCheck.categorie = ligne.categorie
           eventCheck.organisateur = ligne.organisateur
-          // adr management
-          eventCheck.localisation.adr = ligne.adresse
-          // chargement de la programmation
-
-          eventCheck.dateDebut = ligne.datedebut
-          eventCheck.dateFin = ligne.datefin
-          eventCheck.heureDebut = ligne.heuredebut
-          eventCheck.heureFin = ligne.heurefin
-
           eventCheck.urlsite = ligne.lien
           eventCheck.prix = ligne.prix.replace(/€/, '')
           eventCheck.payant = eventCheck.prix > 0
           eventCheck.minisite = ligne.description
           eventCheck.type = ligne.type
 
-          // this.check = !eventCheck.message
+          // adr management
+          eventCheck.localisation = response.localisation
 
-          // chargement de l'image
-          console.log('image ' + ligne.image)
+          // chargement de la programmation
+          eventCheck.dateDebut = ligne.datedebut
+          eventCheck.dateFin = ligne.datefin
+          eventCheck.heureDebut = ligne.heuredebut
+          eventCheck.heureFin = ligne.heurefin
+
+          // chargement de l'image si elle existe
           if (ligne.image) {
             this.getImgFile(ligne.image).then((data) => {
               eventCheck.image = data
               this.readedEvent.push(eventCheck)
               if (nbevent >= contentCsv.data.length) {
                 this.$store.commit('setWaiting', false)
+                this.stepCpt = 2
               }
-
-              this.stepCpt = 2
             })
           } else {
             this.readedEvent.push(eventCheck)
-            this.stepCpt = 2
             if (nbevent >= contentCsv.data.length) {
               this.$store.commit('setWaiting', false)
+              this.stepCpt = 2
             }
           }
           nbevent++
         })
-        //
-        console.log(JSON.stringify(this.currentEvent))
       })
     },
+    //
+    // function en charge de sauvegarder les events validés
+    //
     async saveAnalysedEvents () {
-      let Event2insert = { nom: null }
+      this.nbInserted = 0
+      let nbreaded = 0
+      let firstEnreg = true
+
       //  tri du tabeleau suivant le nom de l'event
       this.readedEvent.sort(function compare (a, b) {
         if (a.nom < b.nom) return -1
@@ -277,50 +360,66 @@ export default {
       })
 
       this.readedEvent.forEach(async (data, index) => {
-        // sauvegarde des events validés
-        if (!data.message) {
-          // sauvegarde de l'event
-          console.log('sauvegarde de ' + data.nom)
-          // gestion des doublons
-          if (Event2insert.nom != data.nom) {
-            Event2insert = JSON.parse(JSON.stringify(data))
-            Event2insert.id = -1
-            let imgBase64 = data.image
-
-            // gestion du planning
+        // insertion que pour les enregistrement sans erreur message.length==0
+        if (data.message.length === 0) {
+          // si on a un event avec le même nom on considère que c'est le même event mais avec des dates différentes
+          // ne doit mettre a jour que le planning
+          if (this.Event2insert.nom !== data.nom) {
+            // la mise à jour ce fait qaund tous les enreg d'un même event sont lus
+            // c'est pas le premier enregistrement, donc on met à jour
+            if (!firstEnreg) {
+              this.saveEVent().then((data) => {})
+            }
+            this.Event2insert = JSON.parse(JSON.stringify(data))
+            this.Event2insert.planning = []
           }
-          Event2insert.planning.push({
-            dtDebut: data.dateDebut,
-            dtFin: data.dateFin,
+          let typeProg = this.typeProgrammation.find(
+            (element) => element.text === data.type
+          )
+          // insertion de la planification de l'event
+          this.Event2insert.planning.push({
+            dtDebut: moment(data.dateDebut, 'DD/MM/YYYY').format('YYYY-MM-DD'),
+            dtFin: moment(data.dateFin, 'DD/MM/YYYY').format('YYYY-MM-DD'),
             heureDebut: data.heureDebut,
             heureFin: data.heureFin,
-            type: data.type
+            type: typeProg.value
           })
-          delete Event2insert.dateDebut
-          delete Event2insert.dateFin
-          delete Event2insert.heureDebut
-          delete Event2insert.heureFin
-          delete Event2insert.type
-          delete Event2insert.image
-
-          this.$store.commit('event/setEvent', Event2insert)
-          await this.saveEVent(imgBase64)
-            .then(() => {
-              console.log('index' + index)
-              data.message = true
-              this.stepCpt = 3
-            })
-            .catch(() => {
-              data.message = false
-            })
+          firstEnreg = false
+          nbreaded++
+          this.nbInserted = (nbreaded / this.readedEvent.length) * 100
         }
+      })
+      // sauvegarde du dernier enregistrement
+      this.saveEVent().then((data) => {
+        this.nbInserted = (nbreaded / this.readedEvent.length) * 100
+        this.stepCpt = 3
       })
     },
 
-    async saveEVent (image) {
+    // gestion de la sauvegarde de l'event data + image
+    // on récupérer les info de la variable this.Event2insert initialisée par saveAnalysedEvents
+
+    saveEVent () {
       return new Promise((resolve, reject) => {
+        console.log('appel data' + this.Event2insert.nom)
+
+        let imgBase64 = this.Event2insert.image.img.replace(
+          /data:image\/.*;base64,/,
+          ''
+        )
+        let imgType = this.Event2insert.type
+
+        this.Event2insert.id = -1
+        delete this.Event2insert.dateDebut
+        delete this.Event2insert.dateFin
+        delete this.Event2insert.heureDebut
+        delete this.Event2insert.heureFin
+        delete this.Event2insert.type
+        delete this.Event2insert.image
+        delete this.Event2insert.message
+
         this.$store
-          .dispatch('event/saveEvent')
+          .dispatch('event/importEvent', this.Event2insert)
           .then((data) => {
             let EventId = data.id
             console.log('id event ' + EventId)
@@ -328,29 +427,39 @@ export default {
             fb.file
               .ref()
               .child('image_event' + '/' + EventId)
-              .putString(image, 'base64', { contentType: 'image/jpg' })
+              .putString(imgBase64, 'base64', {
+                contentType: 'image/' + imgType
+              })
               .then(function () {
                 console.log('save ok' + EventId)
                 resolve(true)
               })
-              .catch(() => {
+              .catch((error) => {
                 this.$store.dispatch('stopWaiting')
-                this.$store.dispatch('displayMessage', 'IMKO')
-                reject(false)
+                this.$store.dispatch('displayMessage', {
+                  code: 'IMKO',
+                  param: error.message
+                })
+                reject(new Error('erreurImg'))
               })
           })
-          .catch(() => {
+          .catch((error) => {
             this.$store.dispatch('stopWaiting')
             this.$store.dispatch('displayMessage', {
-              code: 'SAKO'
+              code: 'SAKO',
+              param: error.message
             })
-            reject(false)
+            reject(new Error('erreurSaveEvt'))
           })
       })
     },
 
     async analyseCheck (ligne) {
-      let message = ''
+      let response = {
+        localisation: { adr: null, LatLgn: { lat: 0, long: 0 } },
+        message: []
+      }
+      this.checkImport = true
       let dtDebut = moment(
         ligne.datedebut + ' ' + ligne.heuredebut,
         'DD/MM/YYYY HH:mm'
@@ -362,24 +471,24 @@ export default {
 
       if (!dtDebut.isValid()) {
         // check diff entre debut et fin
-        message = 'format date debut'
+        response.message.push('format date debut')
       }
       if (!dtFin.isValid()) {
         // check diff entre debut et fin
-        message = 'format date fin'
+        response.message.push('format date fin')
       }
 
       // contrôle valeur date de fin
       if (dtFin.diff(dtDebut) < 0) {
-        message += ' date/heure fin < date/heure debut'
+        response.message.push(' date/heure fin < date/heure debut')
       }
-      if (!ligne.nom) message += ' nom vide'
+      if (!ligne.nom) response.message.push(' nom vide')
 
       // contrôle du type
       if (
         !this.typeProgrammation.find((element) => element.text === ligne.type)
       ) {
-        message += ' le type est inconnu'
+        response.message.push(' le type est inconnu')
       }
 
       // contrôle adresse
@@ -392,20 +501,19 @@ export default {
           // recherche des coordonnées
           let adr = response.data.features[0].properties
           let coord = response.data.features[0].geometry.coordinates
-
-          if (Number(adr.score) > 0.9) {
-            this.localisation = {
+          console.log(adr.label + ' ' + adr.score)
+          if (Number(adr.score) > 0.8) {
+            response.localisation = {
               adr: adr.label,
               latLgn: { lat: coord[0], long: coord[1] }
             }
           } else {
-            message += ' adresse non contrôlée'
-            console.log(Number(adr.score) > 0.9)
-            return message
+            response.message.push(' adresse non contrôlée')
           }
         })
+      if (response.message.length > 0) this.checkImport = false
 
-      return message
+      return response
     }
   }
 }

@@ -103,7 +103,7 @@ export default {
       })
   },
   computed: {
-    ...mapState('event', ['planning']), // assuming you are using namespaced modules
+    ...mapState('event', ['planning', 'currentEvent']), // assuming you are using namespaced modules
     ...mapGetters('cnx', ['isAuthenticated', 'isAdmin']),
     ...mapGetters('event', ['getCategories'])
   },

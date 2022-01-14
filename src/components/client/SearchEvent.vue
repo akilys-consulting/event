@@ -84,19 +84,13 @@ export default {
   },
 
   computed: {
-    ...mapState('event', [
-      'CONST_CATEGORIE',
-      'EVT_SRCH_CAT',
-      'EVT_SRCH_CRITERE',
-      'EVT_SRCH_DT',
-      'EVT_SRCH_ENFANT'
-    ]),
     ...mapGetters('event', [
       'getCategories',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_DT',
       'getEVT_SRCH_CRITERE',
-      'getEVT_SRCH_ENFANT'
+      'getEVT_SRCH_ENFANT',
+      'getEVT_SRCH_GRATUIT'
     ]),
 
     critere: {

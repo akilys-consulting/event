@@ -7,29 +7,29 @@ import { fb } from '@/plugins/firebaseInit'
 const imgAvatarPath = 'image_avatar/'
 const imgDefaut = 'IMG_DEFAUT.png'
 const defaultProfil = {
-  nom: null,
-  prenom: null,
-  email: null,
-  displayName: null,
-  cleAdmin: null,
-  photoURL: null,
-  loalisation: { adr: null, latLng: { lat: null, lng: null } },
-  theme: { name: null, drak: false },
-  alerte: { date: null, categorie: null, activate: false }
+  nom: '',
+  prenom: '',
+  email: '',
+  displayName: '',
+  cleAdmin: '',
+  photoURL: '',
+  localisation: { adr: null, latLng: { lat: null, lng: null } },
+  theme: { name: '', dark: false },
+  alerte: { date: null, categorie: '', activate: false }
 }
 
 const state = {
   user: null,
   currentProfil: {
-    nom: null,
-    prenom: null,
-    email: null,
-    displayName: null,
-    cleAdmin: null,
-    photoURL: null,
-    loalisation: { adr: null, latLng: { lat: null, lng: null } },
-    theme: { name: null, drak: false },
-    alerte: { date: null, categorie: null, activate: false }
+    nom: '',
+    prenom: '',
+    email: '',
+    displayName: '',
+    cleAdmin: '',
+    photoURL: '',
+    localisation: { adr: '', latLng: { lat: null, lng: null } },
+    theme: { name: '', dark: false },
+    alerte: { date: null, categorie: '', activate: false }
   },
   userAlert: [],
   profilLoaded: false,
@@ -64,8 +64,10 @@ const actions = {
   // ajout du profil sur création utilisateur
   // data.user => récuépration des infos firebase après cration compte
   // data.account => infos du formulaire de création du compte
-  async createProfil ({ state, dispatch }, data) {
+  createProfil ({ dispatch }, data) {
     return new Promise((resolve, reject) => {
+      console.log('createProfil')
+
       fb.profilCollection
         .doc(data.user.uid)
         .set({
@@ -73,10 +75,10 @@ const actions = {
           prenom: data.account.prenom,
           email: data.account.email,
           organisation: data.account.organisation,
-          adresse: data.account.adresse,
+          adresse: data.account.localisation,
           cleAdmin: null,
           photoURL: null,
-          displayName: data.account.nom + ' ' + data.account.prenom,
+          displayName: data.account.displayName,
           theme: data.account.theme,
           alerte: data.account.alerte
         })
@@ -120,14 +122,33 @@ const actions = {
       fb.auth
         .createUserWithEmailAndPassword(account.email, account.password)
         .then(({ user }) => {
+          // mémorisation user dans le store
           commit('setUser', user.user)
+          // création du profil du nouvel utilisateur
           dispatch('createProfil', { account, user })
-            .then(() => resolve(true))
-            .catch((error) => reject(error))
+            .then(() => {
+              // tout est ok on repart sur le SignUp
+              resolve(true)
+            })
+            .catch((error) => {
+              // permet de capturer les gorsses erreurs (définition objet incorrect sur profil)
+              reject(error)
+            })
         })
         .catch((error) => {
           // gestion des codes erreurs
           switch (error.code) {
+            case 'auth/invalid-email':
+              dispatch(
+                'displayMessage',
+                {
+                  code: 'CEPR',
+                  param: "cet email n'est pas reconnue"
+                },
+                { root: true }
+              )
+              reject(error)
+              break
             case 'auth/email-already-in-use':
               dispatch(
                 'displayMessage',
@@ -148,6 +169,8 @@ const actions = {
                 },
                 { root: true }
               )
+              reject(error)
+
               break
             default:
               dispatch(
@@ -176,6 +199,25 @@ const actions = {
           resolve()
         })
         .catch((error) => {
+          let message = { code: 'ECNX', param: '' }
+          console.log('error.code' + error.code)
+          switch (error.code) {
+            case 'auth/user-not-found':
+              message.param = 'utilisateur inconu'
+              break
+            case 'auth/invalid-email':
+              message.param = 'email non valide'
+              break
+            case 'auth/invalid-password':
+              message.param = 'mote de passe incorrect'
+              break
+            default:
+              message.param = error.code
+              message.code = 'ADMIN'
+              break
+          }
+          context.dispatch('displayMessage', message, { root: true })
+
           reject(error)
         })
     })
@@ -270,8 +312,6 @@ const actions = {
           .get()
           .then((data) => {
             if (data.exists) {
-              console.log('after await' + data.exists)
-
               commit('setProfil', data.data())
             } else {
               // profil par defaut
@@ -298,13 +338,14 @@ const actions = {
     })
   },
   getProfilPhoto ({ state }) {
-    console.log(state.currentProfil + state.currentProfil.photoURL)
+    console.log(state.currentProfil + ' ' + state.currentProfil.photoURL)
     return new Promise((resolve, reject) => {
       // sur une connexion google user conitent l'url de la photo
       if (state.user.photoURL) {
         state.currentProfil.photoURL = state.user.photoURL
         resolve()
       }
+      // on a pas de photo venant du compte user donc on regarde dans le profil
       if (!state.currentProfil.photoURL) {
         fb.file
           .ref()
@@ -329,8 +370,9 @@ const actions = {
     user
       .updateEmail(newEmail)
       .then(() => {
-        user
-          .sendEmailVerification()
+        state.currentProfil.email = newEmail
+        dispatch
+          .saveProfil(state.currentProfil)
           .then(() => {
             dispatch(
               'displayMessage',
@@ -360,7 +402,7 @@ const actions = {
             dispatch(
               'displayMessage',
               {
-                code: 'CEPR',
+                code: 'MEPR',
                 param: "cet email n'est pas valide"
               },
               { root: true }
@@ -370,7 +412,7 @@ const actions = {
             dispatch(
               'displayMessage',
               {
-                code: 'CEPR',
+                code: 'MEPR',
                 param: 'cet email est déjà utilisé'
               },
               { root: true }
@@ -380,7 +422,7 @@ const actions = {
             dispatch(
               'displayMessage',
               {
-                code: 'CEPR',
+                code: 'MEPR',
                 param: 'cet email était déjà votre ancien email'
               },
               { root: true }
@@ -390,8 +432,10 @@ const actions = {
       })
   },
   // fonction de modification de l'email d'un utilisateur
-  updatePassword ({ state, dispatch }, newPassword) {
-    fb.auth
+  async updatePassword ({ state, dispatch }, newPassword) {
+    let user = fb.auth.currentUser
+
+    await user
       .updatePassword(newPassword)
       .then(() => {
         dispatch(
@@ -411,7 +455,7 @@ const actions = {
             dispatch(
               'displayMessage',
               {
-                code: 'CEPR',
+                code: 'MEPR',
                 param: 'le mot de passe est trop simple'
               },
               { root: true }
@@ -421,8 +465,8 @@ const actions = {
             dispatch(
               'displayMessage',
               {
-                code: 'CEPR',
-                param: 'ce mot de passe a déjà été utilisé'
+                code: 'MEPR',
+                param: 'vous etes connecté depuis trop longtemps'
               },
               { root: true }
             )
@@ -452,11 +496,7 @@ const mutations = {
   },
 
   clearProfil (state) {
-    state.currentProfil = {
-      nom: null,
-      prenom: null,
-      loalisation: {}
-    }
+    state.currentProfil = JSON.parse(JSON.stringify(defaultProfil))
     state.profilLoaded = false
   }
 }

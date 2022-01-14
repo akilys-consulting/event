@@ -9,7 +9,7 @@ import emailjs from 'emailjs-com'
 const DEFINE_EVENT = {
   id: -1,
   nom: null,
-  localisation: { adr: '', latLgn: { lat: '', long: '' } },
+  localisation: { adr: '', latLgn: { lat: 0, long: 0 } },
   plan: null,
   planning: [],
   minisite: null,
@@ -22,7 +22,7 @@ const state = {
   currentEvent: {
     id: -1,
     nom: null,
-    localisation: { adr: '', latLgn: { lat: '', long: '' } },
+    localisation: { adr: '', latLgn: { lat: 0, long: 0 } },
     plan: null,
     planning: [],
     minisite: null,
@@ -58,7 +58,8 @@ const state = {
     { nom: 'loisir', couleur: 'deep-purple lighten-2', icon: '' },
     { nom: 'restaurant', couleur: 'brown lighten-1', icon: '' },
     { nom: 'rencontre', couleur: 'pink lighten-1', icon: '' },
-    { nom: 'sport', couleur: 'teal lighten-2', icon: '' }
+    { nom: 'sport', couleur: 'teal lighten-2', icon: '' },
+    { nom: 'theatre', couleur: 'teal lighten-2', icon: '' }
   ],
   currentPlanning: null,
   searchPlanningId: null,
@@ -70,32 +71,51 @@ const actions = {
   // sauvegarde de l'évent courant en base
   saveEvent ({ state, dispatch }) {
     return new Promise((resolve, reject) => {
-      if (state.currentEvent.id == -1) {
-        let execute = dispatch('insertEvent')
-        execute.then((data) => {
-          resolve(data)
-        })
-        execute.catch((error) => {
-          reject(error)
-        })
+      if (state.currentEvent.id === -1) {
+        dispatch('insertEvent')
+          .then((data) => {
+            resolve(data)
+          })
+          .catch((error) => {
+            reject(error)
+          })
       } else {
-        let execute = dispatch('updateEvent')
-        execute.then((data) => {
-          resolve(data)
-        })
-        execute.catch((error) => {
-          reject(error)
-        })
+        dispatch('updateEvent')
+          .then((data) => {
+            resolve(data)
+          })
+          .catch((error) => {
+            reject(error)
+          })
       }
     })
   },
+  // ajout de l'event courant en base
+  importEvent ({ rootState }, data) {
+    return new Promise((resolve, reject) => {
+      let event = JSON.parse(JSON.stringify(data))
+      delete event.id
+      if (typeof rootState.cnx.currentProfil.cleAdmin !== 'undefined') {
+        event.cleAdmin = rootState.cnx.currentProfil.cleAdmin
+      }
+      let execute = fb.eventCollection.add(event)
+      execute.then(function (data) {
+        state.currentEvent.id = data.id
+        resolve(data)
+      })
+      execute.catch(function (error) {
+        reject(error)
+      })
+    })
+  },
+
   // ajout de l'event courant en base
   insertEvent ({ rootState }) {
     return new Promise((resolve, reject) => {
       let event = JSON.parse(JSON.stringify(state.currentEvent))
       delete event.id
-      if (typeof rootState.cnx.currentProfil.organisation !== 'undefined') {
-        event.organisation = rootState.cnx.currentProfil.organisation
+      if (typeof rootState.cnx.currentProfil.cleAdmin !== 'undefined') {
+        event.cleAdmin = rootState.cnx.currentProfil.cleAdmin
       }
       let execute = fb.eventCollection.add(event)
       execute.then(function (data) {
@@ -126,6 +146,7 @@ const actions = {
       })
     })
   },
+
   // chargement des events en mémoire depuis la base
   loadEvent ({ state }) {
     state.events = []
@@ -153,20 +174,27 @@ const actions = {
     // récupération du profil
     return new Promise((resolve, reject) => {
       let execute = fb.eventCollection
+      console.log(
+        'connected' +
+          rootGetters['cnx/isProfilLoaded'] +
+          rootState.cnx.currentProfil.cleAdmin
+      )
       if (
-        rootGetters['cnx/IsProfilLoaded'] &&
-        rootState.cnx.currentProfil.organisation
+        rootGetters['cnx/isProfilLoaded'] &&
+        rootState.cnx.currentProfil.cleAdmin
       ) {
+        console.log('cle' + rootState.cnx.currentProfil.cleAdmin)
         execute = execute.where(
-          'organisation',
+          'cleAdmin',
           '==',
-          rootState.cnx.currentProfil.organisation
+          rootState.cnx.currentProfil.cleAdmin
         )
       }
       execute
         .get()
         .then(function (querySnapshot) {
           querySnapshot.forEach(function data (result) {
+            console.log('loaded')
             let record = result.data()
             record.id = result.id
             state.events.push(record)
@@ -274,7 +302,10 @@ const mutations = {
     state.currentEvent = JSON.parse(JSON.stringify(DEFINE_EVENT))
   },
   setEvent (state, data) {
-    state.currentEvent = data
+    state.currentEvent = JSON.parse(JSON.stringify(data))
+  },
+  setPlanning (state, data) {
+    state.currentEvent.planning = JSON.parse(JSON.stringify(data))
   },
 
   // definir l'event courant

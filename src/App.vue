@@ -24,20 +24,16 @@
     </v-app>
     <v-bottom-sheet
       inset
-      :open-delay="timeout"
+      :close-delay="timeout"
       v-model="message.display"
       :overlay-color="message.type"
       overlay-opacity="0.2"
     >
       <v-sheet class="text-center" height="100px">
-        <v-btn
-          class="text--lighten-1 text-body-2 mt-6"
-          text
-          @click="message.display = !message.display"
-        >
+        <v-btn plain text @click="message.display = !message.display">
           fermer
         </v-btn>
-        <div class="py-3">
+        <div>
           {{ message.message }}
         </div>
       </v-sheet>

@@ -24,6 +24,7 @@ export const store = new Vuex.Store({
   state: {
     display: false,
     waiting: false,
+    modificationEnCours: false,
     message: {
       display: false,
       message: 'Oups, je vais disparaitre',
@@ -32,8 +33,7 @@ export const store = new Vuex.Store({
     },
     question: {
       display: false,
-      message: 'Oups, je vais disparaitre',
-      type: 'question'
+      message: 'Oups, je vais disparaitre'
     },
     emailParam: {
       template: 'template_W2ROE7Xi',
@@ -188,6 +188,12 @@ export const store = new Vuex.Store({
   },
 
   mutations: {
+    setModifUser (state) {
+      state.modificationEnCours = true
+    },
+    initModifUser (state) {
+      state.modificationEnCours = false
+    },
     setDisplayMenuOff (state) {
       console.log()
       state.display = false
@@ -211,7 +217,6 @@ export const store = new Vuex.Store({
     setQuestion (state, message) {
       state.question.display = true
       state.question.message = message.message
-      state.question.type = message.type
     },
     setInitQuestion (state) {
       state.question = {}
@@ -236,7 +241,7 @@ export const store = new Vuex.Store({
     },
     /* management des modif données */
     getModifUser (state) {
-      return state.modifUser
+      return state.modificationEnCours
     },
     getCurrentAvatarImg (state) {
       if (state.currentUser.uid) return imgAvatarPath + state.currentUser.uid

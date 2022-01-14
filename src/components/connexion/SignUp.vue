@@ -7,14 +7,17 @@
           <v-form>
             <v-text-field
               label="votre email"
+              tabindex="1"
               v-model="dataForm.email"
               prepend-icon="mdi-account"
             />
+
             <v-text-field
               prepend-icon="mdi-lock"
               :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
               :type="showPassword ? 'text' : 'password'"
               label="mot de passe"
+              tabindex="2"
               v-model="dataForm.password"
               @click:append="showPassword = !showPassword"
             />
@@ -23,49 +26,26 @@
               prepend-icon="mdi-lock"
               :append-icon="showPasswordRedo ? 'mdi-eye' : 'mdi-eye-off'"
               :type="showPasswordRedo ? 'text' : 'password'"
-              name="input-10-2"
+              tabindex="3"
               label="confirmation mot de passe"
-              v-model="profil.passwordRedo"
-              class="input-group--focused"
+              v-model="dataForm.passwordRedo"
               @click:append="showPasswordRedo = !showPasswordRedo"
             />
-            <v-text-field v-model="dataForm.nom" label="Nom"></v-text-field>
+            <v-text-field
+              tabindex="4"
+              v-model="dataForm.nom"
+              label="Nom"
+            ></v-text-field>
             <v-text-field
               v-model="dataForm.prenom"
               label="Prénom"
+              tabindex="5"
             ></v-text-field>
-            <!--<v-row>
-              <v-col cols="6">
-                <v-switch
-                  hide-details
-                  inset
-                  color="red"
-                  value="red"
-                  v-model="active_admin"
-                  label="cle admin ?"
-                >
-                  <template v-slot:label>
-                    <v-tooltip color="pink" bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <span v-bind="attrs" v-on="on">cle admin ? </span>
-                      </template>
-                      la cle admin est fournie par le responsable du site pour
-                      les gestionnaires. <br />contacter admin@resaplus.com si
-                      besoin
-                    </v-tooltip>
-                  </template>
-                </v-switch>
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  v-if="active_admin"
-                  label="Votre clef admin"
-                  v-model="profil.admin_key"
-                  prepend-icon="mdi-badge-account"
-                  type="text"
-                />
-              </v-col>
-            </v-row>-->
+            <v-text-field
+              label="nom affiché"
+              tabindex="6"
+              v-model="dataForm.displayName"
+            />
 
             <v-spacer />
             <v-alert
@@ -78,10 +58,12 @@
               >{{ errorMsg }}</v-alert
             ><v-row>
               <v-col cols="6"
-                ><v-btn @click="signUp" plain>Création compte</v-btn>
+                ><v-btn tabindex="7" @click="signUp" plain
+                  >Création compte</v-btn
+                >
               </v-col>
               <v-col cols="6"
-                ><v-btn plain to="/">Annuler</v-btn>
+                ><v-btn tabindex="8" plain to="/">Annuler</v-btn>
               </v-col></v-row
             ></v-form
           ></v-col
@@ -116,8 +98,10 @@ export default {
     ...mapState(['waiting']),
     ...mapState('cnx', ['currentProfil'])
   },
-  crated () {
+  created () {
     this.dataForm = Object.assign({}, this.infoLogin, this.currentProfil)
+    console.log('mix data')
+    console.log(this.dataForm)
   },
   methods: {
     async signUp () {
@@ -127,13 +111,24 @@ export default {
         this.errorMsg = 'les mots de passe sont différents'
       } else {
         try {
+          // creation du user
+          if (!this.dataForm.displayName) {
+            this.dataForm.displayName =
+              this.dataForm.nom + ' ' + this.dataForm.prenom
+          }
           await this.$store.dispatch('cnx/userCreate', this.dataForm)
+          // creation du profil OK, on part sur la page principale de l'application
           this.$router.push('/')
         } catch (error) {
+          // on est sur des erreur
+          this.$store.dispatch('displayMessage', {
+            code: 'CEPR',
+            param: error.message
+          })
           this.$store.commit('setWaiting', false)
         }
-        this.$store.commit('setWaiting', false)
       }
+      this.$store.commit('setWaiting', false)
     }
   }
 }
