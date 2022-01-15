@@ -11,23 +11,32 @@
 		"typescript.tsdk": "node_modules/typescript/lib"
 	},
 	"launch": {
-		"version": "0.2.0",
 		"configurations": [
-		{
-			"name": "Launch Chrome",
-			"request": "launch",
-			"type": "pwa-chrome",
-			"url": "http://localhost:8081",
-			"webRoot": "${workspaceFolder}"
-		},
-		
 			{
-				"type": "pwa-msedge",
+				"name": "Launch Chrome",
 				"request": "launch",
-				"name": "Launch Edge against localhost",
-				"url": "http://localhost:8081",
+				"type": "pwa-chrome",
+				"url": "http://localhost:8080",
 				"webRoot": "${workspaceFolder}"
+			},
+			{
+				"name": "Launch Edge",
+				"request": "launch",
+				"type": "pwa-msedge",
+				"url": "http://localhost:8081",
+				"webRoot": "${workspaceFolder}",
+				"sourceMapPathOverrides": {
+					"webpack:///src/*.vue": "${webRoot}/src/*.vue",
+					"webpack:///./src/*.js": "${webRoot}/src/*.js"
+				}
+			},
+			{
+				"name": "Launch Microsoft Edge and open the Edge DevTools",
+				"request": "launch",
+				"type": "vscode-edge-devtools.debug",
+				"url": ""
 			}
 		]
-	}
+	},
+
 }

@@ -36,10 +36,12 @@
 
 <script>
 import { fb } from '@/plugins/firebaseInit'
-import convert from 'image-file-resize'
+import mixFunctions from '@/components/commun/Functions'
+import { mapState } from 'vuex'
 
 export default {
   name: 'ImageUpload',
+  mixins: [mixFunctions],
   data () {
     return {
       displayImg: false,
@@ -52,13 +54,10 @@ export default {
   },
   props: ['fileName', 'rep'],
   computed: {
-    getUrlImg () {
-      return self.urlImg
-    }
+    ...mapState('event', ['CONST_RESIZE_HEIGHT', 'CONST_RESIZE_WIDTH'])
   },
 
   created () {
-    console.log('id' + this.fileName)
     this.localImg = this.fileName
     this.displayImage()
   },
@@ -117,36 +116,40 @@ export default {
       if (typeof file !== 'undefined' && file != null) {
         this.$store.dispatch('startWaiting')
         // on redéfinit l'image pour la réduire si besoin
-        convert({
-          file: file,
-          width: 150,
-          height: 150,
-          type: typeFile[1]
-        })
-          .then((resp) => {
-            console.log(
-              'enregistrement du fichier' + self.fileName + this.rep + resp
-            )
-            fb.file
-              .ref()
-              // on va détruire l'image qui existait
-              // storageRef.child(this.filename).delete();
-              .child(this.rep + '/' + self.fileName)
-              .put(resp)
-              .then(function (snapshot) {
-                console.log('fichier' + self.fileName)
-                self.$store.dispatch('stopWaiting')
-                self.$store.dispatch('displayMessage', 'IMOK')
-                self.localImg = self.fileName
-                self.displayImage()
-                self.file = null
-              })
-              .catch(() => {
-                self.$store.dispatch('stopWaiting')
-                self.$store.dispatch('displayMessage', 'IMKO')
-              })
-          })
-          .catch(() => {})
+        var reader = new FileReader()
+        reader.onload = function (e) {
+          self
+            .resizeImage({
+              file: file,
+              width: self.CONST_RESIZE_WIDTH,
+              height: self.CONST_RESIZE_HEIGHT,
+              type: typeFile[1]
+            })
+            .then((resp) => {
+              console.log(
+                'enregistrement du fichier' + self.fileName + self.rep + resp
+              )
+              fb.file
+                .ref()
+                // on va détruire l'image qui existait
+                // storageRef.child(this.filename).delete();
+                .child(self.rep + '/' + self.fileName)
+                .put(resp)
+                .then(function (snapshot) {
+                  self.$store.dispatch('stopWaiting')
+                  self.$store.dispatch('displayMessage', 'IMOK')
+                  self.localImg = self.fileName
+                  self.displayImage()
+                  self.file = null
+                })
+                .catch(() => {
+                  self.$store.dispatch('stopWaiting')
+                  self.$store.dispatch('displayMessage', 'IMKO')
+                })
+            })
+            .catch(() => {})
+        }
+        reader.readAsDataURL(file)
       }
     }
   }

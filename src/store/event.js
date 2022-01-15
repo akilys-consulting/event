@@ -27,7 +27,7 @@ const state = {
     planning: [],
     minisite: null,
     prix: null,
-    like: 0,
+    like: [],
     categorie: null,
     organisateur: null,
     organisation: null
@@ -61,8 +61,8 @@ const state = {
     { nom: 'sport', couleur: 'teal lighten-2', icon: '' },
     { nom: 'theatre', couleur: 'teal lighten-2', icon: '' }
   ],
-  CONST_RESIZE_HEIGHT: 250,
-  CONST_RESIZE_WIDTH: 250,
+  CONST_RESIZE_HEIGHT: 230,
+  CONST_RESIZE_WIDTH: 320,
   currentPlanning: null,
   searchPlanningId: null,
   currentImgUrl: null,
@@ -272,7 +272,7 @@ const actions = {
                 alert.alert.date === data.start.substring(0, 10) &&
                 alert.alert.categorie === data.category
               ) {
-                let templateParams = {
+                /* let templateParams = {
                   event_contact: alert.email,
                   event_name: data.name,
                   date_debut: data.start,
@@ -280,7 +280,7 @@ const actions = {
                   event_adr: state.currentEvent.localisation.adr,
                   event_description: state.currentEvent.minisite
                 }
-                /* emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
+                 emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
                 emailjs
                   .send('gmail', 'template_buy6lvg', templateParams)
                   .catch((error) => {
@@ -312,7 +312,7 @@ const mutations = {
 
   // definir l'event courant
   setCurrentEventByPlanning (state, planning) {
-    state.currentEvent = state.events.find((element) => element.id == planning)
+    state.currentEvent = state.events.find((element) => element.id === planning)
   },
 
   // ajout d'une image à l'event courant

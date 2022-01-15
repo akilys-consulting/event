@@ -127,6 +127,8 @@ export default {
               file.height,
               true
             )
+            canvas.height = result.height
+            canvas.width = result.width
             ctx.drawImage(img, 0, 0, result.width, result.height)
             var resizeImg = canvas.toDataURL('image/jpeg')
             resolve({ data: resizeImg, type: 'jpeg' })

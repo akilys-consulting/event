@@ -1,10 +1,5 @@
 <template>
-  <v-img
-    :max-height="height"
-    :max-width="width"
-    :aspect-ratio="16 / 9"
-    :src="urlImg"
-  >
+  <v-img :height="height" :width="width" contain :src="urlImg">
     <template v-slot:placeholder>
       <v-row class="fill-height ma-0" align="center" justify="center">
         <v-progress-circular
@@ -57,7 +52,7 @@ export default {
     displayImage: function () {
       let self = this
       if (this.localImg && typeof this.localImg !== 'undefined') {
-        const file = fb.file
+        fb.file
           .ref()
           .child(this.rep + '/' + this.localImg)
           .getDownloadURL()
@@ -66,7 +61,7 @@ export default {
             self.displayImg = true
             self.loadPhoto = false
           })
-          .catch(function (error) {
+          .catch(function () {
             self.getDefaultImg()
           })
       } else {

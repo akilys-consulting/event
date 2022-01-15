@@ -265,7 +265,7 @@ export default {
                         .dataUrlToFile(image64, filename.split('.').pop())
                         .then((reponse) => {
                           // on resize l'image
-                          console.log('avant consertion image')
+                          console.log('avant consertion image' + filename)
 
                           self
                             .resizeImage({
@@ -410,7 +410,7 @@ export default {
           /data:image\/.*;base64,/,
           ''
         )
-        let imgType = this.Event2insert.type
+        let imgType = this.Event2insert.image.type
 
         this.Event2insert.id = -1
         delete this.Event2insert.dateDebut
@@ -510,7 +510,7 @@ export default {
           if (Number(adr.score) > 0.8) {
             response.localisation = {
               adr: adr.label,
-              latLng: { lat: coord[0], lng: coord[1] }
+              latLng: { lat: coord[1], lng: coord[0] }
             }
           } else {
             response.message.push(' adresse non contrôlée')

@@ -1,97 +1,94 @@
 <template>
   <v-card>
-    <v-toolbar flat>
+    <!--    <v-toolbar flat>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn plain icon @click="refreshList" v-on="on">
+          <v-btn fab small flat color="primary" @click="refreshList" v-on="on">
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
         </template>
         <span>retour à la liste</span>
       </v-tooltip>
-
-      <add-to-calendar
-        :title="event.nom"
-        :location="event.localisation.adr"
-        :details="displayMiniSite"
-        inline-template
-      >
-        <google-calendar id="google-calendar">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn plain v-on="on"> <v-icon>mdi-calendar-plus</v-icon></v-btn>
-            </template>
-            <span>ajouter à votre calendrier</span>
-          </v-tooltip>
-        </google-calendar>
-      </add-to-calendar>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            icon
-            plain
-            v-on="on"
-            v-if="event.urlsite"
-            :href="event.urlsite"
-            target="_blank"
-          >
-            <v-icon dark> mdi-web </v-icon></v-btn
-          >
-        </template>
-        <span>visiter le site de l'organisateur</span>
-      </v-tooltip>
-    </v-toolbar>
-    <v-card-title> {{ event.nom }}</v-card-title>
-
-    <v-card-subtitle v-if="event.organisateurs">
-      organisé par : {{ event.organisateur }}
-    </v-card-subtitle>
-    <v-card-subtitle>
-      {{ event.localisation.adr }}
-      <div class="orange--text">{{ DateDebut }} - {{ DateFin }}</div>
-    </v-card-subtitle>
-
-    <v-card-text>
-      <v-row>
-        <v-col lg="6" sm="6" xs="12">
+    </v-toolbar>-->
+    <v-row no-gutters>
+      <v-col lg="6" sm="6" xs="12" md="12"
+        ><v-avatar tile size="300">
           <displayImage
             :fileName="event.id"
             rep="image_event"
-            height="250"
-            width="auto"
+            height="100%"
+            width="100%"
           ></displayImage>
+        </v-avatar>
+      </v-col>
 
-          Lien vers site organisateur
-        </v-col>
-        <v-col lg="6" sm="6" xm="12">
-          <l-map
-            :zoom="zoom"
-            :options="mapOptions"
-            :center="center"
-            style="height: 300px; width: auto"
-          >
-            <l-tile-layer :url="url" />
-            <l-marker
-              :icon="warehouse_icon"
-              :lat-lng="[
-                event.localisation.latLng.lat,
-                event.localisation.latLng.lng
-              ]"
+      <v-col lg="6" sm="6" xs="12" md="12">
+        <v-card flat>
+          <v-card-title>{{ event.nom }}</v-card-title>
+          <v-card-subtitle> {{ event.localisation.adr }}</v-card-subtitle>
+          <v-divider></v-divider>
+          <v-card-subtitle
+            ><span class="orange--text">Le {{ DateDebut }}</span>
+            <div>
+              {{ event.categorie }} - organisé par : {{ event.organisateur }}
+            </div>
+          </v-card-subtitle>
+          <v-divider></v-divider>
+
+          <v-card-title>Description</v-card-title>
+          <v-card-text>{{ event.minisite }} </v-card-text>
+          <v-card-actions>
+            <v-btn
+              plain
+              calss="ma-1"
+              v-if="event.urlsite"
+              :to="event.urlsite"
+              target="_blank"
             >
-            </l-marker>
-          </l-map>
-        </v-col>
-      </v-row>
-    </v-card-text>
+              <v-icon>mdi-search-web</v-icon> site internet
+            </v-btn>
+            <add-to-calendar
+              :title="event.nom"
+              :location="event.localisation.adr"
+              :details="displayMiniSite"
+              inline-template
+            >
+              <google-calendar id="google-calendar">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn calss="ma-1" plain v-on="on">
+                      <v-icon>mdi-calendar-plus</v-icon>calendrier
+                    </v-btn>
+                  </template>
+                  <span>ajouter à votre calendrier</span>
+                </v-tooltip>
+              </google-calendar>
+            </add-to-calendar>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <v-card-text
-      class="subtitle-2"
-      v-if="event.minisite"
-      v-html="event.minisite"
-    ></v-card-text>
-    <v-card-text class="subtitle-2" v-else
-      >Aucune description n'a été fourni</v-card-text
-    >
+    <v-row no-gutters
+      ><v-col cols="12">
+        <v-card-subtitle>Sur la carte </v-card-subtitle>
+        <l-map
+          :zoom="zoom"
+          :options="mapOptions"
+          :center="center"
+          style="height: 300px; width: auto"
+        >
+          <l-tile-layer :url="url" />
+          <l-marker
+            :icon="warehouse_icon"
+            :lat-lng="[
+              event.localisation.latLng.lat,
+              event.localisation.latLng.lng
+            ]"
+          >
+          </l-marker>
+        </l-map> </v-col
+    ></v-row>
   </v-card>
 </template>
 
@@ -102,7 +99,7 @@ import displayImage from '@/components/commun/DisplayImage'
 import { mapState } from 'vuex'
 
 import { LMap, LTileLayer, LMarker } from 'vue2-leaflet'
-import { latLng, icon } from 'leaflet'
+import { icon } from 'leaflet'
 import marker from '@/assets/marker.png'
 
 export default {
@@ -137,13 +134,13 @@ export default {
   computed: {
     ...mapState('event', ['planning', 'events']),
     DateDebut: function () {
-      return moment(this.currentPlanning.start, 'YYYY-MM-DD HH:mm').format(
-        'DD/MM/YYYY HH:mm'
-      )
+      return moment(this.currentPlanning.start, 'YYYY-MM-DD HH:mm')
+        .lang('fr')
+        .format('DD MMMM à HH:MM')
     },
-    DateFin: function () {
+    HeureFin: function () {
       return moment(this.currentPlanning.end, 'YYYY-MM-DD HH:mm').format(
-        'DD/MM/YYYY HH:mm'
+        'HH:mm'
       )
     },
     // format la date de début pour l'addOn calendar
@@ -156,7 +153,7 @@ export default {
     },
 
     displayMiniSite () {
-      return 'Pas de description'
+      return this.event.minisite ? this.event.minisite : 'Pas de description'
     },
     dynamicSize () {
       return [this.iconSize, this.iconSize * 1.15]

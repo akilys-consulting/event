@@ -16,8 +16,8 @@ const opts = {
     locales: { fr },
     current: 'fr'
   },
-  rtl: false,
-  theme: {
+  rtl: false
+  /*  theme: {
     dark: true,
     themes: {
       dark: {
@@ -39,7 +39,7 @@ const opts = {
         error: '#A31435'
       }
     }
-  }
+  } */
 }
 
 export default new Vuetify(opts)

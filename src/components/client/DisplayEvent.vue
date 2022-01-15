@@ -1,59 +1,57 @@
 <template>
   <v-hover v-slot="{ hover }">
     <v-card :elevation="hover ? 12 : 6" :class="{ 'on-hover': hover }">
-      <template v-slot:placeholder>
-        <v-row class="fill-height ma-0" align="center" justify="center">
-          <v-progress-circularl
-            indeterminate
-            color="#6600A1"
-          ></v-progress-circularl>
-        </v-row>
-      </template>
-      <v-card-title>{{ currentEvent.nom }}</v-card-title>
-      <v-card-text @click="detailEvent(itemPlanning)">
-        <displayImage
-          :fileName="itemPlanning.eventid"
-          rep="image_event"
-          height="150"
-          width="100"
-        ></displayImage>
-        <EmailManagement :content="getHtml" />
-        <v-card-subtitle
-          >{{ itemPlanning.category }}
-          <span class="orange--text">{{ DateDebut }} - {{ DateFin }}</span>
+      <EmailManagement :content="getHtml" />
 
-          <div>{{ getAdresseEvent() }}</div>
-        </v-card-subtitle>
-        <v-badge
-          v-if="nbLike > 0"
-          overlap
-          bordered
-          color="error"
-          :content="nbLike"
-        >
+      <v-list-item @click="detailEvent(itemPlanning)" three-line>
+        <v-list-item-content>
+          <div class="text-overline">
+            {{ itemPlanning.category }}
+          </div>
+
+          <v-list-item-title>
+            {{ currentEvent.nom }}
+          </v-list-item-title>
+          <v-list-item-subtitle
+            ><span class="orange--text">{{ DateDebut }}</span>
+          </v-list-item-subtitle>
+        </v-list-item-content>
+
+        <v-list-item-avatar tile size="125"
+          ><displayImage
+            :fileName="itemPlanning.eventid"
+            rep="image_event"
+            height="100%"
+            width="100%"
+          ></displayImage>
+        </v-list-item-avatar>
+      </v-list-item>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-badge v-if="nbLike > 0" overlap color="error" :content="nbLike">
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon v-on="on">
-                <v-icon small @click="addLike()">mdi-heart</v-icon>
+                <v-icon @click="addLike()">mdi-heart</v-icon>
               </v-btn>
             </template>
             <span>j'aime</span>
           </v-tooltip>
         </v-badge>
-        <v-tooltip bottom>
+        <v-tooltip v-else bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on" v-if="!nbLike">
-              <v-icon small @click="addLike()">mdi-heart</v-icon>
+            <v-btn icon v-on="on">
+              <v-icon @click="addLike()">mdi-heart</v-icon>
             </v-btn>
           </template>
           <span>j'aime</span>
         </v-tooltip>
+
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <v-btn icon v-on="on">
-              <v-icon small @click="sendEmail"
-                >mdi-share-variant-outline</v-icon
-              >
+              <v-icon @click="sendEmail">mdi-share-variant-outline</v-icon>
             </v-btn>
           </template>
           <span>partager</span>
@@ -74,7 +72,7 @@
           </template>
           <span>Gratuit</span>
         </v-tooltip>
-      </v-card-text>
+      </v-card-actions>
     </v-card>
   </v-hover>
 </template>
@@ -121,7 +119,7 @@ export default {
         .format('HH:mm')
     },
     nbLike () {
-      return 0
+      return this.currentEvent.like.length
     },
     getHtml () {
       return {
@@ -145,7 +143,7 @@ export default {
   created () {
     let searchIdEvent = this.itemPlanning.eventid
     this.currentEvent = this.events.find(
-      (element) => element.id == searchIdEvent
+      (element) => element.id === searchIdEvent
     )
     console.log(this.currentEvent)
   },
