@@ -14,7 +14,7 @@ const defaultProfil = {
   cleAdmin: '',
   photoURL: '',
   localisation: { adr: null, latLng: { lat: null, lng: null } },
-  theme: { name: '', dark: false },
+  theme: { name: 'defaut', dark: false },
   alerte: { date: null, categorie: '', activate: false }
 }
 
@@ -74,7 +74,6 @@ const actions = {
           nom: data.account.nom,
           prenom: data.account.prenom,
           email: data.account.email,
-          organisation: data.account.organisation,
           adresse: data.account.localisation,
           cleAdmin: null,
           photoURL: null,
@@ -118,6 +117,7 @@ const actions = {
   //
   // procédure de création via service firebase.auth
   async userCreate ({ dispatch, commit }, account) {
+    console.log(account)
     return new Promise((resolve, reject) => {
       fb.auth
         .createUserWithEmailAndPassword(account.email, account.password)

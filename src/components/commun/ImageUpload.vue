@@ -111,6 +111,7 @@ export default {
     UploadFile: function (file) {
       let self = this
       let typeFile = file.type.split('/')
+      const newMetadata = { cacheControl: 'public,max-age=4000' }
 
       // récupération du nom de l'image
       if (typeof file !== 'undefined' && file != null) {
@@ -134,7 +135,7 @@ export default {
                 // on va détruire l'image qui existait
                 // storageRef.child(this.filename).delete();
                 .child(self.rep + '/' + self.fileName)
-                .put(resp)
+                .put(resp, newMetadata)
                 .then(function (snapshot) {
                   self.$store.dispatch('stopWaiting')
                   self.$store.dispatch('displayMessage', 'IMOK')

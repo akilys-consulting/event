@@ -1,6 +1,6 @@
 <template>
-  <v-row>
-    <v-col cols="12" md="3">
+  <v-row align="center" justify="center">
+    <v-col cols="12" md="auto">
       <v-menu
         ref="menu_date"
         v-model="menu_date"
@@ -16,12 +16,11 @@
           <v-text-field
             @click:clear="date = null"
             :value="formatedDate(date)"
-            label="début après le"
+            placeholder="début après le"
             prepend-icon="mdi-calendar-month"
             readonly
             clearable
             flat
-            color="white"
             v-bind="attrs"
             v-on="on"
           ></v-text-field>
@@ -34,25 +33,40 @@
       </v-menu>
     </v-col>
     <v-col cols="12" md="3">
-      <v-select
-        v-model="categorie"
-        hide-details
-        flat
-        append-icon="mdi-filter-variant"
-        clearable
-        color="white"
-        :items="getCategories"
-        label="Catégorie"
-      ></v-select> </v-col
-    ><v-col cols="12" md="3">
+      <v-chip-group v-model="categorie">
+        <v-chip
+          v-for="cat in categorie"
+          :key="cat.nom"
+          filter
+          :color="cat.couleur"
+        >
+          {{ cat.nom }}
+        </v-chip>
+        <v-menu offset-y rounded>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip v-on="on" v-bind="attrs">+</v-chip>
+          </template>
+          <v-card class="py-4 px-4">
+            <v-chip
+              v-for="cat in categorie"
+              :key="cat.nom"
+              filter
+              :color="cat.couleur"
+              >{{ cat.nom }}</v-chip
+            >
+          </v-card>
+        </v-menu>
+      </v-chip-group>
+    </v-col>
+
+    <v-col cols="12" md="3">
       <v-text-field
         flat
         v-model="critere"
-        append-icon="mdi-magnify"
+        prepend-icon="mdi-magnify"
         label="rechercher..."
         clearable
         @click:clear="critere = null"
-        color="white"
       ></v-text-field>
     </v-col>
     <v-col cols="12" md="3">
@@ -75,7 +89,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import moment from 'moment'
 
 export default {
@@ -85,7 +99,7 @@ export default {
 
   computed: {
     ...mapGetters('event', [
-      'getCategories',
+      'getCategoriesMaster',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_DT',
       'getEVT_SRCH_CRITERE',
@@ -103,10 +117,21 @@ export default {
     },
     categorie: {
       get () {
-        return this.getEVT_SRCH_CAT
+        return this.getCategoriesMaster
       },
       set (value) {
-        this.$store.commit('event/setEVT_SRCH_CAT', value)
+        console.log(
+          typeof value === 'undefined'
+            ? value
+            : this.getCategoriesMaster[value].nom
+        )
+
+        this.$store.commit(
+          'event/setEVT_SRCH_CAT',
+          typeof value === 'undefined'
+            ? value
+            : this.getCategoriesMaster[value].nom
+        )
       }
     },
     date: {

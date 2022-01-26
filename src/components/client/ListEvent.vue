@@ -11,7 +11,6 @@
       :items-per-page="getItemsPerPage"
       :sort-by="['start']"
       no-results-text="Pas d'évènement trouvé"
-      no-data-text="Pas d'évènement trouvé"
     >
       <template v-slot:default="{ items }">
         <v-row>
@@ -31,14 +30,33 @@
           /></v-col>
         </v-row>
       </template>
+      <template v-slot:no-data>
+        <v-img :src="require('@/assets/rechercheko.jpg')"> </v-img>
+      </template>
       <template v-slot:footer>
         <v-row align="center" justify="center">
-          <v-btn icon @click="formerPage">
+          <v-btn
+            x-small
+            fab
+            class="mr-4"
+            outlined
+            color="white"
+            @click="formerPage"
+          >
             <v-icon>mdi-chevron-left</v-icon>
           </v-btn>
-          Page {{ page }} of {{ numberOfPages }}
+          <span class="white--text"
+            >Page {{ page }} of {{ numberOfPages }}</span
+          >
 
-          <v-btn icon @click="nextPage">
+          <v-btn
+            x-small
+            fab
+            class="ml-4"
+            outlined
+            color="white"
+            @click="nextPage"
+          >
             <v-icon>mdi-chevron-right</v-icon>
           </v-btn></v-row
         >
@@ -83,13 +101,29 @@ export default {
     ]),
 
     numberOfPages () {
-      return Math.ceil(this.filteredItems.length / this.itemsPerPage)
+      return Math.ceil(this.filteredItems.length / this.getItemsPerPage)
     },
 
     filteredItems () {
-      return this.planning.filter((row) => {
+      // on récupère les enregistrements correspondant aux critères
+      let allElements = []
+      allElements = this.planning.filter((row) => {
         return this.searchByCritere(row)
       })
+
+      /* allElements = allElements.sort((eventa, eventb) => {
+        let dateEventa = moment(eventa.start, 'YYYY-MM-DD')
+        let dateEventb = moment(eventb.start, 'YYYY-MM-DD')
+
+        return moment(dateEventa).diff(dateEventb)
+      }) */
+
+      // on dédoublonne au niveau du nom pour n'afficher qu'un évènement
+      allElements = allElements.filter(
+        (event, index, self) =>
+          index === self.findIndex((t) => t.name === event.name)
+      )
+      return allElements
     },
 
     computedville: function (item) {
@@ -201,8 +235,4 @@ export default {
 }
 </script>
 
-<style>
-#app {
-  background-image: none !important;
-}
-</style>
+<style></style>

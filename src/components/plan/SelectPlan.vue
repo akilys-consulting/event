@@ -156,14 +156,14 @@ export default {
     numberOfPages () {
       return Math.ceil(this.plans.length / this.itemsPerPage)
     },
-        filteredItems () {
+    filteredItems () {
       return this.plans.filter((row) => {
         return row.nom.toUpperCase().includes(this.search.toUpperCase())
       })
-    },
+    }
   },
   methods: {
-    clearSearch() {
+    clearSearch () {
       this.search = ''
     },
     computedville: function (item) {
@@ -188,8 +188,4 @@ export default {
   }
 }
 </script>
-<style>
-#app {
-  background-image: none !important;
-}
-</style>
+<style></style>

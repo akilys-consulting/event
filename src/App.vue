@@ -67,4 +67,7 @@ export default {
 .v-application {
   font-family: 'Darker Grotesque', sans-cherif !important;
 }
+#app {
+  background-image: url('~@/assets/fond.jpg');
+}
 </style>

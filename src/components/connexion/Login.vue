@@ -42,9 +42,7 @@
               v-if="errorMsg !== ''"
               >{{ errorMsg }}</v-alert
             >
-            <v-btn plain @click="login" class="font-weight-thin" block
-              >connexion</v-btn
-            >
+            <v-btn plain @click="login" color="primary" block>connexion</v-btn>
           </v-form>
         </v-col>
       </v-row>
@@ -58,7 +56,7 @@
           <v-btn icon color="red" outlined @click="cnxgoogle"
             ><v-icon>mdi-google-plus</v-icon>
           </v-btn>
-          <v-btn icon outlined color="indigo lighten-2" @click="cnxFacebook">
+          <v-btn icon outlined color="light-blue darken-2" @click="cnxFacebook">
             <v-icon>mdi-facebook</v-icon></v-btn
           >
         </v-col>
@@ -182,7 +180,6 @@ export default {
         })
     },
     cnxgoogle () {
-      let self = this
       this.$store
         .dispatch('cnx/connexionUserGoogle')
         .then(() => {
@@ -233,5 +230,9 @@ export default {
   max-width: 2em;
   margin-top: -2px;
   margin-right: 10px;
+}
+
+#app {
+  background-image: url('~@/assets/fond.jpg');
 }
 </style>

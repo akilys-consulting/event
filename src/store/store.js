@@ -72,6 +72,27 @@ export const store = new Vuex.Store({
         }
       },
       {
+        name: 'defaut',
+        dark: {
+          primary: '#90AB47',
+          accent: '#9FD656',
+          secondary: '#9FED6B',
+          success: '#74F25A',
+          info: '#BCEDAD',
+          warning: '#EB6D00',
+          error: '#A31435'
+        },
+        light: {
+          primary: '#1976D2',
+          accent: '#9D00E0',
+          secondary: '#30b1dc',
+          success: '#4CAF50',
+          info: '#2196F3',
+          warning: '#FB8C00',
+          error: '#FF5252'
+        }
+      },
+      {
         name: 'marron',
         dark: {
           primary: '#7F5636',
@@ -109,7 +130,7 @@ export const store = new Vuex.Store({
     // declenche l'affichage d'un message
     displayMessage ({ commit }, param) {
       for (var i = 0; i < messages.length; i++) {
-        if (messages[i]['code'] == param.code) {
+        if (messages[i]['code'] === param.code) {
           let displayedmessage = messages[i]
           if (param && typeof param.param !== 'undefined') {
             displayedmessage.message = messages[i].message.replace(

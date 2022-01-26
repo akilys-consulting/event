@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-toolbar>
+  <v-card>
+    <v-toolbar flat>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn plain v-on="on" @click="ajouterEvenement">
@@ -58,7 +58,7 @@
       @click:more="viewDay"
       @click:date="viewDay"
     ></v-calendar>
-  </div>
+  </v-card>
 </template>
 
 <script>
@@ -139,5 +139,9 @@ export default {
 .v-btn--fab.v-size--default {
   height: 24px !important;
   width: 24px !important;
+}
+
+#app {
+  background-image: url('~@/assets/fond.jpg');
 }
 </style>

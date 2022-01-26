@@ -11,7 +11,7 @@
       </v-tooltip>
     </v-toolbar>-->
     <v-row no-gutters>
-      <v-col lg="6" sm="6" xs="12" md="12"
+      <v-col lg="6" sm="6" xs="12" md="6"
         ><v-avatar tile size="300">
           <displayImage
             :fileName="event.id"
@@ -22,13 +22,17 @@
         </v-avatar>
       </v-col>
 
-      <v-col lg="6" sm="6" xs="12" md="12">
+      <v-col lg="6" sm="6" xs="12" md="6">
         <v-card flat>
           <v-card-title>{{ event.nom }}</v-card-title>
           <v-card-subtitle> {{ event.localisation.adr }}</v-card-subtitle>
           <v-divider></v-divider>
           <v-card-subtitle
             ><span class="orange--text">Le {{ DateDebut }}</span>
+            Séances à
+            <span class="orange--text" v-for="item in getseances" :key="item">
+              {{ item }}
+            </span>
             <div>
               {{ event.categorie }} - organisé par : {{ event.organisateur }}
             </div>
@@ -42,7 +46,7 @@
               plain
               calss="ma-1"
               v-if="event.urlsite"
-              :to="event.urlsite"
+              :href="event.urlsite"
               target="_blank"
             >
               <v-icon>mdi-search-web</v-icon> site internet
@@ -112,9 +116,9 @@ export default {
   },
   data () {
     return {
-      url: 'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
       center: [],
-      zoom: 12,
+      zoom: 15,
       mapOptions: {
         zoomSnap: 0.5
       },
@@ -134,9 +138,9 @@ export default {
   computed: {
     ...mapState('event', ['planning', 'events']),
     DateDebut: function () {
-      return moment(this.currentPlanning.start, 'YYYY-MM-DD HH:mm')
+      return moment(this.currentPlanning.start, 'YYYY-MM-DD')
         .lang('fr')
-        .format('DD MMMM à HH:MM')
+        .format('DD MMMM')
     },
     HeureFin: function () {
       return moment(this.currentPlanning.end, 'YYYY-MM-DD HH:mm').format(
@@ -160,9 +164,52 @@ export default {
     },
     dynamicAnchor () {
       return [this.iconSize / 2, this.iconSize * 1.15]
+    },
+    getseances () {
+      let heures = []
+      let self = this
+      console.log(
+        'start heure' +
+          this.$route.params.currentPlanning +
+          ' ' +
+          moment(self.currentPlanning.start).format('YYYY-MM-DD')
+      )
+      let filteredDates = this.planning.filter(
+        (element) => element.id === self.$route.params.currentPlanning
+      )
+
+      let test = filteredDates.filter(
+        (element) =>
+          moment(this.currentPlanning.start).format('YYYY-MM-DD') ===
+          moment(self.currentPlanning.start).format('YYYY-MM-DD')
+      )
+
+      console.log('nb elment ' + test.length)
+
+      test.forEach((element) => {
+        console.log(
+          'heure' +
+            parseInt(
+              moment(moment(element.start).format('HH:mm'), 'HH:mm').format(
+                'HH'
+              )
+            )
+        )
+        heures.push(moment(element.start).format('HH:mm'))
+      })
+      heures.sort(
+        (a, b) =>
+          parseInt(moment(a, 'HH:mm').format('HH')) -
+          parseInt(moment(b, 'HH:mm').format('HH'))
+      )
+
+      return heures
     }
   },
   created () {
+    //
+    // on efface la fentre de recherche
+    this.$store.commit('event/clearActiveSearch')
     // on récupére l'event
     if (typeof this.$route.params.currentPlanning === 'undefined') {
       this.refreshList()

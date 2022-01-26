@@ -1,11 +1,9 @@
 import Vue from 'vue'
-import { mapState } from 'vuex'
 
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import fr from 'vuetify/lib/locale/fr'
 import '@mdi/font/css/materialdesignicons.css'
-import { store } from '@/store/store.js'
 
 Vue.use(Vuetify)
 const opts = {
@@ -16,9 +14,9 @@ const opts = {
     locales: { fr },
     current: 'fr'
   },
-  rtl: false
-  /*  theme: {
-    dark: true,
+  rtl: false,
+  theme: {
+    dark: false,
     themes: {
       dark: {
         primary: '#90AB47',
@@ -39,7 +37,7 @@ const opts = {
         error: '#A31435'
       }
     }
-  } */
+  }
 }
 
 export default new Vuetify(opts)

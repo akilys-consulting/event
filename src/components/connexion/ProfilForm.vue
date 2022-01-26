@@ -132,10 +132,11 @@ export default {
     this.setTheme()
   },
   methods: {
-    setTheme () {
-      if (this.isAuthenticated) {
+    setTheme (nomTheme) {
+      if (this.isAuthenticated || nomTheme) {
         let theme = this.themes.find(
-          (value) => value.name === this.getThemeProfilName
+          (value) =>
+            value.name === nomTheme || value.name === this.getThemeProfilName
         )
         // si un theme est défini pour l'utilisateur
         if (theme) {
@@ -184,6 +185,8 @@ export default {
 
     deconnexion () {
       this.$store.dispatch('cnx/disconnect').then(() => {
+        // on remet le theme par defaut
+
         this.$store.dispatch('displayMessage', { code: 'DCNX', param: null })
       })
 

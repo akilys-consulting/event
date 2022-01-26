@@ -312,9 +312,9 @@ export default {
           eventCheck.organisateur = ligne.organisateur
           eventCheck.urlsite = ligne.lien
           eventCheck.prix = ligne.prix.replace(/€/, '')
-          eventCheck.payant = eventCheck.prix > 0
           eventCheck.minisite = ligne.description
           eventCheck.type = ligne.type
+          eventCheck.like = []
 
           // adr management
           console.log('localisation' + response.localisation.adr)

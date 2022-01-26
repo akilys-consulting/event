@@ -1,6 +1,5 @@
 import { fb } from '@/plugins/firebaseInit'
 import moment from 'moment'
-import emailjs from 'emailjs-com'
 
 /*
     Définition des modèles base
@@ -54,12 +53,13 @@ const state = {
   events: [],
   // permet de définir les catégories
   CONST_CATEGORIE: [
-    { nom: 'culture', couleur: 'orange darken-1', icon: '' },
-    { nom: 'loisir', couleur: 'deep-purple lighten-2', icon: '' },
-    { nom: 'restaurant', couleur: 'brown lighten-1', icon: '' },
-    { nom: 'rencontre', couleur: 'pink lighten-1', icon: '' },
-    { nom: 'sport', couleur: 'teal lighten-2', icon: '' },
-    { nom: 'theatre', couleur: 'teal lighten-2', icon: '' }
+    { nom: 'culture', couleur: 'orange darken-1', icon: '', master: 1 },
+    { nom: 'loisir', couleur: 'deep-purple lighten-2', icon: '', master: 0 },
+    { nom: 'restaurant', couleur: 'brown lighten-1', icon: '', master: 0 },
+    { nom: 'sport', couleur: 'pink lighten-3', icon: '', master: 0 },
+    { nom: 'theatre', couleur: 'indigo lighten-3', icon: '', master: 1 },
+    { nom: 'musique', couleur: 'light-green lighten-3', icon: '', master: 1 },
+    { nom: 'expositions', couleur: 'teal lighten-2', icon: '', master: 0 }
   ],
   CONST_RESIZE_HEIGHT: 230,
   CONST_RESIZE_WIDTH: 320,
@@ -350,11 +350,12 @@ const mutations = {
 const getters = {
   // retourne les catégories
   getCategories (state) {
-    let nomCategorie = []
-    state.CONST_CATEGORIE.forEach((data) => {
-      nomCategorie.push(data.nom)
+    return state.CONST_CATEGORIE
+  },
+  getCategoriesMaster (state) {
+    return state.CONST_CATEGORIE.filter((element) => {
+      return element.master === 1
     })
-    return nomCategorie
   },
   getColorCategorie: (state) => (cat) => {
     return state.CONST_CATEGORIE.find((x) => x.nom === cat).couleur

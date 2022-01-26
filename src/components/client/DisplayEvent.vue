@@ -1,64 +1,71 @@
 <template>
   <v-hover v-slot="{ hover }">
-    <v-card :elevation="hover ? 12 : 6" :class="{ 'on-hover': hover }">
-      <EmailManagement :content="getHtml" />
-
-      <v-list-item @click="detailEvent(itemPlanning)" three-line>
-        <v-list-item-content>
-          <div class="text-overline">
-            {{ itemPlanning.category }}
-          </div>
-
-          <v-list-item-title>
-            {{ currentEvent.nom }}
-          </v-list-item-title>
-          <v-list-item-subtitle
-            ><span class="orange--text">{{ DateDebut }}</span>
-          </v-list-item-subtitle>
-        </v-list-item-content>
-
-        <v-list-item-avatar tile size="125"
-          ><displayImage
-            :fileName="itemPlanning.eventid"
-            rep="image_event"
-            height="100%"
-            width="100%"
-          ></displayImage>
-        </v-list-item-avatar>
-      </v-list-item>
+    <v-card
+      class="cardColor d-flex flex-column"
+      :elevation="hover ? 12 : 6"
+      :class="{ 'on-hover': hover }"
+    >
+      <v-row @click="detailEvent(itemPlanning)">
+        <v-col cols="6">
+          <v-card-title>{{ itemPlanning.category }} </v-card-title>
+          <v-card-subtitle>{{ currentEvent.nom }} </v-card-subtitle>
+        </v-col>
+        <v-col cols="6">
+          <v-avatar tile size="125"
+            ><displayImage
+              :fileName="itemPlanning.eventid"
+              rep="image_event"
+              height="100%"
+              width="100%"
+            ></displayImage>
+          </v-avatar>
+        </v-col>
+      </v-row>
       <v-divider></v-divider>
       <v-card-actions>
+        <v-menu v-model="allDates" :close-on-content-click="false" offset-x>
+          <template v-slot:activator="{ on, attrs }">
+            <v-card-subtitle v-bind="attrs" v-on="on">
+              {{ DisplayDate(itemPlanning.start) }}
+              <v-chip outlined x-small>+{{ nbDates }} dates</v-chip>
+            </v-card-subtitle>
+          </template>
+          <v-date-picker
+            :events="tableDates"
+            event-color="green lighten-1"
+            readonly
+            elevation="15"
+            no-title
+            :show-current="tableDates[0]"
+            width="200"
+            hight="60"
+          ></v-date-picker>
+        </v-menu>
         <v-spacer></v-spacer>
-        <v-badge v-if="nbLike > 0" overlap color="error" :content="nbLike">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon v-on="on">
-                <v-icon @click="addLike()">mdi-heart</v-icon>
-              </v-btn>
-            </template>
-            <span>j'aime</span>
-          </v-tooltip>
-        </v-badge>
-        <v-tooltip v-else bottom>
+
+        <v-tooltip bottom v-if="nbLike > 0">
           <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on">
-              <v-icon @click="addLike()">mdi-heart</v-icon>
+            <v-btn x-small plain v-on="on">
+              <v-icon color="pink" @click="addLike()">mdi-heart</v-icon
+              >{{ nbLike }}
             </v-btn>
           </template>
           <span>j'aime</span>
         </v-tooltip>
 
-        <v-tooltip bottom>
+        <v-tooltip v-else bottom>
           <template v-slot:activator="{ on }">
-            <v-btn icon v-on="on">
-              <v-icon @click="sendEmail">mdi-share-variant-outline</v-icon>
+            <v-btn x-small plain v-on="on">
+              <v-icon @click="addLike()">mdi-heart</v-icon>
             </v-btn>
           </template>
-          <span>partager</span>
+          <span>j'aime</span>
         </v-tooltip>
+        <reseauxSociaux :display="share" :content="getHtml" />
+
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <v-icon v-on="on" x-small v-for="index in getPrix" :key="index"
+            <v-icon v-on="on" small v-for="index in getPrix" :key="index"
               >mdi-currency-eur</v-icon
             >
           </template>
@@ -83,36 +90,35 @@ import axios from 'axios'
 
 import mixFunctions from '@/components/commun/Functions'
 import displayImage from '@/components/commun/DisplayImage'
-import EmailManagement from '@/components/commun/EmailManagement'
+import reseauxSociaux from '@/components/commun/ReseauxSociaux'
 
 import { mapState } from 'vuex'
 
 export default {
   data () {
     return {
+      share: false,
       isAdmin: false,
       urlImg: null,
       displayImg: false,
       calculNbLike: false,
-      currentEvent: {}
+      currentEvent: {},
+      allDates: false,
+      nbDates: 0,
+      tableDates: []
     }
   },
   components: {
     displayImage,
-    EmailManagement
+    reseauxSociaux
   },
   name: 'displayEvent',
   props: ['itemPlanning', 'taille'],
   mixins: [mixFunctions],
 
   computed: {
-    ...mapState('event', ['events']), // assuming you are using namespaced modules
+    ...mapState('event', ['events', 'planning']), // assuming you are using namespaced modules
 
-    DateDebut: function () {
-      return moment(this.itemPlanning.start, 'YYYY-MM-DD HH:mm')
-        .lang('fr')
-        .format('DD MMMM HH:mm')
-    },
     DateFin: function () {
       return moment(this.itemPlanning.end, 'YYYY-MM-DD HH:mm')
         .lang('fr')
@@ -125,8 +131,9 @@ export default {
       return {
         nom: this.currentEvent.nom,
         adr: this.currentEvent.localisation.adr,
-        debut: this.DateDebut,
-        fin: this.DateFin,
+        url: this.currentEvent.urlsite,
+        debut: this.DisplayDate(this.itemPlanning.start),
+        fin: this.DisplayDate(this.itemPlanning.end),
         description: this.currentEvent.minisite
           ? this.currentEvent.minisite
           : 'Pas de description'
@@ -141,14 +148,26 @@ export default {
   },
 
   created () {
+    // on se positionne sur l'event
     let searchIdEvent = this.itemPlanning.eventid
     this.currentEvent = this.events.find(
       (element) => element.id === searchIdEvent
     )
-    console.log(this.currentEvent)
+
+    let data = this.planning.filter((element) => {
+      return element.eventid === this.itemPlanning.eventid
+    })
+    this.nbDates = data.length
+    data.forEach((ligne) => {
+      this.tableDates.push(ligne.start.slice(0, ligne.start.indexOf(' ')))
+    })
   },
 
   methods: {
+    DisplayDate (date) {
+      return moment(date, 'YYYY-MM-DD HH:mm').lang('fr').format('DD MMMM HH:mm')
+    },
+
     detailEvent (element) {
       this.$router.push({
         name: 'clientdetailEvent',
@@ -194,5 +213,14 @@ export default {
 <style scoped>
 .v-badge--bordered {
   border-width: none;
+}
+.cardColor {
+  opacity: 0.8 !important;
+}
+.badgeLike .v-badge__badge {
+  padding: 2px 2px;
+  font-size: 9px;
+  min-width: 10px;
+  height: 10px;
 }
 </style>
