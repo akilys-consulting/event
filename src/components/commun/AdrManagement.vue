@@ -32,8 +32,6 @@ export default {
     }
   },
   created () {
-    console.log('adrManagement')
-    console.log(this.adresse)
     if (typeof this.adresse !== 'undefined') this.localeadr = this.adresse
   },
   mounted () {

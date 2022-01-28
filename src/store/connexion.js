@@ -66,8 +66,6 @@ const actions = {
   // data.account => infos du formulaire de création du compte
   createProfil ({ dispatch }, data) {
     return new Promise((resolve, reject) => {
-      console.log('createProfil')
-
       fb.profilCollection
         .doc(data.user.uid)
         .set({
@@ -200,7 +198,6 @@ const actions = {
         })
         .catch((error) => {
           let message = { code: 'ECNX', param: '' }
-          console.log('error.code' + error.code)
           switch (error.code) {
             case 'auth/user-not-found':
               message.param = 'utilisateur inconu'
@@ -236,15 +233,12 @@ const actions = {
       fb.auth
         .signInWithPopup(provider)
         .then((result) => {
-          console.log('cnxGoogle')
           // connexion réussi
           // on regarder si profil initialisé
-          console.log(result)
           context.commit('setUser', result.user)
           resolve(true)
         })
         .catch((err) => {
-          console.log(err) // This will give you all the information needed to further debug any errors
           reject(err)
         })
     })
@@ -257,15 +251,12 @@ const actions = {
       fb.auth
         .signInWithPopup(provider)
         .then((result) => {
-          console.log('cnxfacebook')
           // connexion réussi
           // on regarder si profil initialisé
-          console.log(result)
           context.commit('setUser', result.user)
           resolve(true)
         })
         .catch((err) => {
-          console.log(err) // This will give you all the information needed to further debug any errors
           reject(err)
         })
     })
@@ -298,15 +289,8 @@ const actions = {
   },
 
   loadProfil ({ state, dispatch, commit, getters }) {
-    console.log(
-      'appel loadProfil' +
-        getters.isAuthenticated +
-        ' ' +
-        getters.isProfilLoaded
-    )
     return new Promise((resolve, reject) => {
       if (getters.isAuthenticated && !getters.isProfilLoaded) {
-        console.log('before await')
         fb.profilCollection
           .doc(state.user.uid)
           .get()
@@ -315,7 +299,6 @@ const actions = {
               commit('setProfil', data.data())
             } else {
               // profil par defaut
-              console.log('default profil')
               commit('setProfil', defaultProfil)
             }
             dispatch('getProfilPhoto')
@@ -484,7 +467,6 @@ const mutations = {
     state.isconnected = false
   },
   setUser (state, connexion) {
-    console.log('connexion user' + connexion)
     if (connexion) {
       state.user = connexion
       state.isconnected = true

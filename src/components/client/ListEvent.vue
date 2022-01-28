@@ -31,9 +31,19 @@
         </v-row>
       </template>
       <template v-slot:no-data>
-        <v-img :src="require('@/assets/rechercheko.jpg')"> </v-img>
+        <v-alert
+          class="pa-md-8 mx-lg-auto"
+          color="#2A3B4D"
+          dark
+          icon="mdi-database-search-outline"
+          width="400"
+          height="150"
+        >
+          Malgré tous nos efforts, aucun évènement correspond à votre recherche
+          Nous travaillons chaque jour à enrichir notre base
+        </v-alert>
       </template>
-      <template v-slot:footer>
+      <template v-if="numberOfPages > 1" v-slot:footer>
         <v-row align="center" justify="center">
           <v-btn
             x-small
@@ -133,15 +143,15 @@ export default {
     getItemsPerPage () {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
-          return 6
+          return 20
         case 'sm':
-          return 8
-        case 'md':
-          return 6
-        case 'lg':
           return 12
+        case 'md':
+          return 12
+        case 'lg':
+          return 24
         case 'xl':
-          return 8
+          return 24
       }
     }
   },

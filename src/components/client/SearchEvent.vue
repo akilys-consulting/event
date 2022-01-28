@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" md="auto">
+    <v-col cols="12" sm="auto">
       <v-menu
         ref="menu_date"
         v-model="menu_date"
@@ -32,23 +32,34 @@
         ></v-date-picker>
       </v-menu>
     </v-col>
-    <v-col cols="12" md="3">
+    <v-col cols="12" sm="auto">
       <v-chip-group v-model="categorie">
         <v-chip
           v-for="cat in categorie"
           :key="cat.nom"
           filter
           :color="cat.couleur"
+          class="pa-2"
         >
           {{ cat.nom }}
         </v-chip>
         <v-menu offset-y rounded>
           <template v-slot:activator="{ on, attrs }">
-            <v-chip v-on="on" v-bind="attrs">+</v-chip>
+            <v-btn
+              class="pa-2"
+              x-small
+              v-on="on"
+              color="primary"
+              elevation="0"
+              v-bind="attrs"
+              fab
+              >+
+            </v-btn>
           </template>
-          <v-card class="py-4 px-4">
+          <v-card class="px-4 pb-2 cardColor">
             <v-chip
-              v-for="cat in categorie"
+              class="mr-2 mt-2"
+              v-for="cat in getCategoriesSecondaries"
               :key="cat.nom"
               filter
               :color="cat.couleur"
@@ -59,7 +70,7 @@
       </v-chip-group>
     </v-col>
 
-    <v-col cols="12" md="3">
+    <v-col cols="12" sm="auto">
       <v-text-field
         flat
         v-model="critere"
@@ -69,7 +80,7 @@
         @click:clear="critere = null"
       ></v-text-field>
     </v-col>
-    <v-col cols="12" md="3">
+    <v-col cols="12" sm="auto">
       <v-switch
         dense
         flat
@@ -100,6 +111,7 @@ export default {
   computed: {
     ...mapGetters('event', [
       'getCategoriesMaster',
+      'getCategoriesSecondaries',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_DT',
       'getEVT_SRCH_CRITERE',
@@ -120,17 +132,13 @@ export default {
         return this.getCategoriesMaster
       },
       set (value) {
-        console.log(
-          typeof value === 'undefined'
-            ? value
-            : this.getCategoriesMaster[value].nom
+        let allValues = this.getCategoriesMaster.concat(
+          this.getCategoriesSecondaries
         )
 
         this.$store.commit(
           'event/setEVT_SRCH_CAT',
-          typeof value === 'undefined'
-            ? value
-            : this.getCategoriesMaster[value].nom
+          typeof value === 'undefined' ? value : allValues[value].nom
         )
       }
     },
@@ -167,4 +175,8 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.cardColor {
+  opacity: 0.8;
+}
+</style>

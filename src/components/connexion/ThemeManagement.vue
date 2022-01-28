@@ -39,7 +39,6 @@ export default {
   }),
 
   mounted () {
-    console.log('theme')
     this.setTheme(this.currentProfil.theme.name)
     this.$vuetify.theme.dark = this.currentProfil.theme.dark
   },
@@ -50,7 +49,6 @@ export default {
       const dark = theme.dark
       const light = theme.light // set themes
       Object.keys(dark).forEach((i) => {
-        console.log('set' + dark[i])
         this.$vuetify.theme.themes.dark[i] = dark[i]
       })
       Object.keys(light).forEach((i) => {

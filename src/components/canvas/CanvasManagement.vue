@@ -124,7 +124,6 @@ export default {
     })
 
     this.canvas.on('selection:created', (evt) => {
-      console.log('selection:created')
       if (evt.target !== null) {
         evt.target.set({
           borderColor: self.borderColor,
@@ -209,45 +208,49 @@ export default {
       let self = this
 
       // charge le fond
-      this.afficherFondPlan().then(() => {
-        // une fois chargé complétement, on charge les stands
-        self
-          .chargerStand()
-          .then((data) => {
-            // on affiche les stands chargés
-            self.afficherStand()
-            // dessiner les resa
-            // self.chargerResa();
-            // console.log("charger resa");
-            // on affcihe la grille
-            self.afficherGrid()
-            // on fait le render
-            self.canvas.renderAll()
-            // on active l'aimant sur la grille pur les emplacements
-            self.canvas.on('object:moving', function grid (options) {
-              if (options.target.get('type') === 'emplacement') {
-                options.target.set({
-                  left: Math.round(options.target.left / self.grid) * self.grid,
-                  top: Math.round(options.target.top / self.grid) * self.grid
-                })
-              }
+      this.afficherFondPlan()
+        .then(() => {
+          // une fois chargé complétement, on charge les stands
+          self
+            .chargerStand()
+            .then((data) => {
+              // on affiche les stands chargés
+              self.afficherStand()
+              // dessiner les resa
+              // self.chargerResa();
+              // console.log("charger resa");
+              // on affcihe la grille
+              self.afficherGrid()
+              // on fait le render
+              self.canvas.renderAll()
+              // on active l'aimant sur la grille pur les emplacements
+              self.canvas.on('object:moving', function grid (options) {
+                if (options.target.get('type') === 'emplacement') {
+                  options.target.set({
+                    left:
+                      Math.round(options.target.left / self.grid) * self.grid,
+                    top: Math.round(options.target.top / self.grid) * self.grid
+                  })
+                }
+              })
+              // on arret le sablier
+              this.$store.dispatch('stopWaiting')
             })
-            // on arret le sablier
-            this.$store.dispatch('stopWaiting')
+            .catch((err) => {
+              self.$store.dispatch('displayMessage', {
+                code: 'LOAS',
+                param: err.message
+              })
+              this.$store.dispatch('stopWaiting')
+            })
+        })
+        .catch((err) => {
+          self.$store.dispatch('displayMessage', {
+            code: 'LOAS',
+            param: err.message
           })
-          .catch((err) => {
-            self.$store.dispatch('displayMessage', {
-              code: 'LOAS',
-              param: err.message
-            })
-            this.$store.dispatch('stopWaiting')
-          })
-      }).catch((err) => {
-            self.$store.dispatch('displayMessage', {
-              code: 'LOAS',
-              param: err.message
-            })
-            this.$store.dispatch('stopWaiting')})
+          this.$store.dispatch('stopWaiting')
+        })
     },
 
     chargerStand: function () {
@@ -391,7 +394,7 @@ export default {
       let plan_fond = this.$store.getters['plan/getPlanPlanJson']
 
       return new Promise((resolve, reject) => {
-        if (typeof plan_fond !== 'undefined' && plan_fond ) {
+        if (typeof plan_fond !== 'undefined' && plan_fond) {
           self.canvas.loadFromJSON(plan_fond, function () {
             resolve(true)
           })
@@ -695,13 +698,11 @@ export default {
           })
           obj.setCoords()
         })
-      } else console.log('on a un seul object')
+      }
 
       this.canvas.renderAll()
     },
     alignCentre () {
-      let self = this
-      let groupWidth = this.canvas.getActiveObject().width
       if (this.canvas.getActiveObject().type == 'activeSelection') {
         let test = this.canvas.getActiveObject().getObjects()
         test.forEach((obj) => {
@@ -711,7 +712,7 @@ export default {
           })
           obj.setCoords()
         })
-      } else console.log('on a un seul object')
+      }
 
       this.canvas.renderAll()
     },

@@ -214,7 +214,6 @@ export default {
     analyse (data) {
       if (data) {
         this.$store.commit('setWaiting', true)
-        console.log('debut analyse')
         // analyse des fichiers csv
         this.getCsvFile()
       }
@@ -229,7 +228,6 @@ export default {
       let self = this
       JSZip.loadAsync(this.file).then(function (content) {
         Object.keys(content.files).forEach(function (filename) {
-          console.log('fichier ' + filename)
           switch (filename.split('.').pop()) {
             case 'csv': // lecture d'un fichier event
               content.files[filename].async('string').then(function (fileData) {
@@ -265,7 +263,6 @@ export default {
                         .dataUrlToFile(image64, filename.split('.').pop())
                         .then((reponse) => {
                           // on resize l'image
-                          console.log('avant consertion image' + filename)
 
                           self
                             .resizeImage({
@@ -275,7 +272,6 @@ export default {
                               type: filename.split('.').pop()
                             })
                             .then((resp) => {
-                              console.log('consertion image')
                               resolve({ type: resp.type, img: resp.data })
                             })
                         })
@@ -404,8 +400,6 @@ export default {
 
     saveEVent () {
       return new Promise((resolve, reject) => {
-        console.log('appel data' + this.Event2insert.nom)
-
         let imgBase64 = this.Event2insert.image.img.replace(
           /data:image\/.*;base64,/,
           ''
@@ -434,7 +428,6 @@ export default {
                 contentType: 'image/' + imgType
               })
               .then(function () {
-                console.log('save ok' + EventId)
                 resolve(true)
               })
               .catch((error) => {
@@ -504,9 +497,7 @@ export default {
           // recherche des coordonnées
           let adr = retour.data.features[0].properties
           let coord = retour.data.features[0].geometry.coordinates
-          console.log(
-            adr.label + ' ' + Number(adr.score) + Number(adr.score) > 0.8
-          )
+
           if (Number(adr.score) > 0.8) {
             response.localisation = {
               adr: adr.label,

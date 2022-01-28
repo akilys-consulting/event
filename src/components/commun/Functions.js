@@ -135,10 +135,9 @@ export default {
           }
           // When there's an error during load, reject the promise
           img.addEventListener('error', function imgOnError (error) {
-            console.log(error)
+            reject(error)
           })
         } catch (error) {
-          console.log('Error while image resize: ', error)
           reject(error)
         }
       })

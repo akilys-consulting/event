@@ -216,7 +216,6 @@ export const store = new Vuex.Store({
       state.modificationEnCours = false
     },
     setDisplayMenuOff (state) {
-      console.log()
       state.display = false
     },
     setDisplayMenuOn (state) {

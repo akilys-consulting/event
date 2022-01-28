@@ -8,7 +8,9 @@
     <v-card>
       <v-btn
         :color="network.color"
-        icon
+        class="ma-1"
+        dark
+        x-small
         fab
         @click="share(network.name)"
         v-for="network in networks"
@@ -67,7 +69,7 @@ export default {
           name: 'SMS',
           icon: 'mdi-message-outline',
           color: '#333333',
-          url: 'sms:?body=@t%0D%0A@u%0D%0A@d'
+          url: 'sms:&body=@t%0D%0A@u%0D%0A@d'
         },
         {
           network: 'twitter',
@@ -93,8 +95,6 @@ export default {
       this.$store.commit('event/setActiveEmailWin')
     },
     share (selectedName) {
-      console.log('value' + selectedName)
-      console.log(this.networks)
       let selectedNetwork = this.networks.find(
         (element) => element.name === selectedName
       )
@@ -113,7 +113,15 @@ export default {
 
       return link
         .replace(/@tu/g, '&via=' + encodeURIComponent('sortietoulouse'))
-        .replace(/@u/g, encodeURIComponent(this.content.url))
+        .replace(
+          /@u/g,
+          encodeURIComponent(
+            'https://akilys-dev.web.app//network/' +
+              this.content.id +
+              '/planningid/' +
+              this.content.planningId
+          )
+        )
         .replace(/@t/g, encodeURIComponent(this.content.nom))
         .replace(
           /@d/g,

@@ -17,10 +17,7 @@
         </template>
 
         <v-list>
-          <v-list-item-group
-            @change="console.log(value)"
-            v-model="selectedType"
-          >
+          <v-list-item-group v-model="selectedType">
             <v-list-item
               v-for="(item, i) in typeToLabel"
               :value="item.type"

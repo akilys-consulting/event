@@ -58,7 +58,6 @@ export default {
     ...mapState(['waiting', 'message'])
   },
   created () {
-    console.log('created App')
     this.$store.dispatch('plan/loadBanqueImage')
   }
 }

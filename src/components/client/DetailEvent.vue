@@ -14,6 +14,7 @@
       <v-col lg="6" sm="6" xs="12" md="6"
         ><v-avatar tile size="300">
           <displayImage
+            :key="refresh"
             :fileName="event.id"
             rep="image_event"
             height="100%"
@@ -29,7 +30,7 @@
           <v-divider></v-divider>
           <v-card-subtitle
             ><span class="orange--text">Le {{ DateDebut }}</span>
-            Séances à
+            à
             <span class="orange--text" v-for="item in getseances" :key="item">
               {{ item }}
             </span>
@@ -49,7 +50,8 @@
               :href="event.urlsite"
               target="_blank"
             >
-              <v-icon>mdi-search-web</v-icon> site internet
+              <v-icon>mdi-information-outline</v-icon>
+              en savoir plus
             </v-btn>
             <add-to-calendar
               :title="event.nom"
@@ -75,8 +77,8 @@
 
     <v-row no-gutters
       ><v-col cols="12">
-        <v-card-subtitle>Sur la carte </v-card-subtitle>
         <l-map
+          :key="refresh"
           :zoom="zoom"
           :options="mapOptions"
           :center="center"
@@ -116,30 +118,39 @@ export default {
   },
   data () {
     return {
+      refresh: false,
+      /* fond de carte */
       url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-      center: [],
+      center: [0, 0],
       zoom: 15,
       mapOptions: {
         zoomSnap: 0.5
       },
-      event: { nom: null, minisite: null },
-      currentPlanning: null,
-
-      makerEvent: null,
+      event: {
+        id: null,
+        nom: null,
+        minisite: null,
+        localisation: { adr: null, latLng: { lat: 12.2, lng: 18.7 } }
+      },
+      currentPlanning: { start: null, end: null },
       aad2calendar: false,
       warehouse_icon: icon({
         iconUrl: marker,
         iconSize: [32, 37],
         iconAnchor: [16, 37]
-      })
+      }),
+      planningId: null,
+      eventId: null
     }
   },
 
   computed: {
     ...mapState('event', ['planning', 'events']),
+    /*
+      formattage date début pour affichage */
     DateDebut: function () {
       return moment(this.currentPlanning.start, 'YYYY-MM-DD')
-        .lang('fr')
+        .locale('fr')
         .format('DD MMMM')
     },
     HeureFin: function () {
@@ -168,23 +179,15 @@ export default {
     getseances () {
       let heures = []
       let self = this
-      console.log(
-        'start heure' +
-          this.$route.params.currentPlanning +
-          ' ' +
-          moment(self.currentPlanning.start).format('YYYY-MM-DD')
-      )
       let filteredDates = this.planning.filter(
-        (element) => element.id === self.$route.params.currentPlanning
+        (element) => element.id === self.planningId
       )
 
       let test = filteredDates.filter(
         (element) =>
-          moment(this.currentPlanning.start).format('YYYY-MM-DD') ===
-          moment(self.currentPlanning.start).format('YYYY-MM-DD')
+          moment(element.start).format('YYYY-MM-DD') ===
+          moment(this.currentPlanning.start).format('YYYY-MM-DD')
       )
-
-      console.log('nb elment ' + test.length)
 
       test.forEach((element) => {
         console.log(
@@ -206,37 +209,57 @@ export default {
       return heures
     }
   },
-  created () {
+  async created () {
     //
     // on efface la fentre de recherche
-    this.$store.commit('event/clearActiveSearch')
     // on récupére l'event
-    if (typeof this.$route.params.currentPlanning === 'undefined') {
-      this.refreshList()
-    }
+    // on a deux appels possible
+    // via l'appli via les réseaux sociaux
+    // appel via les réseaux 2 paramètres eventid et planningid
+    console.log('nom' + this.$route.name)
+    if (this.$route.name === 'detailEventNetwork') {
+      this.planningId = this.$route.params.planningId
+      this.eventId = this.$route.params.eventId
 
-    this.currentPlanning = this.planning.find(
-      (element) => element.id === this.$route.params.currentPlanning
-    )
-    this.event = this.events.find(
-      (element) => element.id === this.currentPlanning.eventid
-    )
+      this.$store.commit('setDisplayMenuOn')
+      this.$store.commit('event/setActiveSearch')
+      this.$store
+        .dispatch('event/loadOnePlanning', this.$route.params.eventId)
+        .then(() => {
+          this.event = this.events.find(
+            (element) => element.id === this.$route.params.eventId
+          )
+          // l'event est chargé , on récupère les données planning
+          this.currentPlanning = this.planning.find(
+            (element) => element.id === this.$route.params.planningId
+          )
+          this.center = [
+            this.event.localisation.latLng.lat,
+            this.event.localisation.latLng.lng
+          ]
+          console.log('lat' + this.event.localisation.latLng.lat)
+          this.refresh = true
+        })
+    } else {
+      this.$store.commit('event/clearActiveSearch')
 
-    this.center = [
-      this.event.localisation.latLng.lat,
-      this.event.localisation.latLng.lng
-    ]
+      this.planningId = this.$route.params.currentPlanning
 
-    console.log(
-      'marker' +
-        this.event.localisation.latLng.lat +
-        ' ' +
+      if (typeof this.planningId === 'undefined') {
+        this.refreshList()
+      }
+      this.currentPlanning = this.planning.find(
+        (element) => element.id === this.planningId
+      )
+
+      this.event = this.events.find(
+        (element) => element.id === this.currentPlanning.eventid
+      )
+      this.center = [
+        this.event.localisation.latLng.lat,
         this.event.localisation.latLng.lng
-    )
-    this.makerEvent = [
-      this.event.localisation.latLng.lat,
-      this.event.localisation.latLng.lng
-    ]
+      ]
+    }
   },
   methods: {
     refreshList () {

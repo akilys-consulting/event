@@ -148,7 +148,34 @@ const actions = {
       })
     })
   },
-
+  // chargement des events et du planning depuis les events en base
+  loadOnePlanning ({ state, dispatch, rootState, rootGetters }, eventID) {
+    state.events = []
+    state.planning = []
+    // récupération du profil
+    return new Promise((resolve, reject) => {
+      let execute = fb.eventCollection
+      if (eventID) {
+        execute = execute.doc(eventID)
+      }
+      console.log('event ' + eventID)
+      execute
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            let record = doc.data()
+            record.id = doc.id
+            state.events.push(record)
+            // on décode la programmation pour définir un planning
+            dispatch('decodePlanning', record)
+            resolve(true)
+          } else reject(false)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  },
   // chargement des events en mémoire depuis la base
   loadEvent ({ state }) {
     state.events = []
@@ -176,16 +203,10 @@ const actions = {
     // récupération du profil
     return new Promise((resolve, reject) => {
       let execute = fb.eventCollection
-      console.log(
-        'connected' +
-          rootGetters['cnx/isProfilLoaded'] +
-          rootState.cnx.currentProfil.cleAdmin
-      )
       if (
         rootGetters['cnx/isProfilLoaded'] &&
         rootState.cnx.currentProfil.cleAdmin
       ) {
-        console.log('cle' + rootState.cnx.currentProfil.cleAdmin)
         execute = execute.where(
           'cleAdmin',
           '==',
@@ -196,7 +217,6 @@ const actions = {
         .get()
         .then(function (querySnapshot) {
           querySnapshot.forEach(function data (result) {
-            console.log('loaded')
             let record = result.data()
             record.id = result.id
             state.events.push(record)
@@ -355,6 +375,11 @@ const getters = {
   getCategoriesMaster (state) {
     return state.CONST_CATEGORIE.filter((element) => {
       return element.master === 1
+    })
+  },
+  getCategoriesSecondaries (state) {
+    return state.CONST_CATEGORIE.filter((element) => {
+      return element.master != 1
     })
   },
   getColorCategorie: (state) => (cat) => {

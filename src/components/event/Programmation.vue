@@ -307,7 +307,6 @@ export default {
       return date ? moment(date).format('DD/MM/YYYY') : null
     },
     deleteItem (item) {
-      console.log('deleteItem')
       this.currentIndex = this.planning.indexOf(item)
       this.$store.dispatch('displayQuestion', { code: 'QSOS' })
 
@@ -348,7 +347,6 @@ export default {
         duree = moment.duration(this.editedItem.heureFin, 'HH:mm')
         let momentDtFin = moment(this.editedItem.dtFin, 'YYYY MM DD').add(duree)
 
-        console.log(moment(momentDtFin).isBefore(momentDtDebut))
         if (!moment(momentDtFin).isBefore(momentDtDebut)) {
           if (this.editedItem.dtDebut) {
             if (this.editedIndex > -1) {

@@ -31,7 +31,11 @@ export const routes = [
     name: 'clientdetailEvent',
     component: detailEvent
   },
-
+  {
+    path: '/network/:eventId/planning/:planningId',
+    name: 'detailEventNetwork',
+    component: detailEvent
+  },
   {
     path: '/profil',
     name: 'voirProfil',

@@ -127,9 +127,6 @@ export default {
               type: typeFile[1]
             })
             .then((resp) => {
-              console.log(
-                'enregistrement du fichier' + self.fileName + self.rep + resp
-              )
               fb.file
                 .ref()
                 // on va détruire l'image qui existait

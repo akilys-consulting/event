@@ -41,8 +41,16 @@
               elevation="2"
               v-if="errorMsg !== ''"
               >{{ errorMsg }}</v-alert
+            ><v-row>
+              <v-col cols="6"
+                ><v-btn plain @click="login" color="primary" block
+                  >connexion</v-btn
+                >
+              </v-col>
+              <v-col cols="6"
+                ><v-btn tabindex="8" plain to="/">Annuler</v-btn>
+              </v-col></v-row
             >
-            <v-btn plain @click="login" color="primary" block>connexion</v-btn>
           </v-form>
         </v-col>
       </v-row>
@@ -91,10 +99,6 @@ export default {
   mounted () {
     this.$store.commit('setDisplayMenuOff')
     console.log('login:Mounted')
-  },
-  destroyed () {
-    var test = document.getElementById('app')
-    test.style.backgroundImage = 'none'
   },
   watch: {
     password () {
@@ -146,18 +150,15 @@ export default {
         })
         .then(() => {
           // le user est connecté on peut récupérer son profil
-          console.log('user connecté')
 
           this.$store
             .dispatch('cnx/loadProfil')
             .then(() => {
               // utilisateur connecté et profil chargé
-              console.log('profil chargé')
               self.$store.dispatch('displayMessage', {
                 code: 'CNXU',
                 param: null
               })
-              console.log('chargement page principale')
               this.$router.go(-1)
             })
             .catch((err) => {
@@ -187,19 +188,16 @@ export default {
           this.$store
             .dispatch('cnx/loadProfil')
             .then(() => {
-              console.log('profil-ok')
               this.$store.dispatch('displayMessage', {
                 code: 'CNXU',
                 param: null
               })
-              console.log('load default page')
               this.$store.commit('setDisplayMenuOn')
               this.$router.push('/')
             })
             .catch((err) => {
               // le chargement du login a échoué
               // on déconnecte
-              console.log('profil-erreur' + err.message)
               this.$router.push('/')
               this.$store.dispatch('displayMessage', {
                 code: 'ECNX',

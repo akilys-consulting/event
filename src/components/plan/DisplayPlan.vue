@@ -62,20 +62,14 @@ export default {
   props: ['itemPlan'],
   mixins: [mixFunctions],
 
-created() {
-  console.log('item : '+ this.itemPlan.id)
-},
-computed: {
-  getImgPlan(){
-    if (this.itemPlan.img_plan )
-    return this.itemPlan.img_plan
-    else
-    return require('@/assets/defautPlan.jpg')
-  }
-},
+  computed: {
+    getImgPlan () {
+      if (this.itemPlan.img_plan) return this.itemPlan.img_plan
+      else return require('@/assets/defautPlan.jpg')
+    }
+  },
   methods: {
     goto (element, destination) {
-      console.log('element' + element)
       this.$store.commit('plan/setCurrentPlan', element)
       this.$router.push({ name: destination })
     }

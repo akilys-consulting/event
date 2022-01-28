@@ -129,6 +129,8 @@ export default {
     },
     getHtml () {
       return {
+        id: this.currentEvent.id,
+        planningId: this.itemPlanning.id,
         nom: this.currentEvent.nom,
         adr: this.currentEvent.localisation.adr,
         url: this.currentEvent.urlsite,
@@ -190,7 +192,6 @@ export default {
     // add like to event
     async addLike () {
       await this.readIP().then((response) => {
-        alert('ip' + response.data.ip)
         if (
           !this.currentEvent.like.find(
             (element) => element === response.data.ip

@@ -130,7 +130,6 @@ export default {
   mounted () {
     var self = this
     this.$store.dispatch('startWaiting')
-    console.log('arrivé sur select plan')
     fb.planCollection
       .get()
       // ajouter condition actif
@@ -138,7 +137,6 @@ export default {
         if (querySnapshot.empty) {
           self.$store.dispatch('displayMessage', 'SSNS')
         } else {
-          console.log('querySnapshot')
           querySnapshot.forEach(function data (plan) {
             var currentPlan = plan.data()
             currentPlan.id = plan.id

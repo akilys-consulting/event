@@ -100,8 +100,6 @@ export default {
   },
   created () {
     this.dataForm = Object.assign({}, this.infoLogin, this.currentProfil)
-    console.log('mix data')
-    console.log(this.dataForm)
   },
   methods: {
     async signUp () {

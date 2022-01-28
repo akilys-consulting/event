@@ -86,7 +86,6 @@ export default {
   mounted () {
     this.date = this.getAlerteDate
     this.categorie = this.getAlerteCategorie
-    console.log('activate' + this.currentProfil.alerte.activate)
   },
   methods: {
     formatedDate (date) {
