@@ -7,8 +7,14 @@
     >
       <v-row @click="detailEvent(itemPlanning)">
         <v-col cols="6">
-          <v-card-title>{{ itemPlanning.category }} </v-card-title>
-          <v-card-subtitle>{{ currentEvent.nom }} </v-card-subtitle>
+          <v-card-subtitle
+            v-for="categorie in itemPlanning.category"
+            :key="categorie"
+            >{{ categorie }}
+          </v-card-subtitle>
+          <v-card-subtitle class="orange--text"
+            >{{ currentEvent.nom }}
+          </v-card-subtitle>
         </v-col>
         <v-col cols="6">
           <v-avatar tile size="125"

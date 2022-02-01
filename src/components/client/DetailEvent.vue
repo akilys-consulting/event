@@ -26,32 +26,42 @@
       <v-col lg="6" sm="6" xs="12" md="6">
         <v-card flat>
           <v-card-title>{{ event.nom }}</v-card-title>
-          <v-card-subtitle> {{ event.localisation.adr }}</v-card-subtitle>
-          <v-divider></v-divider>
           <v-card-subtitle
-            ><span class="orange--text">Le {{ DateDebut }}</span>
-            à
-            <span class="orange--text" v-for="item in getseances" :key="item">
-              {{ item }}
-            </span>
-            <div>
-              {{ event.categorie }} - organisé par : {{ event.organisateur }}
+            >organisateur : {{ event.organisateur }}
+          </v-card-subtitle>
+
+          <v-divider></v-divider>
+          <v-card-subtitle>
+            {{ event.localisation.adr }}
+            <div class="orange--text">
+              Le {{ DateDebut }}
+              à
+              <span class="orange--text" v-for="item in getseances" :key="item">
+                {{ item }}
+              </span>
+            </div></v-card-subtitle
+          >
+          <v-divider></v-divider>
+
+          <v-card-subtitle>
+            <div v-for="cat in event.categorie" :key="cat">
+              {{ cat }}
             </div>
           </v-card-subtitle>
           <v-divider></v-divider>
 
           <v-card-title>Description</v-card-title>
-          <v-card-text>{{ event.minisite }} </v-card-text>
+          <v-card-text v-html="event.minisite"> </v-card-text>
           <v-card-actions>
             <v-btn
               plain
-              calss="ma-1"
+              calss="ma-1 btn"
               v-if="event.urlsite"
               :href="event.urlsite"
               target="_blank"
             >
               <v-icon>mdi-information-outline</v-icon>
-              en savoir plus
+              <span class="no-uppercase">en savoir plus</span>
             </v-btn>
             <add-to-calendar
               :title="event.nom"
@@ -63,7 +73,8 @@
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-btn calss="ma-1" plain v-on="on">
-                      <v-icon>mdi-calendar-plus</v-icon>calendrier
+                      <v-icon>mdi-calendar-plus</v-icon
+                      ><span class="no-uppercase">ajouter calendrier</span>
                     </v-btn>
                   </template>
                   <span>ajouter à votre calendrier</span>
@@ -277,5 +288,8 @@ export default {
 }
 .vue-add-to-calendar {
   text-decoration: none;
+}
+.no-uppercase {
+  text-transform: none !important;
 }
 </style>

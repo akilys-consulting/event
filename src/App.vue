@@ -17,9 +17,23 @@
       </v-main>
 
       <v-footer app height="40">
-        <v-col class="text-center" cols="12">
-          <strong>Sortie-toulouse@{{ new Date().getFullYear() }} </strong>
-        </v-col>
+        <strong>Sortie-toulouse@{{ new Date().getFullYear() }} </strong>
+        <v-spacer></v-spacer>
+        <v-menu nudge-top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn x-small plain v-on="on"
+              ><span class="no-uppercase">version 0.3-AKILYS </span></v-btn
+            >
+          </template>
+          <v-card>
+            <v-card-subtitle>SARL AKILYS </v-card-subtitle>
+            <v-card-subtitle
+              >1, impasse du Colonel Jean-Stanislas Remy
+              <div>31200 Toulouse</div></v-card-subtitle
+            >
+            <v-card-subtitle>Hébergé par Google Hosting</v-card-subtitle>
+          </v-card>
+        </v-menu>
       </v-footer>
     </v-app>
     <v-bottom-sheet
@@ -56,9 +70,6 @@ export default {
   components: { navbar, chargement },
   computed: {
     ...mapState(['waiting', 'message'])
-  },
-  created () {
-    this.$store.dispatch('plan/loadBanqueImage')
   }
 }
 </script>
@@ -68,5 +79,8 @@ export default {
 }
 #app {
   background-image: url('~@/assets/fond.jpg');
+}
+.no-uppercase {
+  text-transform: none !important;
 }
 </style>

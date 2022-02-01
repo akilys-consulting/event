@@ -278,7 +278,7 @@ export default {
   methods: {
     displayFormProg () {
       this.dialog = true
-      this.$refs.form.reset()
+      // this.$refs.form.reset()
     },
     displayDtFr (dt) {
       return moment(dt).format('DD/MM/YYYY')

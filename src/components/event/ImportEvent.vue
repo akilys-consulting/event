@@ -389,16 +389,18 @@ export default {
         }
       })
       // sauvegarde du dernier enregistrement
-      this.saveEVent().then((data) => {
+      this.saveEvent().then((data) => {
         this.nbInserted = (nbreaded / this.readedEvent.length) * 100
-        this.stepCpt = 3
+        if (nbreaded >= this.readedEvent.length) this.stepCpt = 3
+        // gestion des alertes
+        this.$store.dispatch('event/ManageAlerte')
       })
     },
 
     // gestion de la sauvegarde de l'event data + image
     // on récupérer les info de la variable this.Event2insert initialisée par saveAnalysedEvents
 
-    saveEVent () {
+    saveEvent () {
       return new Promise((resolve, reject) => {
         let imgBase64 = this.Event2insert.image.img.replace(
           /data:image\/.*;base64,/,
@@ -419,7 +421,6 @@ export default {
           .dispatch('event/importEvent', this.Event2insert)
           .then((data) => {
             let EventId = data.id
-            console.log('id event ' + EventId)
             // on sauvegarde l'image
             fb.file
               .ref()
@@ -428,6 +429,7 @@ export default {
                 contentType: 'image/' + imgType
               })
               .then(function () {
+                //
                 resolve(true)
               })
               .catch((error) => {

@@ -22,18 +22,8 @@ export const messages = [
     type: 'warning'
   },
 
-  // gestion du plan
-  {
-    code: 'SLIN',
-    message: 'vous devez sélectionner un objet',
-    type: 'success'
-  },
   // message connexion
-  {
-    code: 'DLOJ',
-    message: 'Impossible de dupliquer les objets',
-    type: 'error'
-  },
+
   { code: 'DCNX', message: 'Vous êtes déconnecté', type: 'primary' },
   {
     code: 'EDNX',
@@ -81,11 +71,6 @@ export const messages = [
     code: 'LEVT',
     message: 'Impossible de charger vos évènements: [PARAM]',
     type: 'error'
-  },
-  {
-    code: 'EVAD',
-    message: "Impossible de retrouver l'adresse du plan",
-    type: 'warning'
   },
   {
     code: 'EADC',

@@ -4,7 +4,6 @@ import { fb } from '@/plugins/firebaseInit'
 import { messages } from '@/messages/messages'
 import storeEvent from '@/store/event.js'
 import storeConnexion from '@/store/connexion.js'
-import storePlan from '@/store/plan.js'
 
 Vue.use(Vuex)
 
@@ -15,14 +14,14 @@ const imgDefaut = 'IMG_DEFAUT.jpg'
 export const store = new Vuex.Store({
   modules: {
     event: storeEvent,
-    cnx: storeConnexion,
-    plan: storePlan
+    cnx: storeConnexion
   },
   /*
   définition d'un user */
 
   state: {
     display: false,
+    displayMenuSearch: false,
     waiting: false,
     modificationEnCours: false,
     message: {
@@ -209,6 +208,12 @@ export const store = new Vuex.Store({
   },
 
   mutations: {
+    setActiveMenuSearch (state) {
+      state.displayMenuSearch = true
+    },
+    setUnactiveMenuSearch (state) {
+      state.displayMenuSearch = false
+    },
     setModifUser (state) {
       state.modificationEnCours = true
     },
@@ -227,6 +232,15 @@ export const store = new Vuex.Store({
       state.waiting = val
     },
 
+    /* etat affichage info de chargement */
+    setWaitingOn (state) {
+      state.waiting = true
+    },
+
+    /* etat affichage info de chargement */
+    setWaitingOff (state) {
+      state.waiting = false
+    },
     /* init message à afficher */
     setMessage (state, message) {
       state.message.display = true
@@ -243,6 +257,10 @@ export const store = new Vuex.Store({
     }
   },
   getters: {
+    getStateMenuSearch (state) {
+      return state.displayMenuSearch
+    },
+
     getQuestion (state) {
       return state.question
     },

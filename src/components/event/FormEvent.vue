@@ -66,6 +66,7 @@
                 v-model="currentEvent.categorie"
                 :rules="[rules.required]"
                 required
+                multiple
                 :items="getCategorie"
                 label="Catégorie"
               ></v-select
@@ -120,10 +121,7 @@
 </template>
 <script>
 import adrmanagement from '@/components/commun/AdrManagement'
-import optionevent from '@/components/event/OptionEvent'
-import optionemplacement from '@/components/event/OptionEmplacement'
 import imageUpload from '@/components/commun/ImageUpload'
-import prixevent from '@/components/event/OptionPrix'
 import dialogmodal from '@/components/commun/DialogModal'
 import programmation from '@/components/event/Programmation'
 
@@ -132,9 +130,6 @@ export default {
   name: 'formEvent',
   components: {
     adrmanagement,
-    optionevent,
-    optionemplacement,
-    prixevent,
     imageUpload,
     dialogmodal,
     programmation
@@ -258,7 +253,7 @@ export default {
               /* gestion de l 'alerting
           on recherche dans tous les profils des alertes qui correspondent a l'event
           si cela correspond => envoi du mail via email du profil */
-              console.log('event/ManageAlerte')
+
               this.$store.dispatch('event/ManageAlerte')
               resolve()
             })

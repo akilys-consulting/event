@@ -1,7 +1,5 @@
 import Vue from 'vue'
 
-import '@/plugins/fireauth'
-
 import router from '@/router'
 import App from './App'
 import { store } from '@/store/store.js'

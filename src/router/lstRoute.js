@@ -5,9 +5,6 @@ import detailEvent from '@/components/client/DetailEvent'
 import calendrier from '@/components/event/CalendrierEvent'
 import formevent from '@/components/event/FormEvent'
 import profilForm from '@/components/connexion/ProfilForm'
-import designPlan from '@/components/plan/Design'
-import selectPlan from '@/components/plan/SelectPlan'
-import planform from '@/components/plan/FormPlan'
 import importEvent from '@/components/event/ImportEvent'
 
 export const routes = [
@@ -61,30 +58,6 @@ export const routes = [
     path: '/formevent',
     name: 'formEvent',
     component: formevent,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/plandesign',
-    name: 'plandesign',
-    component: designPlan,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/selectplan',
-    name: 'selectPlan',
-    component: selectPlan,
-    meta: {
-      requiresAuth: true
-    }
-  },
-  {
-    path: '/planForm',
-    name: 'planForm',
-    component: planform,
     meta: {
       requiresAuth: true
     }

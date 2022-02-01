@@ -1,5 +1,6 @@
 import { fb } from '@/plugins/firebaseInit'
 import moment from 'moment'
+import emailjs from 'emailjs-com'
 
 /*
     Définition des modèles base
@@ -53,13 +54,91 @@ const state = {
   events: [],
   // permet de définir les catégories
   CONST_CATEGORIE: [
-    { nom: 'culture', couleur: 'orange darken-1', icon: '', master: 1 },
-    { nom: 'loisir', couleur: 'deep-purple lighten-2', icon: '', master: 0 },
-    { nom: 'restaurant', couleur: 'brown lighten-1', icon: '', master: 0 },
-    { nom: 'sport', couleur: 'pink lighten-3', icon: '', master: 0 },
-    { nom: 'theatre', couleur: 'indigo lighten-3', icon: '', master: 1 },
-    { nom: 'musique', couleur: 'light-green lighten-3', icon: '', master: 1 },
-    { nom: 'expositions', couleur: 'teal lighten-2', icon: '', master: 0 }
+    {
+      nom: 'évènement sportif',
+      couleur: 'brown lighten-1',
+      icon: '',
+      master: 0
+    },
+    { nom: 'visite culturel', couleur: 'pink lighten-3', icon: '', master: 0 },
+    {
+      nom: 'vide grenier/vide dressing',
+      couleur: 'indigo lighten-3',
+      icon: '',
+      master: 1
+    },
+    {
+      nom: 'exposition/musée',
+      couleur: 'light-green lighten-3',
+      icon: '',
+      master: 1
+    },
+    {
+      nom: 'théatre/spectacle',
+      couleur: 'deep-purple lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'marché',
+      couleur: 'light-green lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'apéro-concert',
+      couleur: 'indigo lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'festival/concert',
+      couleur: 'blue lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'bien-être',
+      couleur: 'cyan lighten-3',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'salon/manifestation',
+      couleur: 'lime lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'danse',
+      couleur: 'green lighten-2',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'bénévolat/caritatif',
+      couleur: 'amber lighten-3',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'atelier/stage',
+      couleur: 'yellow lighten-1',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'activité extérieur',
+      couleur: 'brown lighten-3',
+      icon: '',
+      master: 0
+    },
+    {
+      nom: 'activité intérieur',
+      couleur: 'brown lighten-3',
+      icon: '',
+      master: 0
+    }
   ],
   CONST_RESIZE_HEIGHT: 230,
   CONST_RESIZE_WIDTH: 320,
@@ -248,7 +327,6 @@ const actions = {
             let newPlanning = {
               id: planningId,
               eventid: record.id,
-              color: getters.getColorCategorie(record.categorie),
               category: record.categorie,
               name: record.nom,
               enfant: record.enfant,
@@ -292,7 +370,7 @@ const actions = {
                 alert.alert.date === data.start.substring(0, 10) &&
                 alert.alert.categorie === data.category
               ) {
-                /* let templateParams = {
+                let templateParams = {
                   event_contact: alert.email,
                   event_name: data.name,
                   date_debut: data.start,
@@ -300,12 +378,12 @@ const actions = {
                   event_adr: state.currentEvent.localisation.adr,
                   event_description: state.currentEvent.minisite
                 }
-                 emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
+                emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
                 emailjs
                   .send('gmail', 'template_buy6lvg', templateParams)
                   .catch((error) => {
                     reject(error)
-                  }) */
+                  })
               }
             })
           })
@@ -381,9 +459,6 @@ const getters = {
     return state.CONST_CATEGORIE.filter((element) => {
       return element.master != 1
     })
-  },
-  getColorCategorie: (state) => (cat) => {
-    return state.CONST_CATEGORIE.find((x) => x.nom === cat).couleur
   },
   getEVT_SRCH_CAT (state) {
     return state.EVT_SRCH_CAT

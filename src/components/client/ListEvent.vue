@@ -16,7 +16,7 @@
         <v-row>
           <v-col
             v-for="item in items"
-            :key="item.start + item.end + item.name"
+            :key="item.start + item.name"
             cols="12"
             xs="12"
             sm="6"
@@ -24,9 +24,7 @@
             md="4"
             class="d-flex child-flex"
           >
-            <displayEvent
-              :key="item.start + item.end + item.nom"
-              :itemPlanning="item"
+            <displayEvent :key="item.start + item.nom" :itemPlanning="item"
           /></v-col>
         </v-row>
       </template>
@@ -195,9 +193,19 @@ export default {
 
       if (this.getEVT_SRCH_DT) critereMatch = dateSearch.isBefore(dateDebut)
 
-      if (this.getEVT_SRCH_CAT) {
+      if (this.getEVT_SRCH_CAT && this.getEVT_SRCH_CAT.length > 0) {
+        // check categories
+
+        console.log(
+          this.getEVT_SRCH_CAT +
+            ' ' +
+            row.category +
+            ' ' +
+            this.getEVT_SRCH_CAT.includes(row.category)
+        )
         critereMatch =
-          critereMatch && row.category.includes(this.getEVT_SRCH_CAT)
+          critereMatch &&
+          row.category.some((item) => this.getEVT_SRCH_CAT.includes(item))
       }
 
       if (this.getEVT_SRCH_CRITERE) {
