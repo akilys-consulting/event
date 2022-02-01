@@ -2,7 +2,7 @@
   <v-row>
     <v-col cols="5">
       <v-avatar :size="sizeAvatar">
-        <v-img :src="urlImg"></v-img>
+        <v-img :src="currentProfil.photoURL"></v-img>
       </v-avatar>
     </v-col>
 
@@ -25,11 +25,11 @@
 
 <script>
 import { fb } from '@/plugins/firebaseInit'
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 
 export default {
   name: 'AvatarDisplay',
-  props: ['uploadMode', 'sizeAvatar'],
+  props: ['avatar', 'uploadMode', 'sizeAvatar'],
 
   data () {
     return {
@@ -41,13 +41,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('cnx', ['getProfilPhoto'])
+    ...mapState('cnx', ['currentProfil'])
   },
 
-  created () {
-    // récupération de l'avatar (google ou storage)
-    this.urlImg = this.getProfilPhoto
-  },
   methods: {
     UploadFile (file) {
       let self = this
@@ -84,10 +80,7 @@ export default {
       let filename = this.$store.getters['cnx/getAvatarImg']
       return new Promise((resolve, reject) => {
         if (filename && typeof filename !== 'undefined') {
-          const file = fb.file
-            .ref()
-            .child(filename)
-            .getDownloadURL()
+          const file = fb.file.ref().child(filename).getDownloadURL()
           file.then(function (url) {
             self.urlImg = url
             self.displayImg = true

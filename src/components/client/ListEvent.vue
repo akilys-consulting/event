@@ -4,34 +4,72 @@
       <email />
     </v-dialog>
     <v-skeleton-loader v-if="firstLoad" type="table"></v-skeleton-loader>
-    <v-data-table
-      class="elevation-1"
+    <v-data-iterator
+      hide-default-footer
+      :page.sync="page"
       :items="filteredItems"
-      :sort-by="['category', 'start']"
-      group-by="start"
-      item-key="name+start"
-      :show="!firstLoad"
-      :items-per-page="5"
+      :items-per-page="getItemsPerPage"
+      :sort-by="['start']"
       no-results-text="Pas d'évènement trouvé"
-      no-data-text="Pas d'évènement trouvé"
-      show-group-by
     >
-      <template v-slot:group.header="{ items, isOpen, toggle }">
-        <th colspan="2">
-          <v-icon @click="toggle"
-            >{{ isOpen ? 'mdi-minus' : 'mdi-plus' }}
-          </v-icon>
+      <template v-slot:default="{ items }">
+        <v-row>
+          <v-col
+            v-for="item in items"
+            :key="item.start + item.name"
+            cols="12"
+            xs="12"
+            sm="6"
+            lg="3"
+            md="4"
+            class="d-flex child-flex"
+          >
+            <displayEvent :key="item.start + item.nom" :itemPlanning="item"
+          /></v-col>
+        </v-row>
+      </template>
+      <template v-slot:no-data>
+        <v-alert
+          class="pa-md-8 mx-lg-auto"
+          color="#2A3B4D"
+          dark
+          icon="mdi-database-search-outline"
+          width="400"
+          height="150"
+        >
+          Malgré tous nos efforts, aucun évènement correspond à votre recherche
+          Nous travaillons chaque jour à enrichir notre base
+        </v-alert>
+      </template>
+      <template v-if="numberOfPages > 1" v-slot:footer>
+        <v-row align="center" justify="center">
+          <v-btn
+            x-small
+            fab
+            class="mr-4"
+            outlined
+            color="white"
+            @click="formerPage"
+          >
+            <v-icon>mdi-chevron-left</v-icon>
+          </v-btn>
+          <span class="white--text"
+            >Page {{ page }} of {{ numberOfPages }}</span
+          >
 
-          {{ displayDate(items[0].start) }}
-        </th>
+          <v-btn
+            x-small
+            fab
+            class="ml-4"
+            outlined
+            color="white"
+            @click="nextPage"
+          >
+            <v-icon>mdi-chevron-right</v-icon>
+          </v-btn></v-row
+        >
       </template>
-      <template v-slot:item="{ item }">
-        <displayEvent
-          :key="item.start + item.end + item.nom"
-          :itemPlanning="item"
-        />
-      </template>
-    </v-data-table>
+    </v-data-iterator>
   </div>
 </template>
 
@@ -48,11 +86,13 @@ export default {
   components: { displayEvent, email },
   data () {
     return {
-      firstLoad: true,
-      itemsPerPageArray: [4, 8, 12],
-      sortDesc: false,
       page: 1,
-      itemsPerPage: 4,
+      pageCount: 0,
+
+      firstLoad: true,
+      items_per_page: [5, 15, 20],
+      sortDesc: false,
+      itemsPerPage: 5,
       // planning: [],
       key: 1,
       DisplaySend2email: false
@@ -64,22 +104,53 @@ export default {
       'getEVT_SRCH_DT',
       'getEVT_SRCH_CAT',
       'getEVT_SRCH_CRITERE',
-      'getEVT_SRCH_GRATUIT'
+      'getEVT_SRCH_GRATUIT',
+      'getEVT_SRCH_ENFANT'
     ]),
 
     numberOfPages () {
-      return Math.ceil(this.filteredItems.length / this.itemsPerPage)
+      return Math.ceil(this.filteredItems.length / this.getItemsPerPage)
     },
 
     filteredItems () {
-      return this.planning.filter(row => {
+      // on récupère les enregistrements correspondant aux critères
+      let allElements = []
+      allElements = this.planning.filter((row) => {
         return this.searchByCritere(row)
       })
+
+      /* allElements = allElements.sort((eventa, eventb) => {
+        let dateEventa = moment(eventa.start, 'YYYY-MM-DD')
+        let dateEventb = moment(eventb.start, 'YYYY-MM-DD')
+
+        return moment(dateEventa).diff(dateEventb)
+      }) */
+
+      // on dédoublonne au niveau du nom pour n'afficher qu'un évènement
+      allElements = allElements.filter(
+        (event, index, self) =>
+          index === self.findIndex((t) => t.name === event.name)
+      )
+      return allElements
     },
 
     computedville: function (item) {
       let ville = item.adr.split(',')
       return ville[ville.length - 3]
+    },
+    getItemsPerPage () {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return 20
+        case 'sm':
+          return 12
+        case 'md':
+          return 12
+        case 'lg':
+          return 24
+        case 'xl':
+          return 24
+      }
     }
   },
   async created () {
@@ -87,19 +158,17 @@ export default {
     this.$store.commit('setDisplayMenuOn')
     this.$store.commit('event/setActiveSearch')
 
-    console.log('listEvent : created')
-
     // charger les events via la liste des events et leurs planning
     this.$store.dispatch('startWaiting')
-    let execute = this.$store
+    this.$store
       .dispatch('event/loadPlanning')
       .then(() => {
         // les events sont chargés
         // self.planning = self.$store.getters['event/getAllPlanning']
-        self.$store.dispatch('stopWaiting')
+        this.$store.dispatch('stopWaiting')
         this.firstLoad = false
       })
-      .catch(error => {
+      .catch((error) => {
         self.$store.dispatch('stopWaiting')
         self.$store.dispatch('displayMessage', {
           code: 'LEVT',
@@ -115,47 +184,58 @@ export default {
 
     searchByCritere (row) {
       let dateDebut = moment(row.start, 'YYYY-MM-DD')
-      let dateSearch = moment(this.getEVT_SRCH_DT, 'YYYY-MM-DD')
+      let dateSearch = moment(this.getEVT_SRCH_DT, 'YYYY-MM-DD').subtract(
+        1,
+        'days'
+      )
+
       let critereMatch = true
 
       if (this.getEVT_SRCH_DT) critereMatch = dateSearch.isBefore(dateDebut)
 
-      if (this.getEVT_SRCH_CAT) {
+      if (this.getEVT_SRCH_CAT && this.getEVT_SRCH_CAT.length > 0) {
+        // check categories
+
+        console.log(
+          this.getEVT_SRCH_CAT +
+            ' ' +
+            row.category +
+            ' ' +
+            this.getEVT_SRCH_CAT.includes(row.category)
+        )
         critereMatch =
-          critereMatch && row.category.includes(this.getEVT_SRCH_CAT)
+          critereMatch &&
+          row.category.some((item) => this.getEVT_SRCH_CAT.includes(item))
       }
 
       if (this.getEVT_SRCH_CRITERE) {
         critereMatch =
           critereMatch &&
-          (row.name
+          row.name
             .toUpperCase()
-            .includes(this.getEVT_SRCH_CRITERE.toUpperCase()) ||
-            this.getAdresseEvent(row.id))
+            .includes(this.getEVT_SRCH_CRITERE.toUpperCase())
       }
 
       if (this.getEVT_SRCH_GRATUIT) {
         critereMatch = critereMatch && !row.prix
       }
+      if (this.getEVT_SRCH_ENFANT) {
+        critereMatch = critereMatch && row.enfant
+      }
 
       return critereMatch
     },
 
-    getAdresseEvent (eventId) {
-      let search = this.critere
-      let event = null
-      event = this.events.find(element => {
+    getAdresseEvent (row) {
+      let event = this.events.find((element) => {
         if (typeof element.localisation === 'undefined') return false
         else {
-          return (
-            element.localisation.adr
-              .toUpperCase()
-              .includes(search.toUpperCase()) && element.id == eventId
-          )
+          return element.localisation.adr
+            .toUpperCase()
+            .includes(this.getEVT_SRCH_CRITERE.toUpperCase())
         }
       })
-      if (event) return true
-      else return false
+      return !!event
     },
 
     nextPage () {
@@ -172,4 +252,5 @@ export default {
   }
 }
 </script>
+
 <style></style>

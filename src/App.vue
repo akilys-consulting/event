@@ -16,29 +16,38 @@
         </v-container>
       </v-main>
 
-      <v-footer app>
-        <v-col class="text-center" cols="12" color="blue-grey lighten-2">
-          {{ new Date().getFullYear() }} —
-          <strong>AKILYS</strong>
-        </v-col>
+      <v-footer app height="40">
+        <strong>Sortie-toulouse@{{ new Date().getFullYear() }} </strong>
+        <v-spacer></v-spacer>
+        <v-menu nudge-top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn x-small plain v-on="on"
+              ><span class="no-uppercase">version 0.3-AKILYS </span></v-btn
+            >
+          </template>
+          <v-card>
+            <v-card-subtitle>SARL AKILYS </v-card-subtitle>
+            <v-card-subtitle
+              >1, impasse du Colonel Jean-Stanislas Remy
+              <div>31200 Toulouse</div></v-card-subtitle
+            >
+            <v-card-subtitle>Hébergé par Google Hosting</v-card-subtitle>
+          </v-card>
+        </v-menu>
       </v-footer>
     </v-app>
     <v-bottom-sheet
       inset
-      :open-delay="message.timeout"
+      :close-delay="timeout"
       v-model="message.display"
       :overlay-color="message.type"
       overlay-opacity="0.2"
     >
-      <v-sheet color="blue-grey darken-3" class="text-center" height="100px">
-        <v-btn
-          class="text--lighten-1 text-body-2 mt-6"
-          text
-          @click="message.display = !message.display"
-        >
+      <v-sheet class="text-center" height="100px">
+        <v-btn plain text @click="message.display = !message.display">
           fermer
         </v-btn>
-        <div class="py-3">
+        <div>
           {{ message.message }}
         </div>
       </v-sheet>
@@ -50,18 +59,28 @@
 import navbar from '@/components/commun/NavBar'
 import chargement from '@/components/commun/Chargement'
 import { mapState } from 'vuex'
+
 export default {
   data () {
     return {
-      user: false
+      user: false,
+      timeout: 2000
     }
   },
   components: { navbar, chargement },
   computed: {
     ...mapState(['waiting', 'message'])
-  },
-  created () {
-    console.log('created App')
   }
 }
 </script>
+<style>
+.v-application {
+  font-family: 'Darker Grotesque', sans-cherif !important;
+}
+#app {
+  background-image: url('~@/assets/fond.jpg');
+}
+.no-uppercase {
+  text-transform: none !important;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="ActiveEmailWin" width="500">
     <v-card>
-      <v-card-subtitle>Partager cette event</v-card-subtitle>
+      <v-card-subtitle>Partager cet évènement</v-card-subtitle>
       <v-card-text>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-row>
@@ -42,8 +42,8 @@ export default {
       email: '',
       valid: true,
       emailRules: [
-        v => !!v || 'E-mail à saisir',
-        v => /.+@.+\..+/.test(v) || 'E-mail non valide'
+        (v) => !!v || 'E-mail à saisir',
+        (v) => /.+@.+\..+/.test(v) || 'E-mail non valide'
       ]
     }
   },
@@ -66,7 +66,7 @@ export default {
         emailjs.init('user_ykRUBR3yHvO1VOlIU0z2V')
         emailjs
           .send('gmail', 'template_buy6lvg', templateParams)
-          .catch(error => {
+          .catch((error) => {
             console.log('erreur emailjs' + error.message)
           })
         this.$store.commit('event/setActiveEmailWin')

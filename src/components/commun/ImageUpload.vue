@@ -1,41 +1,47 @@
 <template>
   <v-container fluid>
-    <v-card>
-      <v-row>
-        <v-col cols="12" align-self="start">
-          <v-file-input
-            v-model="file"
-            show-size
-            dense
-            accept="image/png, image/jpeg, image/bmp image/svg"
-            :placeholder="placeholderImg"
-            prepend-icon="mdi-camera"
-            @change="UploadFile"
-            @click.stop
-          ></v-file-input>
-        </v-col>
+    <v-row>
+      <v-col cols="12" align-self="start">
+        <v-file-input
+          v-model="file"
+          show-size
+          dense
+          v-if="this.fileName != -1"
+          accept="image/jpeg"
+          :placeholder="placeholderImg"
+          prepend-icon="mdi-camera"
+          @change="UploadFile"
+          @click.stop
+        ></v-file-input>
+        <span v-else
+          >L'image ne peut être changée que si l'évènement est sauvegardé</span
+        >
+      </v-col>
 
-        <v-col cols="12">
-          <v-img height="200" :src="urlImg">
-            <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align="center" justify="center">
-                <v-progress-circular
-                  indeterminate
-                  color="grey lighten-5"
-                ></v-progress-circular>
-              </v-row>
-            </template>
-          </v-img>
-        </v-col>
-      </v-row>
-    </v-card>
+      <v-col cols="12">
+        <v-img contain max-height="150" max-width="300" :src="urlImg">
+          <template v-slot:placeholder>
+            <v-row class="fill-height ma-0" align="center" justify="center">
+              <v-progress-circular
+                indeterminate
+                color="grey lighten-5"
+              ></v-progress-circular>
+            </v-row>
+          </template>
+        </v-img>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
 import { fb } from '@/plugins/firebaseInit'
+import mixFunctions from '@/components/commun/Functions'
+import { mapState } from 'vuex'
+
 export default {
   name: 'ImageUpload',
+  mixins: [mixFunctions],
   data () {
     return {
       displayImg: false,
@@ -48,9 +54,7 @@ export default {
   },
   props: ['fileName', 'rep'],
   computed: {
-    getUrlImg () {
-      return self.urlImg
-    }
+    ...mapState('event', ['CONST_RESIZE_HEIGHT', 'CONST_RESIZE_WIDTH'])
   },
 
   created () {
@@ -87,45 +91,63 @@ export default {
         typeof this.localImg !== 'undefined' &&
         this.localImg !== -1
       ) {
-        const file = fb.file
+        fb.file
           .ref()
           .child(this.rep + '/' + this.localImg)
           .getDownloadURL()
-        file.then(function (url) {
-          self.urlImg = url
-          self.displayImg = true
-          self.loadPhoto = false
-          self.placeholderImg = "Changer d'image"
-        })
-        file.catch(function () {
-          self.getDefaultImg()
-        })
+          .then(function (url) {
+            self.urlImg = url
+            self.displayImg = true
+            self.loadPhoto = false
+            self.placeholderImg = "Changer d'image"
+          })
+          .catch(function () {
+            self.getDefaultImg()
+          })
       } else {
         self.getDefaultImg()
       }
     },
     UploadFile: function (file) {
       let self = this
+      let typeFile = file.type.split('/')
+      const newMetadata = { cacheControl: 'public,max-age=4000' }
 
       // récupération du nom de l'image
       if (typeof file !== 'undefined' && file != null) {
         this.$store.dispatch('startWaiting')
-        var storageRef = fb.file.ref()
-
-        // on va détruire l'image qui existait
-        // storageRef.child(this.filename).delete();
-        storageRef.child(this.rep + '/' + self.fileName).put(file)
-        storageRef.then(function (snapshot) {
-          self.$store.dispatch('stopWaiting')
-          self.$store.dispatch('displayMessage', 'IMOK')
-          self.localImg = self.fileName
-          self.displayImage()
-          self.file = null
-        })
-        storageRef.catch(() => {
-          self.$store.dispatch('stopWaiting')
-          self.$store.dispatch('displayMessage', 'IMKO')
-        })
+        // on redéfinit l'image pour la réduire si besoin
+        var reader = new FileReader()
+        reader.onload = function (e) {
+          self
+            .resizeImage({
+              file: file,
+              width: self.CONST_RESIZE_WIDTH,
+              height: self.CONST_RESIZE_HEIGHT,
+              type: typeFile[1]
+            })
+            .then((resp) => {
+              fb.file
+                .ref()
+                // on va détruire l'image qui existait
+                // storageRef.child(this.filename).delete();
+                .child(self.rep + '/' + self.fileName)
+                .put(resp, newMetadata)
+                .then(function (snapshot) {
+                  self.$store.dispatch('stopWaiting')
+                  self.$store.dispatch('displayMessage', 'IMOK')
+                  self.localImg = self.fileName
+                  self.displayImage()
+                  self.file = null
+                })
+                .catch(() => {
+                  self.$store.dispatch('stopWaiting')
+                  self.$store.dispatch('displayMessage', 'IMKO')
+                })
+            })
+            .catch(() => {})
+        }
+        reader.readAsDataURL(file)
       }
     }
   }

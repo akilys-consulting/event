@@ -5,6 +5,7 @@ import detailEvent from '@/components/client/DetailEvent'
 import calendrier from '@/components/event/CalendrierEvent'
 import formevent from '@/components/event/FormEvent'
 import profilForm from '@/components/connexion/ProfilForm'
+import importEvent from '@/components/event/ImportEvent'
 
 export const routes = [
   {
@@ -18,22 +19,33 @@ export const routes = [
     component: login
   },
   {
-    path: '/profil',
-    name: 'voirProfil',
-    component: profilForm
-  },
-  {
     path: '/creation',
     name: 'creation',
     component: signUp
   },
-
   {
     path: '/detailEvent',
     name: 'clientdetailEvent',
     component: detailEvent
   },
-
+  {
+    path: '/network/:eventId/planning/:planningId',
+    name: 'detailEventNetwork',
+    component: detailEvent
+  },
+  {
+    path: '/profil',
+    name: 'voirProfil',
+    component: profilForm
+  },
+  {
+    path: '/importEvent',
+    name: 'importEvent',
+    component: importEvent,
+    meta: {
+      requiresAuth: true
+    }
+  },
   {
     path: '/calendrier',
     name: 'calendrier',
@@ -42,10 +54,12 @@ export const routes = [
       requiresAuth: true
     }
   },
-
   {
     path: '/formevent',
     name: 'formEvent',
-    component: formevent
+    component: formevent,
+    meta: {
+      requiresAuth: true
+    }
   }
 ]

@@ -48,7 +48,6 @@ export default {
         this.email = ''
       })
       user.catch((err) => {
-        console.log(err)
         this.performingRequest = false
         this.errorMsg = err.message
       })

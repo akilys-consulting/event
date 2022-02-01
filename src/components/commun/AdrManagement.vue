@@ -1,19 +1,18 @@
 <template>
   <div>
-    <dialogmodal ref="checkModif" :message="codeQuestion">
-      <example-slot :key="codeQuestion.display"></example-slot>
-    </dialogmodal>
+    <dialogmodal ref="checkModif"> </dialogmodal>
     <v-text-field
-      class="updateAdr"
+      id="autocomplete"
+      ref="autocomplete"
       v-model="localeadr.adr"
-      id="country"
-      :label="libelleAdr == null ? 'Votre adresse' : libelleAdr"
-    ></v-text-field>
+      label="Votre adresse"
+      onfocus="value = ''"
+      type="text"
+    />
   </div>
 </template>
 
 <script>
-import places from 'places.js'
 import dialogmodal from '@/components/commun/DialogModal'
 export default {
   name: 'adrmanagement',
@@ -23,10 +22,6 @@ export default {
   props: ['adresse', 'libelleAdr'],
   data () {
     return {
-      codeQuestion: {
-        code: 'GMOD',
-        display: false
-      },
       localeadr: {
         adr: '',
         latLgt: {
@@ -37,23 +32,29 @@ export default {
     }
   },
   created () {
-    console.log('adrManagement' + this.adresse)
     if (typeof this.adresse !== 'undefined') this.localeadr = this.adresse
   },
   mounted () {
-    let self = this
-    var placesAutocomplete = places({
-      container: document.getElementById('country')
-    }).configure({
-      countries: ['fr']
-    })
-    placesAutocomplete.on('clear', function (e) {
-      self.localeadr = { adr: null, latLng: { lat: 0, lng: 0 } }
-    })
+    // permet d'effacer le placeholder par défaut de Google
+    document.getElementById('autocomplete').setAttribute('placeholder', '')
+    let currentField = document.getElementById('autocomplete')
 
-    placesAutocomplete.on('change', function (e) {
-      self.localeadr = { adr: e.suggestion.value, latLng: e.suggestion.latlng }
-      self.$emit('uptadr', self.localeadr)
+    this.autocomplete = new window.google.maps.places.Autocomplete(
+      currentField,
+      { componentRestrictions: { country: 'fr' } }
+    )
+
+    this.autocomplete.addListener('place_changed', () => {
+      let place = this.autocomplete.getPlace()
+      this.localeadr = { adr: null, latLng: { lat: 0, lng: 0 } }
+      this.localeadr = {
+        adr: place['formatted_address'],
+        latLng: {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng()
+        }
+      }
+      this.$emit('uptadr', this.localeadr)
     })
   },
   methods: {}

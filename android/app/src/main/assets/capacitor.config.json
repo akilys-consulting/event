@@ -1,0 +1,6 @@
+{
+	"appId": "com.sortie.app",
+	"appName": "sortietoulouse",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}

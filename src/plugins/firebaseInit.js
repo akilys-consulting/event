@@ -23,9 +23,8 @@ const errorCode = [
   }
 ]
 
-!firebase.apps.length ? firebase.initializeApp(config) : ''
+if (!firebase.apps.length) firebase.initializeApp(config)
 
-// firebase utils
 const db = firebase.firestore()
 const auth = firebase.auth()
 const authObj = firebase.auth
@@ -37,6 +36,9 @@ const currentUser = auth.currentUser
 // firebase collections
 const profilCollection = db.collection('profil')
 const eventCollection = db.collection('event')
+const planCollection = db.collection('plan')
+const orgaCollection = db.collection('organisation')
+const banqueEmplacementCollection = db.collection('emplacement')
 
 export const fb = {
   db,
@@ -47,5 +49,8 @@ export const fb = {
   currentUser,
   profilCollection,
   eventCollection,
-  errorCode
+  planCollection,
+  orgaCollection,
+  errorCode,
+  banqueEmplacementCollection
 }

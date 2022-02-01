@@ -21,7 +21,9 @@ export const store = new Vuex.Store({
 
   state: {
     display: false,
+    displayMenuSearch: false,
     waiting: false,
+    modificationEnCours: false,
     message: {
       display: false,
       message: 'Oups, je vais disparaitre',
@@ -30,8 +32,7 @@ export const store = new Vuex.Store({
     },
     question: {
       display: false,
-      message: 'Oups, je vais disparaitre',
-      type: 'question'
+      message: 'Oups, je vais disparaitre'
     },
     emailParam: {
       template: 'template_W2ROE7Xi',
@@ -46,7 +47,72 @@ export const store = new Vuex.Store({
     countStand: 0,
     numCmd: 1,
     remiseMode: false,
-    paypalData: {}
+    paypalData: {},
+    themes: [
+      {
+        name: 'vert',
+        dark: {
+          primary: '#90AB47',
+          accent: '#9FD656',
+          secondary: '#9FED6B',
+          success: '#74F25A',
+          info: '#BCEDAD',
+          warning: '#EB6D00',
+          error: '#A31435'
+        },
+        light: {
+          primary: '#1976D2',
+          accent: '#9D00E0',
+          secondary: '#30b1dc',
+          success: '#4CAF50',
+          info: '#2196F3',
+          warning: '#FB8C00',
+          error: '#FF5252'
+        }
+      },
+      {
+        name: 'defaut',
+        dark: {
+          primary: '#90AB47',
+          accent: '#9FD656',
+          secondary: '#9FED6B',
+          success: '#74F25A',
+          info: '#BCEDAD',
+          warning: '#EB6D00',
+          error: '#A31435'
+        },
+        light: {
+          primary: '#1976D2',
+          accent: '#9D00E0',
+          secondary: '#30b1dc',
+          success: '#4CAF50',
+          info: '#2196F3',
+          warning: '#FB8C00',
+          error: '#FF5252'
+        }
+      },
+      {
+        name: 'marron',
+        dark: {
+          primary: '#7F5636',
+          accent: '#B6D173',
+          secondary: '#D1905E',
+          success: '#43A047',
+          info: '#78909C',
+          warning: '#FB8C00',
+          error: '#E65100'
+        },
+        light: {
+          primary: '#ffa450',
+          accent: '#9D00E0',
+          secondary: '#92de4e',
+          success: '#6dff74',
+          info: '#7365ff',
+          warning: '#2e8ac0',
+          error: '#ff5e3c'
+        }
+      }
+    ]
   },
 
   actions: {
@@ -63,9 +129,8 @@ export const store = new Vuex.Store({
     // declenche l'affichage d'un message
     displayMessage ({ commit }, param) {
       for (var i = 0; i < messages.length; i++) {
-        if (messages[i]['code'] == param.code) {
+        if (messages[i]['code'] === param.code) {
           let displayedmessage = messages[i]
-          console.log('error' + param.param)
           if (param && typeof param.param !== 'undefined') {
             displayedmessage.message = messages[i].message.replace(
               '[PARAM]',
@@ -114,7 +179,7 @@ export const store = new Vuex.Store({
             .then(function (url) {
               resolve(url)
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error)
             })
         })
@@ -127,14 +192,14 @@ export const store = new Vuex.Store({
           storageRef.child(file.rep + '/' + file.name).put(file.file)
           storageRef.then(function (snapshot) {
             const data = snapshot.ref.getDownloadURL()
-            data.then(path => {
+            data.then((path) => {
               resolve(path)
             })
-            data.catch(error => {
+            data.catch((error) => {
               reject(error)
             })
           })
-          storageRef.catch(error => {
+          storageRef.catch((error) => {
             reject(error)
           })
         }
@@ -143,17 +208,23 @@ export const store = new Vuex.Store({
   },
 
   mutations: {
+    setActiveMenuSearch (state) {
+      state.displayMenuSearch = true
+    },
+    setUnactiveMenuSearch (state) {
+      state.displayMenuSearch = false
+    },
+    setModifUser (state) {
+      state.modificationEnCours = true
+    },
+    initModifUser (state) {
+      state.modificationEnCours = false
+    },
     setDisplayMenuOff (state) {
-      console.log()
       state.display = false
     },
     setDisplayMenuOn (state) {
       state.display = true
-    },
-
-    /* configuration du profil courant */
-    async setUserProfile (state, val) {
-      state.currentProfil = val
     },
 
     /* etat affichage info de chargement */
@@ -161,6 +232,15 @@ export const store = new Vuex.Store({
       state.waiting = val
     },
 
+    /* etat affichage info de chargement */
+    setWaitingOn (state) {
+      state.waiting = true
+    },
+
+    /* etat affichage info de chargement */
+    setWaitingOff (state) {
+      state.waiting = false
+    },
     /* init message à afficher */
     setMessage (state, message) {
       state.message.display = true
@@ -171,13 +251,16 @@ export const store = new Vuex.Store({
     setQuestion (state, message) {
       state.question.display = true
       state.question.message = message.message
-      state.question.type = message.type
     },
     setInitQuestion (state) {
       state.question = {}
     }
   },
   getters: {
+    getStateMenuSearch (state) {
+      return state.displayMenuSearch
+    },
+
     getQuestion (state) {
       return state.question
     },
@@ -186,32 +269,17 @@ export const store = new Vuex.Store({
       if (typeof state.currentUser.uid === 'undefined') return false
       else return true
     },
-    getProfil (state) {
-      return state.currentProfil
-    },
-    getOrganisation (state) {
-      return state.currentProfil.organisation
-    },
 
     getUserUid (state) {
       return state.currentUser.uid
     },
-    isAdmin (state) {
-      if (state.currentUser) {
-        if (
-          typeof state.currentProfil.organisation === 'function' ||
-          state.currentProfil.organisation === ''
-        ) {
-          return false
-        } else return true
-      } else return false
-    },
+
     getUserInfo (state) {
       return state.currentUser
     },
     /* management des modif données */
     getModifUser (state) {
-      return state.modifUser
+      return state.modificationEnCours
     },
     getCurrentAvatarImg (state) {
       if (state.currentUser.uid) return imgAvatarPath + state.currentUser.uid

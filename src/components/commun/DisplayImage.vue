@@ -1,16 +1,14 @@
 <template>
-  <v-card>
-    <v-img :height="height" :width="width" :src="urlImg">
-      <template v-slot:placeholder>
-        <v-row class="fill-height ma-0" align="center" justify="center">
-          <v-progress-circular
-            indeterminate
-            color="grey lighten-5"
-          ></v-progress-circular>
-        </v-row>
-      </template>
-    </v-img>
-  </v-card>
+  <v-img :height="height" :width="width" contain :src="urlImg">
+    <template v-slot:placeholder>
+      <v-row class="fill-height ma-0" align="center" justify="center">
+        <v-progress-circular
+          indeterminate
+          color="grey lighten-5"
+        ></v-progress-circular>
+      </v-row>
+    </template>
+  </v-img>
 </template>
 
 <script>
@@ -27,7 +25,6 @@ export default {
     }
   },
 
-
   props: ['fileName', 'rep', 'height', 'width', 'planning', 'event'],
 
   created () {
@@ -41,7 +38,7 @@ export default {
         .ref()
         .child(this.rep + '/IMG_DEFAUT.jpg')
         .getDownloadURL()
-      file.then(url => {
+      file.then((url) => {
         self.urlImg = url
         self.displayImg = true
         self.loadPhoto = false
@@ -55,7 +52,7 @@ export default {
     displayImage: function () {
       let self = this
       if (this.localImg && typeof this.localImg !== 'undefined') {
-        const file = fb.file
+        fb.file
           .ref()
           .child(this.rep + '/' + this.localImg)
           .getDownloadURL()
@@ -64,7 +61,7 @@ export default {
             self.displayImg = true
             self.loadPhoto = false
           })
-          .catch(function (error) {
+          .catch(function () {
             self.getDefaultImg()
           })
       } else {

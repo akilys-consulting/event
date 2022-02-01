@@ -34,6 +34,8 @@ module.exports = {
 
     // https://webpack.js.org/configuration/devtool/#development
     devtool: 'cheap-module-eval-source-map',
+    devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+
 
     // If you have problems debugging vue-files in devtools,
     // set this to false - it *may* help
