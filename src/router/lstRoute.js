@@ -6,10 +6,16 @@ import calendrier from '@/components/event/CalendrierEvent'
 import formevent from '@/components/event/FormEvent'
 import profilForm from '@/components/connexion/ProfilForm'
 import importEvent from '@/components/event/ImportEvent'
+import presentation from '@/components/client/Accueil'
 
 export const routes = [
   {
     path: '/',
+    name: 'presentation',
+    component: listEvent
+  },
+  {
+    path: '/events',
     name: 'listEvent',
     component: listEvent
   },

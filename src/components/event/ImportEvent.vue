@@ -296,7 +296,11 @@ export default {
 
       contentCsv.data.forEach((ligne) => {
         // chargement de l'event
-        let eventCheck = { localisation: { adr: null }, planning: [] }
+        let eventCheck = {
+          defaultImg: true,
+          localisation: { adr: null },
+          planning: []
+        }
         // check event
         this.analyseCheck(ligne).then((response) => {
           eventCheck.message = response.message
@@ -326,6 +330,7 @@ export default {
           if (ligne.image) {
             this.getImgFile(ligne.image).then((data) => {
               eventCheck.image = data
+              eventCheck.defaultImg = false
               this.readedEvent.push(eventCheck)
               if (nbevent >= contentCsv.data.length) {
                 this.$store.commit('setWaiting', false)

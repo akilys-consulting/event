@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-btn v-if="!isAuthenticated" icon to="/login"
+    <v-btn v-if="!isAuthenticated" icon :to="{ name: 'login' }"
       ><v-icon>mdi-account-arrow-right-outline </v-icon></v-btn
     >
     <v-menu

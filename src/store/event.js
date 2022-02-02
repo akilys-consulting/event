@@ -17,11 +17,14 @@ const DEFINE_EVENT = {
 }
 
 const state = {
+  limitnbEvent: 300,
+  lastRequestedEvent: {},
   currentEventId: null,
   // pemret de stocker l'event courant ( event + programmation)
   currentEvent: {
     id: -1,
     nom: null,
+    defaultImg: true,
     localisation: { adr: '', latLgn: { lat: 0, long: 0 } },
     plan: null,
     planning: [],
@@ -62,15 +65,15 @@ const state = {
     },
     { nom: 'visite culturel', couleur: 'pink lighten-3', icon: '', master: 0 },
     {
-      nom: 'vide grenier/vide dressing',
+      nom: 'vide grenier',
       couleur: 'indigo lighten-3',
-      icon: '',
+      default: 'marche_default',
       master: 1
     },
     {
       nom: 'exposition/musée',
       couleur: 'light-green lighten-3',
-      icon: '',
+      default: '',
       master: 1
     },
     {
@@ -82,7 +85,7 @@ const state = {
     {
       nom: 'marché',
       couleur: 'light-green lighten-2',
-      icon: '',
+      default: 'marche_default',
       master: 0
     },
     {
@@ -104,7 +107,7 @@ const state = {
       master: 0
     },
     {
-      nom: 'salon/manifestation',
+      nom: 'manifestation',
       couleur: 'lime lighten-2',
       icon: '',
       master: 0
@@ -260,8 +263,12 @@ const actions = {
     state.events = []
     state.calendar = []
     return new Promise((resolve, reject) => {
-      const execute = fb.eventCollection.get()
+      const execute = fb.eventCollection.get().limit(state.limitnbEvent)
+      if (state.lastRequestedEvent) execute.startAfter(state.lastRequestedEvent)
       execute.then(function (querySnapshot) {
+        state.lastRequestedEvent =
+          querySnapshot.docs[querySnapshot.docs.length - 1]
+
         querySnapshot.forEach(function data (result) {
           let record = result.data()
           record.id = result.id
@@ -341,7 +348,26 @@ const actions = {
       })
     }
   },
+  // chargement des events en mémoire depuis la base
+  getLastEvants ({ state }) {
+    state.events = []
+    state.calendar = []
+    return new Promise((resolve, reject) => {
+      const execute = fb.eventCollection.get().limit(5)
+      execute.then(function (querySnapshot) {
+        querySnapshot.forEach(function data (result) {
+          let record = result.data()
+          record.id = result.id
+          state.events.push(record)
+        })
 
+        resolve()
+      })
+      execute.catch((error) => {
+        reject(error)
+      })
+    })
+  },
   addLike2Event ({ state, dispatch }, event) {
     console.log('id' + event.id)
     console.log(event.like)

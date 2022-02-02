@@ -1,11 +1,18 @@
 <template>
   <div>
     <v-app-bar fixed flat v-if="display" :extensionHeight="extensionHeight" app>
-      <v-btn text small plain to="/">
+      <v-btn text small plain :to="{ name: 'listEvent' }">
         <img :src="require('@/assets/icon-site.png')" alt="Sortie-Toulouse" />
       </v-btn>
 
-      <v-menu class="mt-2" offset-y min-width="200">
+      <v-menu
+        class="mt-2"
+        v-model="showMenu"
+        offset-y
+        min-width="200"
+        :close-on-content-click="false"
+        :close-on-click="false"
+      >
         <template v-slot:activator="{ on, attrs }">
           <v-chip outlined class="hidden-lg-and-up" v-bind="attrs" v-on="on"
             ><v-icon>mdi-magnify</v-icon>Rechercher...
@@ -15,12 +22,15 @@
           <v-card-subtitle class="text-center"
             >Vos critères des recherches</v-card-subtitle
           >
-          <v-card-text> <eventsearch></eventsearch></v-card-text>
+          <v-card-text>
+            <eventsearch @closeMenu="showMenu = false"></eventsearch
+          ></v-card-text>
         </v-card>
       </v-menu>
       <v-spacer></v-spacer>
 
       <eventsearch
+        :large="true"
         class="hidden-md-and-down"
         v-if="EVT_ACTIVE_SEARCH"
       ></eventsearch>
@@ -30,13 +40,17 @@
         class="mx-2"
         outlined
         v-if="isAuthenticated && isAdmin"
-        to="/importEvent"
+        to="{ name: 'importEvent'}"
       >
         <v-icon>mdi-import</v-icon>
         <span class="hidden-md-and-down">Importer</span>
       </v-chip>
 
-      <v-chip outlined v-if="isAuthenticated && isAdmin" to="/calendrier">
+      <v-chip
+        outlined
+        v-if="isAuthenticated && isAdmin"
+        to="{ name: 'calendrier'}"
+      >
         <v-icon>mdi-calendar-edit</v-icon>
 
         <span class="hidden-md-and-down">Calendrier</span>
@@ -62,7 +76,8 @@ export default {
       menuProfil: false,
       connected: false,
       menuItem: [],
-      connexion: false
+      connexion: false,
+      showMenu: false
     }
   },
 

@@ -76,7 +76,6 @@
                           readonly
                           v-bind="attrs"
                           v-on="on"
-                          :rules="[(v) => !!v || 'champ obligatoire']"
                         ></v-text-field>
                       </template>
                       <v-date-picker
@@ -113,6 +112,7 @@
                       </template>
                       <v-time-picker
                         v-if="menu_HD"
+                        no-title
                         v-model="editedItem.heureDebut"
                         format="24hr"
                         :max="editedItem.heureFin"
@@ -139,12 +139,12 @@
                           prepend-icon="mdi-clock-outline"
                           readonly
                           v-bind="attrs"
-                          :rules="[(v) => !!v || 'champ obligatoire']"
                           v-on="on"
                         ></v-text-field>
                       </template>
                       <v-time-picker
                         v-if="menu_HF"
+                        no-title
                         v-model="editedItem.heureFin"
                         format="24hr"
                         :min="editedItem.heureDebut"

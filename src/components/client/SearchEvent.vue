@@ -28,7 +28,10 @@
           v-if="menu_date"
           v-model="date"
           :min="today"
-          @change="$refs.menu_date.save(date)"
+          @change="
+            $refs.menu_date.save(date)
+            large ? queryCloseMenu : false
+          "
         ></v-date-picker>
       </v-menu>
     </v-col>
@@ -38,13 +41,15 @@
       <v-menu :offset-y="true" :close-on-content-click="false" offset-x rounded>
         <template v-slot:activator="{ on }">
           <v-chip
-            :color="nbCatSelected > 0 ? 'green' : 'none'"
+            :color="categorie.length > 0 ? 'green' : 'none'"
             v-on="on"
             outlined
             @click:close="close"
             close
             >Categories
-            {{ nbCatSelected > 0 ? '(' + nbCatSelected + ')' : '' }}</v-chip
+            {{
+              categorie.length > 0 ? '(' + categorie.length + ')' : ''
+            }}</v-chip
           ><span class="pl-2 hidden-lg-and-up"> Filter sur des thèmes</span>
         </template>
         <v-card
@@ -55,7 +60,12 @@
         >
           <v-card-subtitle>Les catégories</v-card-subtitle>
 
-          <v-chip-group column multiple v-model="categorie">
+          <v-chip-group
+            column
+            multiple
+            @change="large ? queryCloseMenu : false"
+            v-model="categorie"
+          >
             <v-row>
               <v-col cols="6" v-for="cat in getCategories" :key="cat.nom">
                 <v-chip filter :color="cat.couleur">
@@ -72,7 +82,12 @@
     <v-col cols="12" lg="auto">
       <v-menu :close-on-content-click="false" offset-x rounded>
         <template v-slot:activator="{ on }">
-          <v-chip v-on="on" close @click:close="clearOptions" outlined
+          <v-chip
+            v-on="on"
+            :color="evtGratuit || evtEnfant ? 'green' : 'none'"
+            close
+            @click:close="clearOptions"
+            outlined
             >options </v-chip
           ><span class="pl-2 hidden-lg-and-up"> (enfants, tarifs, etc)</span>
         </template>
@@ -86,6 +101,7 @@
             dense
             flat
             v-model="evtGratuit"
+            @change="large ? queryCloseMenu : false"
             class="mt-4"
             label="Gratuit"
           ></v-switch>
@@ -94,9 +110,20 @@
             class="mt-4"
             flat
             v-model="evtEnfant"
+            @change="large ? queryCloseMenu : false"
             label="Enfants"
-          ></v-switch></v-card></v-menu
+          ></v-switch> </v-card></v-menu
     ></v-col>
+    <v-col class="hidden-lg-and-up" cols="6"
+      ><v-btn plain small @click="clearCriteria"
+        ><span class="no-uppercase">effacer</span></v-btn
+      ></v-col
+    >
+    <v-col class="hidden-lg-and-up" cols="6"
+      ><v-btn plain small @click="queryCloseMenu"
+        ><span class="no-uppercase"> valider</span></v-btn
+      ></v-col
+    >
   </v-row>
 </template>
 
@@ -105,9 +132,19 @@ import { mapGetters } from 'vuex'
 import moment from 'moment'
 
 export default {
+  name: 'searchEvent',
   data () {
-    return { menu_date: false, nbCatSelected: 0 }
+    return {
+      menu_date: false,
+      nbCatSelected: 0,
+      menuClose: false,
+      date: null,
+      categorie: [],
+      evtGratuit: false,
+      evtEnfant: false
+    }
   },
+  props: ['large'],
 
   computed: {
     ...mapGetters('event', [
@@ -130,8 +167,8 @@ export default {
       set (value) {
         this.$store.commit('event/setEVT_SRCH_CRITERE', value)
       }
-    },
-    categorie: {
+    }
+    /*   categorie: {
       get () {
         return ''
       },
@@ -169,20 +206,46 @@ export default {
       set (value) {
         this.$store.commit('event/setEVT_SRCH_ENFANT', value)
       }
-    }
+    } */
   },
   methods: {
+    queryCloseMenu () {
+      let lstValue = []
+
+      this.categorie.forEach((data) => {
+        lstValue.push(this.getCategories[data].nom)
+      })
+
+      this.$store.commit('event/setEVT_SRCH_CAT', lstValue)
+      this.nbCatSelected = lstValue.length
+      this.$store.commit('event/setEVT_SRCH_DT', this.date)
+      this.$store.commit('event/setEVT_SRCH_GRATUIT', this.evtGratuit)
+      this.$store.commit('event/setEVT_SRCH_ENFANT', this.evtEnfant)
+
+      this.$emit('closeMenu')
+    },
     formatedDate (date) {
       return date ? moment(date).format('DD/MM/YYYY') : null
     },
+
+    // demande pour effacer les catégories sélectionnées
     close () {
       this.$store.commit('event/setEVT_SRCH_CAT', '')
-      this.nbCatSelected = 0
+      this.categorie = []
     },
+
     clearOptions () {
       this.$store.commit('event/setEVT_SRCH_GRATUIT', false)
+      this.evtGratuit = false
       this.$store.commit('event/setEVT_SRCH_ENFANT', false)
+      this.evtEnfant = false
+    },
 
+    clearCriteria () {
+      this.clearOptions()
+      this.$store.commit('event/setEVT_SRCH_DT', null)
+      this.date = null
+      this.categorie = []
       this.nbCatSelected = 0
     }
   }
@@ -192,5 +255,8 @@ export default {
 <style scoped>
 .cardColor {
   opacity: 0.9;
+}
+.no-uppercase {
+  text-transform: none !important;
 }
 </style>
