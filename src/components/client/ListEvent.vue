@@ -115,6 +115,7 @@ export default {
     filteredItems () {
       // on récupère les enregistrements correspondant aux critères
       let allElements = []
+      this.$store.commit('setWaitingOn')
       allElements = this.planning.filter((row) => {
         return this.searchByCritere(row)
       })
@@ -131,6 +132,8 @@ export default {
         (event, index, self) =>
           index === self.findIndex((t) => t.name === event.name)
       )
+      this.$store.commit('setWaitingOff')
+
       return allElements
     },
 
@@ -195,14 +198,6 @@ export default {
 
       if (this.getEVT_SRCH_CAT && this.getEVT_SRCH_CAT.length > 0) {
         // check categories
-
-        console.log(
-          this.getEVT_SRCH_CAT +
-            ' ' +
-            row.category +
-            ' ' +
-            this.getEVT_SRCH_CAT.includes(row.category)
-        )
         critereMatch =
           critereMatch &&
           row.category.some((item) => this.getEVT_SRCH_CAT.includes(item))

@@ -48,7 +48,9 @@
                 >
               </v-col>
               <v-col cols="6"
-                ><v-btn tabindex="8" plain to="/">Annuler</v-btn>
+                ><v-btn tabindex="8" plain :to="{ name: 'listEvent' }"
+                  >Annuler</v-btn
+                >
               </v-col></v-row
             >
           </v-form>
@@ -71,7 +73,9 @@
       </v-row>
 
       <p class="text-right font-weight-thin mt-3">
-        <router-link to="/creation">créér un nouveau compte</router-link>
+        <router-link :to="{ name: 'creation' }"
+          >créér un nouveau compte</router-link
+        >
       </p>
     </v-card-text>
     <!--</v-parallax>-->

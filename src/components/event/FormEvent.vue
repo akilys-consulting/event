@@ -39,7 +39,7 @@
               v-if="currentEvent"
               :fileName="getImage"
               rep="image_event"
-              @uploadfile="saveEvent"
+              @uploaded="newImageLoaded"
             />
           </v-col>
           <v-col cols="12" lg="6">
@@ -136,7 +136,6 @@ export default {
   },
   data () {
     return {
-      currentEvent: null,
       payant: false,
       public: ['Tous', 'adultes', 'Enfants'],
       check: true,
@@ -177,7 +176,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('event', ['CONST_CATEGORIE']),
+    ...mapState('event', ['currentEvent', 'CONST_CATEGORIE']),
     getImage () {
       return this.currentEvent !== null ? this.currentEvent.id : null
     },
@@ -234,6 +233,11 @@ export default {
     updateadresse (localisation) {
       this.currentEvent.localisation = localisation
       this.$store.commit('setModifUser')
+    },
+    // save info new image
+    async newImageLoaded () {
+      this.currentEvent.defaultImg = true
+      await this.$store.dispatch('event/saveEvent')
     },
     // manage save all options
     saveEvent () {

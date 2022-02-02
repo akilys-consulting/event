@@ -6,12 +6,15 @@
       :class="{ 'on-hover': hover }"
     >
       <v-row @click="detailEvent(itemPlanning)">
-        <v-col cols="6">
-          <v-card-subtitle
+        <v-col class="mt-3" cols="6">
+          <span></span>
+          <div
+            class="ms-4"
             v-for="categorie in itemPlanning.category"
             :key="categorie"
-            >{{ categorie }}
-          </v-card-subtitle>
+          >
+            {{ categorie }}
+          </div>
           <v-card-subtitle class="orange--text"
             >{{ currentEvent.nom }}
           </v-card-subtitle>
@@ -165,7 +168,7 @@ export default {
     let data = this.planning.filter((element) => {
       return element.eventid === this.itemPlanning.eventid
     })
-    this.nbDates = data.length
+    this.nbDates = data.length - 1
     data.forEach((ligne) => {
       this.tableDates.push(ligne.start.slice(0, ligne.start.indexOf(' ')))
     })

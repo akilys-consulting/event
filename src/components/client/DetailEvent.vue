@@ -1,15 +1,13 @@
 <template>
   <v-card>
-    <!--    <v-toolbar flat>
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn fab small flat color="primary" @click="refreshList" v-on="on">
-            <v-icon>mdi-arrow-left</v-icon>
-          </v-btn>
-        </template>
-        <span>retour à la liste</span>
-      </v-tooltip>
-    </v-toolbar>-->
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on }">
+        <v-btn class="mt-2 ml-2" fab x-small @click="refreshList" v-on="on">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+      </template>
+      <span>retour à la liste</span>
+    </v-tooltip>
     <v-row no-gutters>
       <v-col lg="6" sm="6" xs="12" md="6"
         ><v-avatar tile size="300">
@@ -33,14 +31,37 @@
           <v-divider></v-divider>
           <v-card-subtitle>
             {{ event.localisation.adr }}
-            <div class="orange--text">
-              Le {{ DateDebut }}
-              à
-              <span class="orange--text" v-for="item in getseances" :key="item">
-                {{ item }}
-              </span>
-            </div></v-card-subtitle
-          >
+
+            <v-menu v-model="allDates" :close-on-content-click="false" offset-x>
+              <template v-slot:activator="{ on, attrs }">
+                <v-card-subtitle v-bind="attrs" v-on="on">
+                  <span class="orange--text">
+                    Le {{ DateDebut }}
+                    à
+                    <span
+                      class="orange--text"
+                      v-for="item in getseances"
+                      :key="item"
+                    >
+                      {{ item }}
+                    </span>
+                    <v-chip outlined small
+                      >+{{ nbDates }} dates à suivre</v-chip
+                    >
+                  </span>
+                </v-card-subtitle>
+              </template>
+              <v-date-picker
+                :events="tableDates"
+                event-color="green lighten-1"
+                readonly
+                elevation="15"
+                no-title
+                :show-current="tableDates[0]"
+                width="200"
+                hight="60"
+              ></v-date-picker> </v-menu
+          ></v-card-subtitle>
           <v-divider></v-divider>
 
           <v-card-subtitle>
@@ -151,7 +172,10 @@ export default {
         iconAnchor: [16, 37]
       }),
       planningId: null,
-      eventId: null
+      eventId: null,
+      allDates: false,
+      nbDates: 0,
+      tableDates: []
     }
   },
 
@@ -250,6 +274,15 @@ export default {
           ]
           console.log('lat' + this.event.localisation.latLng.lat)
           this.refresh = true
+
+          let data = this.planning.filter((element) => {
+            return element.eventid === this.$route.params.eventId
+          })
+
+          this.nbDates = data.length - 1
+          data.forEach((ligne) => {
+            this.tableDates.push(ligne.start.slice(0, ligne.start.indexOf(' ')))
+          })
         })
     } else {
       this.$store.commit('event/clearActiveSearch')
@@ -270,6 +303,15 @@ export default {
         this.event.localisation.latLng.lat,
         this.event.localisation.latLng.lng
       ]
+
+      let data = this.planning.filter((element) => {
+        return element.eventid === this.currentPlanning.eventid
+      })
+
+      this.nbDates = data.length - 1
+      data.forEach((ligne) => {
+        this.tableDates.push(ligne.start.slice(0, ligne.start.indexOf(' ')))
+      })
     }
   },
   methods: {

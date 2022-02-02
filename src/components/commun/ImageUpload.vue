@@ -139,6 +139,7 @@ export default {
                   self.localImg = self.fileName
                   self.displayImage()
                   self.file = null
+                  self.$emit('uploaded')
                 })
                 .catch(() => {
                   self.$store.dispatch('stopWaiting')
