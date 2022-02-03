@@ -80,13 +80,13 @@
                     </v-card>
                   </v-menu>
                 </template>
-                <template v-slot:item.image="{ item }">
+                <!--<template v-slot:item.image="{ item }">
                   <v-img
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
                   />
-                </template>
+                </template>-->
               </v-data-table>
             </v-card-text>
 
@@ -116,13 +116,13 @@
                 :items-per-page="5"
                 class="elevation-1"
               >
-                <template v-slot:item.image="{ item }">
+                <!-- <template v-slot:item.image="{ item }">
                   <v-img
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
                   />
-                </template>
+                </template>-->
               </v-data-table>
             </v-card-text>
           </v-stepper-content>
@@ -308,7 +308,7 @@ export default {
 
           // load data
           eventCheck.nom = ligne.nom
-          eventCheck.categorie = ligne.categorie
+          eventCheck.categorie.push(ligne.categorie)
           eventCheck.organisateur = ligne.organisateur
           eventCheck.urlsite = ligne.lien
           eventCheck.prix = ligne.prix.replace(/€/, '')
@@ -372,7 +372,7 @@ export default {
             // la mise à jour ce fait qaund tous les enreg d'un même event sont lus
             // c'est pas le premier enregistrement, donc on met à jour
             if (!firstEnreg) {
-              this.saveEVent().then((data) => {})
+              this.saveEvent().then((data) => {})
             }
             this.Event2insert = JSON.parse(JSON.stringify(data))
             this.Event2insert.planning = []
@@ -407,11 +407,15 @@ export default {
 
     saveEvent () {
       return new Promise((resolve, reject) => {
-        let imgBase64 = this.Event2insert.image.img.replace(
-          /data:image\/.*;base64,/,
-          ''
-        )
-        let imgType = this.Event2insert.image.type
+        let importedImg = false
+        if (this.Event2insert.image) {
+          let imgBase64 = this.Event2insert.image.img.replace(
+            /data:image\/.*;base64,/,
+            ''
+          )
+          let imgType = this.Event2insert.image.type
+          importedImg = true
+        }
 
         this.Event2insert.id = -1
         delete this.Event2insert.dateDebut
@@ -427,24 +431,26 @@ export default {
           .then((data) => {
             let EventId = data.id
             // on sauvegarde l'image
-            fb.file
-              .ref()
-              .child('image_event' + '/' + EventId)
-              .putString(imgBase64, 'base64', {
-                contentType: 'image/' + imgType
-              })
-              .then(function () {
-                //
-                resolve(true)
-              })
-              .catch((error) => {
-                this.$store.dispatch('stopWaiting')
-                this.$store.dispatch('displayMessage', {
-                  code: 'IMKO',
-                  param: error.message
+            if (importedImg) {
+              fb.file
+                .ref()
+                .child('image_event' + '/' + EventId)
+                .putString(imgBase64, 'base64', {
+                  contentType: 'image/' + imgType
                 })
-                reject(new Error('erreurImg'))
-              })
+                .then(function () {
+                  //
+                  resolve(true)
+                })
+                .catch((error) => {
+                  this.$store.dispatch('stopWaiting')
+                  this.$store.dispatch('displayMessage', {
+                    code: 'IMKO',
+                    param: error.message
+                  })
+                  reject(new Error('erreurImg'))
+                })
+            }
           })
           .catch((error) => {
             this.$store.dispatch('stopWaiting')

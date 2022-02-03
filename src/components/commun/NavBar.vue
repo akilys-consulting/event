@@ -40,7 +40,7 @@
         class="mx-2"
         outlined
         v-if="isAuthenticated && isAdmin"
-        to="{ name: 'importEvent'}"
+        :to="{ name: 'importEvent' }"
       >
         <v-icon>mdi-import</v-icon>
         <span class="hidden-md-and-down">Importer</span>
@@ -49,7 +49,7 @@
       <v-chip
         outlined
         v-if="isAuthenticated && isAdmin"
-        to="{ name: 'calendrier'}"
+        :to="{ name: 'calendrier' }"
       >
         <v-icon>mdi-calendar-edit</v-icon>
 
