@@ -80,13 +80,13 @@
                     </v-card>
                   </v-menu>
                 </template>
-                <!--<template v-slot:item.image="{ item }">
+                <template v-slot:item.image="{ item }">
                   <v-img
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
                   />
-                </template>-->
+                </template>
               </v-data-table>
             </v-card-text>
 
@@ -116,13 +116,13 @@
                 :items-per-page="5"
                 class="elevation-1"
               >
-                <!-- <template v-slot:item.image="{ item }">
+                <template v-slot:item.image="{ item }">
                   <v-img
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
                   />
-                </template>-->
+                </template>
               </v-data-table>
             </v-card-text>
           </v-stepper-content>
@@ -299,7 +299,8 @@ export default {
         let eventCheck = {
           defaultImg: true,
           localisation: { adr: null },
-          planning: []
+          planning: [],
+          categorie: []
         }
         // check event
         this.analyseCheck(ligne).then((response) => {
@@ -408,12 +409,14 @@ export default {
     saveEvent () {
       return new Promise((resolve, reject) => {
         let importedImg = false
+        let imgBase64 = null
+        let imgType = null
         if (this.Event2insert.image) {
-          let imgBase64 = this.Event2insert.image.img.replace(
+          imgBase64 = this.Event2insert.image.img.replace(
             /data:image\/.*;base64,/,
             ''
           )
-          let imgType = this.Event2insert.image.type
+          imgType = this.Event2insert.image.type
           importedImg = true
         }
 
@@ -478,19 +481,22 @@ export default {
         'DD/MM/YYYY HH:mm'
       )
 
+      if (!ligne.nom) response.message.push('nom obligatoire')
+
       if (!dtDebut.isValid()) {
         // check diff entre debut et fin
         response.message.push('format date debut')
       }
-      if (!dtFin.isValid()) {
+      if (ligne.datefin && !dtFin.isValid()) {
         // check diff entre debut et fin
         response.message.push('format date fin')
       }
 
       // contrôle valeur date de fin
-      if (dtFin.diff(dtDebut) < 0) {
+      if (ligne.datefin && dtFin.diff(dtDebut) < 0) {
         response.message.push(' date/heure fin < date/heure debut')
       }
+      // un event doit avoir un nom
       if (!ligne.nom) response.message.push(' nom vide')
 
       // contrôle du type

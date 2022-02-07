@@ -28,17 +28,20 @@
           v-if="menu_date"
           v-model="date"
           :min="today"
-          @change="
-            $refs.menu_date.save(date)
-            large ? queryCloseMenu : false
-          "
+          @change="dynamicSearchDate"
         ></v-date-picker>
       </v-menu>
     </v-col>
     <v-divider></v-divider>
 
     <v-col cols="12" lg="auto">
-      <v-menu :offset-y="true" :close-on-content-click="false" offset-x rounded>
+      <v-menu
+        :offset-y="true"
+        :close-on-content-click="false"
+        v-model="catClose"
+        offset-x
+        rounded
+      >
         <template v-slot:activator="{ on }">
           <v-chip
             :color="categorie.length > 0 ? 'green' : 'none'"
@@ -56,22 +59,34 @@
           color="blue-grey lighten-4"
           outlined
           max-width="400"
-          class="px-4 pb-2 cardColor"
+          class="px-4 cardColor"
         >
-          <v-card-subtitle>Les catégories</v-card-subtitle>
+          <v-card-actions
+            >Les catégories
 
+            <v-spacer></v-spacer
+            ><v-btn class="mr-n4 mt-n2" small icon @click="catClose = false">
+              <v-icon> mdi-close-box </v-icon>
+            </v-btn>
+          </v-card-actions>
           <v-chip-group
             column
             multiple
-            @change="large ? queryCloseMenu : false"
+            @change="dynamicSearch"
             v-model="categorie"
           >
-            <v-row>
-              <v-col cols="6" v-for="cat in getCategories" :key="cat.nom">
-                <v-chip filter :color="cat.couleur">
-                  {{ cat.nom }}
-                </v-chip></v-col
-              ></v-row
+            <v-virtual-scroll
+              :items="getCategories"
+              height="200"
+              width="180"
+              item-height="50"
+            >
+              <template v-slot:default="{ item }">
+                <v-chip filter :color="item.couleur">
+                  {{ item.nom }}
+                </v-chip>
+              </template>
+              ></v-virtual-scroll
             >
           </v-chip-group>
         </v-card>
@@ -101,7 +116,7 @@
             dense
             flat
             v-model="evtGratuit"
-            @change="large ? queryCloseMenu : false"
+            @change="dynamicSearch"
             class="mt-4"
             label="Gratuit"
           ></v-switch>
@@ -110,7 +125,7 @@
             class="mt-4"
             flat
             v-model="evtEnfant"
-            @change="large ? queryCloseMenu : false"
+            @change="dynamicSearch"
             label="Enfants"
           ></v-switch> </v-card></v-menu
     ></v-col>
@@ -128,7 +143,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapSetters, mapGetters } from 'vuex'
 import moment from 'moment'
 
 export default {
@@ -141,7 +156,8 @@ export default {
       date: null,
       categorie: [],
       evtGratuit: false,
-      evtEnfant: false
+      evtEnfant: false,
+      catClose: true
     }
   },
   props: ['large'],
@@ -209,7 +225,20 @@ export default {
     } */
   },
   methods: {
+    dynamicSearchDate () {
+      this.$refs.menu_date.save(this.date)
+      this.dynalicSearch()
+    },
+    dynamicSearch () {
+      if (this.large) this.queryCloseMenu()
+    },
     queryCloseMenu () {
+      console.log('queryCloseMenu')
+      eventBus.$emit('search')
+
+      this.$store.commit('event/setDisableSort')
+      // this.disableSort = true
+
       let lstValue = []
 
       this.categorie.forEach((data) => {
