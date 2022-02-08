@@ -230,6 +230,30 @@ const actions = {
       })
     })
   },
+  //
+
+  // contrôle si un enregistrement existe déjà ( on se base sur le nom et la programmation )
+  checkEvent ({ state }, data) {
+    return new Promise((resolve, reject) => {
+      let execute = fb.eventCollection.doc()
+      execute = execute.where('nom', '==', data.nom)
+      execute = execute.where('planning', 'array-contains', data.dtDebut)
+      execute
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            resolve(true)
+          } else {
+            // doc.data() will be undefined in this case
+            resolve(false)
+          }
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  },
+
   // chargement des events et du planning depuis les events en base
   loadOnePlanning ({ state, dispatch, rootState, rootGetters }, eventID) {
     state.events = []

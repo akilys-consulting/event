@@ -157,7 +157,7 @@ export default {
       categorie: [],
       evtGratuit: false,
       evtEnfant: false,
-      catClose: true
+      catClose: false
     }
   },
   props: ['large'],

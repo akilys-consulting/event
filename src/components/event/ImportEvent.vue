@@ -17,7 +17,7 @@
             step="2"
           >
             <small v-if="!checkImport">analyse avec erreur</small>
-            <small v-if="checkImport">analyse sans erreur</small>
+            <small v-else>analyse sans erreur</small>
           </v-stepper-step>
 
           <v-divider></v-divider>
@@ -85,7 +85,9 @@
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
+                    v-if="!item.defaultImg"
                   />
+                  <span v-else>Pas d'image</span>
                 </template>
               </v-data-table>
             </v-card-text>
@@ -121,7 +123,9 @@
                     max-height="100"
                     max-width="150"
                     :src="item.image.img"
+                    v-if="!item.defaultImg"
                   />
+                  <span v-else>Pas d'image</span>
                 </template>
               </v-data-table>
             </v-card-text>
@@ -295,6 +299,10 @@ export default {
       let nbevent = contentCsv.data.length
 
       contentCsv.data.forEach((ligne) => {
+        if (!ligne.nom) {
+          return
+        }
+
         // chargement de l'event
         let eventCheck = {
           defaultImg: true,
@@ -365,6 +373,7 @@ export default {
       })
 
       this.readedEvent.forEach(async (data, index) => {
+        console.log('element', this.Event2insert)
         // insertion que pour les enregistrement sans erreur message.length==0
         if (data.message.length === 0) {
           // si on a un event avec le même nom on considère que c'est le même event mais avec des dates différentes
@@ -396,6 +405,7 @@ export default {
       })
       // sauvegarde du dernier enregistrement
       this.saveEvent().then((data) => {
+        console.log('event saved', this.readedEvent.length, nbreaded)
         this.nbInserted = (nbreaded / this.readedEvent.length) * 100
         if (nbreaded >= this.readedEvent.length) this.stepCpt = 3
         // gestion des alertes
@@ -428,41 +438,45 @@ export default {
         delete this.Event2insert.type
         delete this.Event2insert.image
         delete this.Event2insert.message
-
-        this.$store
-          .dispatch('event/importEvent', this.Event2insert)
-          .then((data) => {
-            let EventId = data.id
-            // on sauvegarde l'image
-            if (importedImg) {
-              fb.file
-                .ref()
-                .child('image_event' + '/' + EventId)
-                .putString(imgBase64, 'base64', {
-                  contentType: 'image/' + imgType
+        console.log('save event', this.Event2insert)
+        this.$store.dispatch('event/checkEvent').then((result) => {
+          if (!result) {
+            this.$store
+              .dispatch('event/importEvent', this.Event2insert)
+              .then((data) => {
+                let EventId = data.id
+                // on sauvegarde l'image
+                if (importedImg) {
+                  fb.file
+                    .ref()
+                    .child('image_event' + '/' + EventId)
+                    .putString(imgBase64, 'base64', {
+                      contentType: 'image/' + imgType
+                    })
+                    .then(function () {
+                      //
+                      resolve(true)
+                    })
+                    .catch((error) => {
+                      this.$store.dispatch('stopWaiting')
+                      this.$store.dispatch('displayMessage', {
+                        code: 'IMKO',
+                        param: error.message
+                      })
+                      reject(new Error('erreurImg'))
+                    })
+                } else resolve(true)
+              })
+              .catch((error) => {
+                this.$store.dispatch('stopWaiting')
+                this.$store.dispatch('displayMessage', {
+                  code: 'SAKO',
+                  param: error.message
                 })
-                .then(function () {
-                  //
-                  resolve(true)
-                })
-                .catch((error) => {
-                  this.$store.dispatch('stopWaiting')
-                  this.$store.dispatch('displayMessage', {
-                    code: 'IMKO',
-                    param: error.message
-                  })
-                  reject(new Error('erreurImg'))
-                })
-            }
-          })
-          .catch((error) => {
-            this.$store.dispatch('stopWaiting')
-            this.$store.dispatch('displayMessage', {
-              code: 'SAKO',
-              param: error.message
-            })
-            reject(new Error('erreurSaveEvt'))
-          })
+                reject(new Error('erreurSaveEvt'))
+              })
+          }
+        })
       })
     },
 
@@ -477,23 +491,39 @@ export default {
         'DD/MM/YYYY HH:mm'
       )
       let dtFin = moment(
-        ligne.datefin + ' ' + ligne.heurefin,
+        ligne.datefin + ' ' + !ligne.heurefin
+          ? ligne.heuredebut
+          : ligne.heurefin,
         'DD/MM/YYYY HH:mm'
       )
 
-      if (!ligne.nom) response.message.push('nom obligatoire')
+      if (!ligne.nom) {
+        response.message.push('nom obligatoire')
+        return response
+      }
+
+      this.$store
+        .dispatch('event/checkEvent', {
+          nom: ligne.nom,
+          dtDebut: moment(ligne.datedebut).format('YYYY-MM-DD')
+        })
+        .then((result) => {
+          // result à true l'enregistrement existe
+          if (result) response.message.push('déjà existant')
+        })
 
       if (!dtDebut.isValid()) {
         // check diff entre debut et fin
         response.message.push('format date debut')
       }
-      if (ligne.datefin && !dtFin.isValid()) {
+      if (ligne.datefin && ligne.heurefin && !dtFin.isValid()) {
         // check diff entre debut et fin
         response.message.push('format date fin')
       }
 
       // contrôle valeur date de fin
-      if (ligne.datefin && dtFin.diff(dtDebut) < 0) {
+      console.log('date de fin', ligne.datefin)
+      if (ligne.datefin && ligne.heurefin && dtFin.diff(dtDebut) < 0) {
         response.message.push(' date/heure fin < date/heure debut')
       }
       // un event doit avoir un nom

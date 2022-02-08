@@ -36,7 +36,9 @@
           <template v-slot:activator="{ on, attrs }">
             <v-card-subtitle v-bind="attrs" v-on="on">
               {{ DisplayDate(itemPlanning.start) }}
-              <v-chip outlined x-small>+{{ nbDates }} dates</v-chip>
+              <v-chip v-if="nbDates > 0" outlined x-small
+                >+{{ nbDates }} dates</v-chip
+              >
             </v-card-subtitle>
           </template>
           <v-date-picker
